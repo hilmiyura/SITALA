@@ -1,6 +1,394 @@
 {literal}
 <script type="text/javascript">
   var scrollTobtn = '{/literal}{$scrollTobtn}{literal}';
+  var currentDocBlobUrl = null;
+  var ocrOptions = [];
+  var ocrMode = null; //null|"single"|"all"
+
+  function renderDocPreview(url, isPdf) {
+    $("#doc-preview-empty").hide();
+    $("#doc-preview-wrapper").show();
+    if (isPdf) {
+      $("#doc-preview").html('<iframe src="' + url + '"></iframe>');
+    } else {
+      $("#doc-preview").html('<img src="' + url + '">');
+    }
+  }
+
+  function clearDocPreview() {
+    if (currentDocBlobUrl) {
+      URL.revokeObjectURL(currentDocBlobUrl);
+      currentDocBlobUrl = null;
+    }
+    $("#doc-preview").html("");
+    $("#doc-preview-wrapper").hide();
+    $("#doc-preview-empty").show();
+  }
+
+  function showDropzoneFile(name) {
+    $("#ocr-dropzone").addClass("has-file");
+    $("#ocr-dropzone-placeholder").hide();
+    $("#ocr-dropzone-filename").text(name);
+    $("#ocr-dropzone-selected").show();
+  }
+
+  function resetDropzone() {
+    $("#ocr-dropzone").removeClass("has-file dragover");
+    $("#ocr-dropzone-selected").hide();
+    $("#ocr-dropzone-placeholder").show();
+  }
+
+  $(document).on("dragover", "#ocr-dropzone", function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).addClass("dragover");
+  });
+
+  $(document).on("dragleave", "#ocr-dropzone", function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).removeClass("dragover");
+  });
+
+  $(document).on("drop", "#ocr-dropzone", function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).removeClass("dragover");
+    var files = e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files;
+    if (files && files.length) {
+      $("#shu")[0].files = files;
+      $("#shu").trigger("change");
+    }
+  });
+
+  function setOcrStatus(type, html) {
+    $("#ocr-status")
+      .removeClass("alert-info alert-success alert-warning alert-danger")
+      .addClass("alert-" + type)
+      .html(html)
+      .show();
+  }
+
+  //sfx = "" for the single/default fields, "_r0", "_r1", ... for cloned repeater rows
+  function applyOcrResult(data, opts) {
+    opts = opts || {};
+    var sfx = opts.suffix || "";
+    var done = opts.done;
+    var unmatched = [];
+
+    var lokasiDone = function() {
+      if (typeof done === "function") {
+        done();
+      }
+    };
+
+    if (data.lokasi && data.lokasi.uid) {
+      $.ajax({
+        url: baseUrl + "ajax/lokasiById/x/" + data.lokasi.uid,
+        method: "GET",
+        success: function(r) {
+          var htmls = "<option value=''>--PILIH LOKASI PEMANTAUAN--</option>";
+          if (r.total) {
+            jQuery.each(r.data, function(i, val) {
+              htmls += "<option value='" + val.uid_lokasi_pemantauan + "' selected>" + val.kode_lokasi + " - " + val.alamat + " - " + val.alamat_detail + "</option>";
+              $("#alamat" + sfx).val(val.alamat);
+              $("#alamat_detail" + sfx).val(val.alamat_detail);
+              $("#latitude" + sfx).val(val.latitude);
+              $("#longitude" + sfx).val(val.longitude);
+              if (!sfx) {
+                $("#uid_provinsi").val(val.uid_provinsi).trigger("change");
+              }
+            });
+          }
+          $("#uid_lokasi_pemantauan" + sfx).html(htmls);
+          lokasiDone();
+        },
+        error: lokasiDone
+      });
+    } else {
+      if (data.lokasi && data.lokasi.text) {
+        unmatched.push("Lokasi Pemantauan (\"" + data.lokasi.text + "\")");
+      }
+      lokasiDone();
+    }
+
+    if (data.peruntukan && data.peruntukan.uid) {
+      $("#uid_rf_peruntukan" + sfx).val(data.peruntukan.uid).trigger("change");
+    } else if (data.peruntukan && data.peruntukan.text) {
+      unmatched.push("Peruntukan (\"" + data.peruntukan.text + "\")");
+    }
+
+    jQuery.each(["tss", "do_p", "minyak_dan_lemak", "amonia_total", "orto_fosfat"], function(i, id) {
+      var nilai = data.parameters ? data.parameters[id] : undefined;
+      if (nilai !== undefined && nilai !== null) {
+        $("#" + id + sfx).val(nilai);
+      }
+    });
+    if (data.unmatched_parameters && data.unmatched_parameters.length) {
+      unmatched.push("Parameter lain terbaca di dokumen tapi tidak ada kolomnya di form: " + data.unmatched_parameters.join(", "));
+    }
+
+    return unmatched;
+  }
+
+  //tanggal/periode/lab are document-level (identical for every location in the same OCR result)
+  function applySharedFields(data) {
+    if (data.tanggal) {
+      $("#tanggal").val(data.tanggal).trigger("change");
+    }
+    if (data.periode_pemantauan) {
+      $("#periode_pemantauan").val(data.periode_pemantauan).trigger("change");
+    }
+    if (data.lab && data.lab.uid) {
+      $("#uid_lab").val([String(data.lab.uid)]).trigger("change");
+    }
+  }
+
+  //clone the <template>, suffix every id/for/to with _r{idx} so it can coexist with the single block
+  function cloneOcrRowTemplate(idx) {
+    var tpl = document.getElementById("ocr-row-template");
+    var sfx = "_r" + idx;
+    var $wrap = $("<div>").append(tpl.content.cloneNode(true));
+
+    $wrap.find("[id]").each(function() {
+      this.id = this.id + sfx;
+    });
+    $wrap.find("[for]").each(function() {
+      $(this).attr("for", $(this).attr("for") + sfx);
+    });
+    $wrap.find("[to]").each(function() {
+      $(this).attr("to", $(this).attr("to") + sfx);
+    });
+
+    return $wrap.children();
+  }
+
+  function renderOcrRepeaterRows() {
+    $("#ocr-repeater-rows").empty();
+    jQuery.each(ocrOptions, function(idx, opt) {
+      var sfx = "_r" + idx;
+      var $content = cloneOcrRowTemplate(idx);
+      var $row = $('<div class="iku-row" data-idx="' + idx + '"></div>');
+      var $header = $(
+        '<div class="iku-row-header">'
+        + '<p class="iku-row-title">Lokasi ' + (idx + 1) + ': ' + (opt.label || "-") + '</p>'
+        + '<span class="iku-row-remove">Hapus dari batch</span>'
+        + '</div>'
+      );
+      $row.append($header).append($content);
+      $("#ocr-repeater-rows").append($row);
+
+      $row.find(".select2").each(function() {
+        $(this).select2({ dropdownParent: $(this).parent() });
+      });
+
+      $("#uid_lokasi_pemantauan" + sfx).on("change", function() {
+        var valId = $(this).val();
+        if (!valId) {
+          $("#alamat" + sfx).val("");
+          $("#alamat_detail" + sfx).val("");
+          $("#latitude" + sfx).val("");
+          $("#longitude" + sfx).val("");
+          return;
+        }
+        $.ajax({
+          url: baseUrl + "ajax/lokasiById/x/" + valId,
+          method: "GET",
+          success: function(req) {
+            if (req.total) {
+              jQuery.each(req.data, function(i, val) {
+                $("#alamat" + sfx).val(val.alamat);
+                $("#alamat_detail" + sfx).val(val.alamat_detail);
+                $("#latitude" + sfx).val(val.latitude);
+                $("#longitude" + sfx).val(val.longitude);
+              });
+            }
+          }
+        });
+      });
+
+      applyOcrResult(opt, { suffix: sfx });
+
+      $row.find(".iku-row-remove").on("click", function() {
+        $row.remove();
+      });
+    });
+  }
+
+  $(document).on("change", "#ocr-lokasi-picker", function() {
+    var val = $(this).val();
+    if (val === "all") {
+      ocrMode = "all";
+      $("#ocr-single-block").hide();
+      $("#ocr-repeater-rows").show();
+      renderOcrRepeaterRows();
+      setOcrStatus("info", "Menampilkan " + ocrOptions.length + " lokasi sebagai form terpisah di bawah. Periksa/lengkapi tiap lokasi lalu klik Simpan untuk menyimpan semuanya sekaligus.");
+    } else if (val !== "" && ocrOptions[val]) {
+      ocrMode = "single";
+      $("#ocr-repeater-rows").hide().empty();
+      $("#ocr-single-block").show();
+      var unmatched = applyOcrResult(ocrOptions[val]);
+      var msg = "Lokasi \"" + (ocrOptions[val].label || "") + "\" diisikan ke form. Lokasi Pemantauan tetap bisa diganti manual di bawah.";
+      if (unmatched.length) {
+        setOcrStatus("warning", msg + "<br>Tidak dapat dicocokkan otomatis, mohon isi manual: " + unmatched.join(", "));
+      } else {
+        setOcrStatus("success", msg);
+      }
+    } else {
+      ocrMode = null;
+      $("#ocr-repeater-rows").hide().empty();
+      $("#ocr-single-block").show();
+    }
+  });
+
+  $(document).on("submit", "#tambahData form", function(event) {
+    if (ocrMode !== "all") {
+      return;
+    }
+    var $rows = $("#ocr-repeater-rows .iku-row");
+    if (!$rows.length) {
+      return;
+    }
+    event.preventDefault();
+
+    var formEl = this;
+    var total = $rows.length;
+    var processed = 0;
+
+    $("#btn-simpan-ikal").prop("disabled", true);
+
+    function buildRowFormData(idx) {
+      var sfx = "_r" + idx;
+      var fd = new FormData(formEl);
+      fd.set("submit", "1");
+      //.set() replaces whatever the (hidden) single block's same-named fields captured
+      fd.set("form[uid_lokasi_pemantauan]", $("#uid_lokasi_pemantauan" + sfx).val() || "");
+      fd.set("form[uid_rf_peruntukan]", $("#uid_rf_peruntukan" + sfx).val() || "");
+      fd.set("form[tss]", $("#tss" + sfx).val() || "");
+      fd.set("form[do_p]", $("#do_p" + sfx).val() || "");
+      fd.set("form[minyak_dan_lemak]", $("#minyak_dan_lemak" + sfx).val() || "");
+      fd.set("form[amonia_total]", $("#amonia_total" + sfx).val() || "");
+      fd.set("form[orto_fosfat]", $("#orto_fosfat" + sfx).val() || "");
+      return fd;
+    }
+
+    function submitNext(i) {
+      if (i >= $rows.length) {
+        setOcrStatus("success", "Selesai memproses " + processed + " dari " + total + " lokasi. Halaman akan dimuat ulang...");
+        setTimeout(function() {
+          location.reload();
+        }, 800);
+        return;
+      }
+      var idx = $($rows.get(i)).data("idx");
+      $("#btn-simpan-ikal").text("Menyimpan " + (i + 1) + "/" + total + "...");
+      $.ajax({
+        url: baseUrl + ctrl,
+        method: "POST",
+        data: buildRowFormData(idx),
+        processData: false,
+        contentType: false,
+        complete: function() {
+          processed++;
+          submitNext(i + 1);
+        }
+      });
+    }
+
+    submitNext(0);
+  });
+
+  $(document).on("change", "#shu", function(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) {
+      $("#ocr-status").hide().html("");
+      return;
+    }
+
+    if (currentDocBlobUrl) {
+      URL.revokeObjectURL(currentDocBlobUrl);
+    }
+    currentDocBlobUrl = URL.createObjectURL(file);
+    renderDocPreview(currentDocBlobUrl, file.type === "application/pdf");
+    showDropzoneFile(file.name);
+    ocrOptions = [];
+    ocrMode = null;
+    $("#ocr-multi-panel").hide();
+    $("#ocr-repeater-rows").hide().empty();
+    $("#ocr-single-block").show();
+
+    if (file.size > 10 * 1024 * 1024) {
+      setOcrStatus("danger", "Ukuran file melebihi 10 Mb, OCR dibatalkan. Silakan isi form manual.");
+      return;
+    }
+
+    var fd = new FormData();
+    fd.append("file", file);
+
+    setOcrStatus("info", "Membaca dokumen, mohon tunggu...");
+    $("#btn-simpan-ikal").prop("disabled", true).text("Membaca dokumen...");
+
+    $.ajax({
+      url: baseUrl + "ocr/ikalExtract",
+      method: "POST",
+      data: fd,
+      processData: false,
+      contentType: false,
+      success: function(res) {
+        try {
+          res = (typeof res === "string") ? JSON.parse(res) : res;
+        } catch (err) {
+          res = { statusCode: 500, message: "Response OCR tidak valid" };
+        }
+        if (res.statusCode == 200) {
+          if (res.data && res.data.multi) {
+            ocrOptions = res.data.options || [];
+            applySharedFields(ocrOptions[0] || {});
+
+            var pickerHtml = '<option value="">--PILIH LOKASI--</option><option value="all">PILIH SEMUA</option>';
+            jQuery.each(ocrOptions, function(i, opt) {
+              pickerHtml += "<option value='" + i + "'>" + (opt.label || ("Lokasi " + (i + 1))) + "</option>";
+            });
+            $("#ocr-lokasi-picker").html(pickerHtml);
+            $("#ocr-multi-panel").show();
+
+            var matchedCount = 0;
+            jQuery.each(ocrOptions, function(i, o) {
+              if (o.lokasi && o.lokasi.uid) {
+                matchedCount++;
+              }
+            });
+            setOcrStatus("info", "Dokumen ini memuat " + ocrOptions.length + " lokasi pemantauan ("
+              + matchedCount + " cocok otomatis). Pilih salah satu lokasi, atau \"PILIH SEMUA\" "
+              + "untuk menampilkan semuanya sebagai form terpisah di bawah.");
+          } else {
+            $("#ocr-multi-panel").hide();
+            ocrOptions = [];
+            ocrMode = null;
+            applySharedFields(res.data);
+            var unmatched = applyOcrResult(res.data);
+            var msg = "Dokumen berhasil dibaca, form terisi otomatis. Mohon periksa kembali sebelum menyimpan. "
+              + "Catatan: parameter kualitas air (TSS/DO/Minyak &amp; Lemak/Amonia/Ortofosfat) belum didukung "
+              + "OCR untuk IKAL, mohon isi manual.";
+            if (unmatched.length) {
+              setOcrStatus("warning", msg + "<br>Tidak dapat dicocokkan otomatis, mohon isi manual: " + unmatched.join(", "));
+            } else {
+              setOcrStatus("warning", msg);
+            }
+          }
+        } else {
+          setOcrStatus("danger", (res.message || "OCR gagal dibaca") + ". Silakan isi form manual.");
+        }
+      },
+      error: function() {
+        setOcrStatus("danger", "OCR gagal dihubungi. Silakan isi form manual.");
+      },
+      complete: function() {
+        $("#btn-simpan-ikal").prop("disabled", false).text("Simpan");
+      }
+    });
+  });
+
   $(document).ready(function() {
     $('#primary').on('show.bs.modal', function(event) {
       $(".select-year-indeks").val("").trigger("change");
@@ -123,6 +511,17 @@
     $("#uid_provinsi").val("").trigger("change");
     $(".shu-download").hide();
     $("#uid_lab").val("").trigger("change");
+    $("#shu").val("");
+    $("#ocr-status").hide().html("");
+    ocrOptions = [];
+    ocrMode = null;
+    $("#ocr-multi-panel").hide();
+    $("#ocr-lokasi-picker").html('<option value="">--PILIH LOKASI--</option><option value="all">PILIH SEMUA</option>');
+    $("#ocr-repeater-rows").hide().empty();
+    $("#ocr-single-block").show();
+    $("#btn-simpan-ikal").prop("disabled", false).text("Simpan");
+    clearDocPreview();
+    resetDropzone();
   };
 
   $(".tahun-pemantauan").on("change", function() {
@@ -185,11 +584,16 @@
             $("#uid_rf_peruntukan").val(req.uid_rf_peruntukan).trigger("change");
             $("#uid_provinsi").val(req.uid_provinsi).trigger("change");
             if (req.shu) {
-              var htmlDownload = '<a title="Download File" class="border-secondary badge badge-dark round" href="' + baseUrl + 'uploads/monitoring/' + req.shu + '" target="_blank" >Download</a>'
+              var shuUrl = baseUrl + 'uploads/monitoring/' + req.shu;
+              var htmlDownload = '<a title="Download File" class="border-secondary badge badge-dark round" href="' + shuUrl + '" target="_blank" >Download</a>'
               $(".shu-download").html(htmlDownload);
               $(".shu-download").show();
+              renderDocPreview(shuUrl, /\.pdf$/i.test(req.shu));
+              showDropzoneFile(req.shu.replace(/^\d+_/, ""));
             } else {
               $(".shu-download").hide();
+              clearDocPreview();
+              resetDropzone();
             }
             $("#uid_lab").val(req.uid_lab? req.uid_lab.split(',') : '').trigger("change");
           }
@@ -245,16 +649,6 @@
       }
     });
   });
-  // function freezeHeader(toFreeze){
-  //   // alert(toFreeze);
-  //   $(function() {
-  //      $(this).find(toFreeze).freezeTable({
-  //       'freezeColumn': false,
-  //     });
-  //     var freezeTable = new FreezeTable(toFreeze, {'namespace': 'first-table'});
-  //    freezeTable.resize();
-  //   });
-  // }
   $(".hide-detail-data").on("click", function() {
     var data_uid_p = $(this).attr("data-uid");
     $(".tr-detail-" + data_uid_p).hide("slow");
