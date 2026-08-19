@@ -398,6 +398,10 @@
 			});
 
 			jQuery.each(["no2", "so2", "pm25"], function(i, param) {
+				//cloned rows start from the template's raw (all-visible) markup, so force the
+				//same default state reset() gives the single block before OCR data can override it
+				toggleDurasiPemantauan(param, sfx, "");
+				$("#" + param + "-faktor-koreksi" + sfx).hide();
 				$("#" + param + "_uid_metode_pemantauan" + sfx).on("change", function() {
 					toggleDurasiPemantauan(param, sfx, $(this).val());
 				});
