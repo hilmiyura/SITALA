@@ -1,6 +1,418 @@
 {literal}
 <script type="text/javascript">
   var scrollTobtn = '{/literal}{$scrollTobtn}{literal}';
+  var currentDocBlobUrl = null;
+  var ocrOptions = [];
+  var ocrMode = null; //null|"single"|"all"
+  var IKA_PARAMS = ["debit","ph","bod","cod","tss","do_p","no3_n","total_phosphat","fecal_coliform",
+    "kecerahan","klorofil_a","total_nitrogen","total_coliform","temperatur_air","temperatur_udara",
+    "minyak_lemak","detergen_total","fenol","tds","sulfat","klorida","nitrit","amoniak","florida",
+    "belerang_sbg_h2s","sianida","klorin_bebas","warna","sampah","ba","bo","hg","as_","se","fe","cd",
+    "co","mn","ni","zn","cu","pb","cr_6","aldrin","bhc","chlordane","ddt","endrin","heptachlor",
+    "lindane","methoxychlor","toxapan","radioaktivitas_gross_a","radioaktivitas_gross_b","e_coli"];
+
+  function renderDocPreview(url, isPdf) {
+    $("#doc-preview-empty").hide();
+    $("#doc-preview-wrapper").show();
+    if (isPdf) {
+      $("#doc-preview").html('<iframe src="' + url + '"></iframe>');
+    } else {
+      $("#doc-preview").html('<img src="' + url + '">');
+    }
+  }
+
+  function clearDocPreview() {
+    if (currentDocBlobUrl) {
+      URL.revokeObjectURL(currentDocBlobUrl);
+      currentDocBlobUrl = null;
+    }
+    $("#doc-preview").html("");
+    $("#doc-preview-wrapper").hide();
+    $("#doc-preview-empty").show();
+  }
+
+  function showDropzoneFile(name) {
+    $("#ocr-dropzone").addClass("has-file");
+    $("#ocr-dropzone-placeholder").hide();
+    $("#ocr-dropzone-filename").text(name);
+    $("#ocr-dropzone-selected").show();
+  }
+
+  function resetDropzone() {
+    $("#ocr-dropzone").removeClass("has-file dragover");
+    $("#ocr-dropzone-selected").hide();
+    $("#ocr-dropzone-placeholder").show();
+  }
+
+  $(document).on("dragover", "#ocr-dropzone", function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).addClass("dragover");
+  });
+
+  $(document).on("dragleave", "#ocr-dropzone", function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).removeClass("dragover");
+  });
+
+  $(document).on("drop", "#ocr-dropzone", function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).removeClass("dragover");
+    var files = e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files;
+    if (files && files.length) {
+      $("#shu")[0].files = files;
+      $("#shu").trigger("change");
+    }
+  });
+
+  function setOcrStatus(type, html) {
+    $("#ocr-status")
+      .removeClass("alert-info alert-success alert-warning alert-danger")
+      .addClass("alert-" + type)
+      .html(html)
+      .show();
+  }
+
+  function toggleKategoriFields($scope, val) {
+    var $fields = $scope.find(".danau_parameter");
+    if (val == 3) {
+      $fields.show();
+    } else {
+      $fields.hide();
+    }
+  }
+
+  //sfx = "" for the single/default fields, "_r0", "_r1", ... for cloned repeater rows.
+  //Unlike IKU/IKAL, IKA's OCR result carries tanggal PER LOCATION (not document-level), so it's
+  //set here per-suffix rather than via applySharedFields.
+  function applyOcrResult(data, opts) {
+    opts = opts || {};
+    var sfx = opts.suffix || "";
+    var done = opts.done;
+    var unmatched = [];
+
+    if (data.tanggal) {
+      $("#tanggal" + sfx).val(data.tanggal).trigger("change");
+    }
+
+    var lokasiDone = function() {
+      if (typeof done === "function") {
+        done();
+      }
+    };
+
+    if (data.lokasi && data.lokasi.uid) {
+      $.ajax({
+        url: baseUrl + "ajax/lokasiById/x/" + data.lokasi.uid,
+        method: "GET",
+        success: function(r) {
+          var htmls = "<option value=''>--PILIH LOKASI PEMANTAUAN--</option>";
+          if (r.total) {
+            jQuery.each(r.data, function(i, val) {
+              htmls += "<option value='" + val.uid_lokasi_pemantauan + "' selected>" + val.kode_lokasi + " - " + val.alamat + " - " + val.alamat_detail + "</option>";
+              $("#alamat" + sfx).val(val.alamat);
+              $("#alamat_detail" + sfx).val(val.alamat_detail);
+              $("#latitude" + sfx).val(val.latitude);
+              $("#longitude" + sfx).val(val.longitude);
+              if (!sfx) {
+                id_kabkota = val.uid_kabkota;
+                $("#uid_provinsi").val(val.uid_provinsi).trigger("change");
+                setTimeout(function() {
+                  $("#uid_kabkota").val(val.uid_kabkota).trigger("change");
+                }, 1000);
+              }
+            });
+          }
+          $("#uid_lokasi_pemantauan" + sfx).html(htmls);
+          lokasiDone();
+        },
+        error: lokasiDone
+      });
+    } else {
+      if (data.lokasi && data.lokasi.text) {
+        unmatched.push("Lokasi Pemantauan (\"" + data.lokasi.text + "\")");
+      }
+      lokasiDone();
+    }
+
+    if (data.kategori && data.kategori.value) {
+      $("#kategori" + sfx).val(data.kategori.value).trigger("change");
+    } else if (data.kategori && data.kategori.text) {
+      unmatched.push("Kategori (\"" + data.kategori.text + "\")");
+    }
+
+    jQuery.each(IKA_PARAMS, function(i, id) {
+      var val = data.parameters ? data.parameters[id] : undefined;
+      if (val !== undefined && val !== null) {
+        $("#" + id + sfx).val(val);
+      }
+    });
+
+    if (data.unmatched_parameters && data.unmatched_parameters.length) {
+      unmatched.push("Parameter lain yang terbaca tapi belum bisa dipetakan otomatis: " + data.unmatched_parameters.join(", "));
+    }
+
+    return unmatched;
+  }
+
+  //periode_pemantauan/laboratorium are document-level (identical for every location in one OCR result)
+  function applySharedFields(data) {
+    if (data.periode_pemantauan) {
+      $("#periode_pemantauan").val(data.periode_pemantauan).trigger("change");
+    }
+    if (data.lab && data.lab.uid) {
+      $("#uid_lab").val([String(data.lab.uid)]).trigger("change");
+    }
+  }
+
+  //clone the <template>, suffix every id/for/to with _r{idx} so it can coexist with the single block
+  function cloneOcrRowTemplate(idx) {
+    var tpl = document.getElementById("ocr-row-template");
+    var sfx = "_r" + idx;
+    var $wrap = $("<div>").append(tpl.content.cloneNode(true));
+
+    $wrap.find("[id]").each(function() {
+      this.id = this.id + sfx;
+    });
+    $wrap.find("[for]").each(function() {
+      $(this).attr("for", $(this).attr("for") + sfx);
+    });
+    $wrap.find("[to]").each(function() {
+      $(this).attr("to", $(this).attr("to") + sfx);
+    });
+
+    return $wrap.children();
+  }
+
+  function renderOcrRepeaterRows() {
+    $("#ocr-repeater-rows").empty();
+    jQuery.each(ocrOptions, function(idx, opt) {
+      var sfx = "_r" + idx;
+      var $content = cloneOcrRowTemplate(idx);
+      var $row = $('<div class="iku-row" data-idx="' + idx + '"></div>');
+      var $header = $(
+        '<div class="iku-row-header">'
+        + '<p class="iku-row-title">Lokasi ' + (idx + 1) + ': ' + (opt.label || "-") + '</p>'
+        + '<span class="iku-row-remove">Hapus dari batch</span>'
+        + '</div>'
+      );
+      $row.append($header).append($content);
+      $("#ocr-repeater-rows").append($row);
+
+      $row.find(".select2").each(function() {
+        $(this).select2({ dropdownParent: $(this).parent() });
+      });
+
+      $("#uid_lokasi_pemantauan" + sfx).on("change", function() {
+        var valId = $(this).val();
+        if (!valId) {
+          $("#alamat" + sfx).val("");
+          $("#alamat_detail" + sfx).val("");
+          $("#latitude" + sfx).val("");
+          $("#longitude" + sfx).val("");
+          return;
+        }
+        $.ajax({
+          url: baseUrl + "ajax/lokasiById/x/" + valId,
+          method: "GET",
+          success: function(req) {
+            if (req.total) {
+              jQuery.each(req.data, function(i, val) {
+                $("#alamat" + sfx).val(val.alamat);
+                $("#alamat_detail" + sfx).val(val.alamat_detail);
+                $("#latitude" + sfx).val(val.latitude);
+                $("#longitude" + sfx).val(val.longitude);
+              });
+            }
+          }
+        });
+      });
+
+      $("#kategori" + sfx).on("change", function() {
+        toggleKategoriFields($row, $(this).val());
+      });
+
+      applyOcrResult(opt, { suffix: sfx });
+
+      $row.find(".iku-row-remove").on("click", function() {
+        $row.remove();
+      });
+    });
+  }
+
+  $(document).on("change", "#ocr-lokasi-picker", function() {
+    var val = $(this).val();
+    if (val === "all") {
+      ocrMode = "all";
+      $("#ocr-single-block").hide();
+      $("#ocr-repeater-rows").show();
+      renderOcrRepeaterRows();
+      setOcrStatus("info", "Menampilkan " + ocrOptions.length + " lokasi sebagai form terpisah di bawah. Periksa/lengkapi tiap lokasi lalu klik Simpan untuk menyimpan semuanya sekaligus.");
+    } else if (val !== "" && ocrOptions[val]) {
+      ocrMode = "single";
+      $("#ocr-repeater-rows").hide().empty();
+      $("#ocr-single-block").show();
+      var unmatched = applyOcrResult(ocrOptions[val]);
+      var msg = "Lokasi \"" + (ocrOptions[val].label || "") + "\" diisikan ke form. Lokasi Pemantauan tetap bisa diganti manual di bawah.";
+      if (unmatched.length) {
+        setOcrStatus("warning", msg + "<br>Tidak dapat dicocokkan otomatis, mohon isi manual: " + unmatched.join(", "));
+      } else {
+        setOcrStatus("success", msg);
+      }
+    } else {
+      ocrMode = null;
+      $("#ocr-repeater-rows").hide().empty();
+      $("#ocr-single-block").show();
+    }
+  });
+
+  $(document).on("submit", "#tambahData form", function(event) {
+    if (ocrMode !== "all") {
+      return;
+    }
+    var $rows = $("#ocr-repeater-rows .iku-row");
+    if (!$rows.length) {
+      return;
+    }
+    event.preventDefault();
+
+    var formEl = this;
+    var total = $rows.length;
+    var processed = 0;
+
+    $("#btn-simpan-ika").prop("disabled", true);
+
+    function buildRowFormData(idx) {
+      var sfx = "_r" + idx;
+      var fd = new FormData(formEl);
+      fd.set("submit", "1");
+      //.set() replaces whatever the (hidden) single block's same-named fields captured
+      fd.set("form[tanggal]", $("#tanggal" + sfx).val() || "");
+      fd.set("form[uid_lokasi_pemantauan]", $("#uid_lokasi_pemantauan" + sfx).val() || "");
+      fd.set("form[kategori]", $("#kategori" + sfx).val() || "");
+      jQuery.each(IKA_PARAMS, function(i, id) {
+        fd.set("form[" + id + "]", $("#" + id + sfx).val() || "");
+      });
+      return fd;
+    }
+
+    function submitNext(i) {
+      if (i >= $rows.length) {
+        setOcrStatus("success", "Selesai memproses " + processed + " dari " + total + " lokasi. Halaman akan dimuat ulang...");
+        setTimeout(function() {
+          location.reload();
+        }, 800);
+        return;
+      }
+      var idx = $($rows.get(i)).data("idx");
+      $("#btn-simpan-ika").text("Menyimpan " + (i + 1) + "/" + total + "...");
+      $.ajax({
+        url: baseUrl + ctrl,
+        method: "POST",
+        data: buildRowFormData(idx),
+        processData: false,
+        contentType: false,
+        complete: function() {
+          processed++;
+          submitNext(i + 1);
+        }
+      });
+    }
+
+    submitNext(0);
+  });
+
+  $(document).on("change", "#shu", function(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) {
+      $("#ocr-status").hide().html("");
+      return;
+    }
+
+    if (currentDocBlobUrl) {
+      URL.revokeObjectURL(currentDocBlobUrl);
+    }
+    currentDocBlobUrl = URL.createObjectURL(file);
+    renderDocPreview(currentDocBlobUrl, file.type === "application/pdf");
+    showDropzoneFile(file.name);
+    ocrOptions = [];
+    ocrMode = null;
+    $("#ocr-multi-panel").hide();
+    $("#ocr-repeater-rows").hide().empty();
+    $("#ocr-single-block").show();
+
+    if (file.size > 10 * 1024 * 1024) {
+      setOcrStatus("danger", "Ukuran file melebihi 10 Mb, OCR dibatalkan. Silakan isi form manual.");
+      return;
+    }
+
+    var fd = new FormData();
+    fd.append("file", file);
+
+    setOcrStatus("info", "Membaca dokumen, mohon tunggu...");
+    $("#btn-simpan-ika").prop("disabled", true).text("Membaca dokumen...");
+
+    $.ajax({
+      url: baseUrl + "ocr/ikaExtract",
+      method: "POST",
+      data: fd,
+      processData: false,
+      contentType: false,
+      success: function(res) {
+        try {
+          res = (typeof res === "string") ? JSON.parse(res) : res;
+        } catch (err) {
+          res = { statusCode: 500, message: "Response OCR tidak valid" };
+        }
+        if (res.statusCode == 200) {
+          if (res.data && res.data.multi) {
+            ocrOptions = res.data.options || [];
+            applySharedFields(ocrOptions[0] || {});
+
+            var pickerHtml = '<option value="">--PILIH LOKASI--</option><option value="all">PILIH SEMUA</option>';
+            jQuery.each(ocrOptions, function(i, opt) {
+              pickerHtml += "<option value='" + i + "'>" + (opt.label || ("Lokasi " + (i + 1))) + "</option>";
+            });
+            $("#ocr-lokasi-picker").html(pickerHtml);
+            $("#ocr-multi-panel").show();
+
+            var matchedCount = 0;
+            jQuery.each(ocrOptions, function(i, o) {
+              if (o.lokasi && o.lokasi.uid) {
+                matchedCount++;
+              }
+            });
+            setOcrStatus("info", "Dokumen ini memuat " + ocrOptions.length + " lokasi pemantauan ("
+              + matchedCount + " cocok otomatis). Pilih salah satu lokasi, atau \"PILIH SEMUA\" "
+              + "untuk menampilkan semuanya sebagai form terpisah di bawah.");
+          } else {
+            $("#ocr-multi-panel").hide();
+            ocrOptions = [];
+            ocrMode = null;
+            applySharedFields(res.data);
+            var unmatched = applyOcrResult(res.data);
+            var msg = "Dokumen berhasil dibaca, form terisi otomatis. Mohon periksa kembali sebelum menyimpan.";
+            if (unmatched.length) {
+              setOcrStatus("warning", msg + "<br>Tidak dapat dicocokkan otomatis, mohon isi manual: " + unmatched.join(", "));
+            } else {
+              setOcrStatus("success", msg);
+            }
+          }
+        } else {
+          setOcrStatus("danger", (res.message || "OCR gagal dibaca") + ". Silakan isi form manual.");
+        }
+      },
+      error: function() {
+        setOcrStatus("danger", "OCR gagal dihubungi. Silakan isi form manual.");
+      },
+      complete: function() {
+        $("#btn-simpan-ika").prop("disabled", false).text("Simpan");
+      }
+    });
+  });
+
   $(document).ready(function() {
     $('#exportTitik').on("click", function(){
       TableToExcel.convert(document.getElementById("titik"), {
@@ -162,62 +574,9 @@
     $("#tanggal").val("");
     $('input[name="form[tanggal]_submit"]').attr('value', "");
     // $("#uid_rf_bma").val("").trigger("change");
-    $("#debit").val("");
-    $("#ph").val("");
-    $("#bod").val("");
-    $("#cod").val("");
-    $("#tss").val("");
-    $("#do_p").val("");
-    $("#do_max_p").val("");
-    $("#no3_n").val("");
-    $("#total_phosphat").val("");
-    $("#fecal_coliform").val("");
-    $("#kecerahan").val("");
-    $("#klorofil_a").val("");
-    $("#total_coliform").val("");
-    $("#temperatur_air").val("");
-    $("#temperatur_udara").val("");
-    $("#minyak_lemak").val("");
-    $("#detergen_total").val("");
-    $("#fenol").val("");
-    $("#tds").val("");
-    $("#sulfat").val("");
-    $("#klorida").val("");
-    $("#nitrit").val("");
-    $("#amoniak").val("");
-    $("#total_nitrogen").val("");
-    $("#florida").val("");
-    $("#belerang_sbg_h2s").val("");
-    $("#sianida").val("");
-    $("#klorin_bebas").val("");
-    $("#warna").val("");
-    $("#sampah").val("");
-    $("#ba").val("");
-    $("#bo").val("");
-    $("#hg").val("");
-    $("#as_").val("");
-    $("#se").val("");
-    $("#fe").val("");
-    $("#cd").val("");
-    $("#co").val("");
-    $("#mn").val("");
-    $("#ni").val("");
-    $("#zn").val("");
-    $("#cu").val("");
-    $("#pb").val("");
-    $("#cr_6").val("");
-    $("#aldrin").val("");
-    $("#bhc").val("");
-    $("#chlordane").val("");
-    $("#ddt").val("");
-    $("#endrin").val("");
-    $("#heptachlor").val("");
-    $("#lindane").val("");
-    $("#methoxychlor").val("");
-    $("#toxapan").val("");
-    $("#radioaktivitas_gross_a").val("");
-    $("#radioaktivitas_gross_b").val("");
-    $("#e_coli").val("");
+    jQuery.each(IKA_PARAMS, function(i, id) {
+      $("#" + id).val("");
+    });
     $("#kategori").val("").trigger("change");
     $("#alamat").val("");
     $("#alamat_detail").val("");
@@ -230,6 +589,17 @@
     $("#uid_kabkota").val("").trigger("change");
     $(".shu-download").hide();
     $("#uid_lab").val("").trigger("change");
+    $("#shu").val("");
+    $("#ocr-status").hide().html("");
+    ocrOptions = [];
+    ocrMode = null;
+    $("#ocr-multi-panel").hide();
+    $("#ocr-lokasi-picker").html('<option value="">--PILIH LOKASI--</option><option value="all">PILIH SEMUA</option>');
+    $("#ocr-repeater-rows").hide().empty();
+    $("#ocr-single-block").show();
+    $("#btn-simpan-ika").prop("disabled", false).text("Simpan");
+    clearDocPreview();
+    resetDropzone();
   };
 
   $(".tahun-pemantauan").on("change", function() {
@@ -266,62 +636,9 @@
             $("#tanggal").val(req.tanggal);
             $('input[name="form[tanggal]_submit"]').attr('value', req.tanggal);
             // $("#uid_rf_bma").val(req.uid_rf_bma).trigger("change");
-            $("#debit").val(req.debit);
-            $("#ph").val(req.ph);
-            $("#bod").val(req.bod);
-            $("#cod").val(req.cod);
-            $("#tss").val(req.tss);
-            $("#do_p").val(req.do_p);
-            $("#do_max_p").val(req.do_max_p);
-            $("#no3_n").val(req.no3_n);
-            $("#total_phosphat").val(req.total_phosphat);
-            $("#fecal_coliform").val(req.fecal_coliform);
-            $("#kecerahan").val(req.kecerahan);
-            $("#klorofil_a").val(req.klorofil_a);
-            $("#total_coliform").val(req.total_coliform);
-            $("#temperatur_air").val(req.temperatur_air);
-            $("#temperatur_udara").val(req.temperatur_udara);
-            $("#minyak_lemak").val(req.minyak_lemak);
-            $("#detergen_total").val(req.detergen_total);
-            $("#fenol").val(req.fenol);
-            $("#tds").val(req.tds);
-            $("#sulfat").val(req.sulfat);
-            $("#klorida").val(req.klorida);
-            $("#nitrit").val(req.nitrit);
-            $("#amoniak").val(req.amoniak);
-            $("#total_nitrogen").val(req.total_nitrogen);
-            $("#florida").val(req.florida);
-            $("#belerang_sbg_h2s").val(req.belerang_sbg_h2s);
-            $("#sianida").val(req.sianida);
-            $("#klorin_bebas").val(req.klorin_bebas);
-            $("#warna").val(req.warna);
-            $("#sampah").val(req.sampah);
-            $("#ba").val(req.ba);
-            $("#bo").val(req.bo);
-            $("#hg").val(req.hg);
-            $("#as_").val(req.as_);
-            $("#se").val(req.se);
-            $("#fe").val(req.fe);
-            $("#cd").val(req.cd);
-            $("#co").val(req.co);
-            $("#mn").val(req.mn);
-            $("#ni").val(req.ni);
-            $("#zn").val(req.zn);
-            $("#cu").val(req.cu);
-            $("#pb").val(req.pb);
-            $("#cr_6").val(req.cr_6);
-            $("#aldrin").val(req.aldrin);
-            $("#bhc").val(req.bhc);
-            $("#chlordane").val(req.chlordane);
-            $("#ddt").val(req.ddt);
-            $("#endrin").val(req.endrin);
-            $("#heptachlor").val(req.heptachlor);
-            $("#lindane").val(req.lindane);
-            $("#methoxychlor").val(req.methoxychlor);
-            $("#toxapan").val(req.toxapan);
-            $("#radioaktivitas_gross_a").val(req.radioaktivitas_gross_a);
-            $("#radioaktivitas_gross_b").val(req.radioaktivitas_gross_b);
-            $("#e_coli").val(req.e_coli);
+            jQuery.each(IKA_PARAMS, function(i, id) {
+              $("#" + id).val(req[id]);
+            });
             $("#periode_pemantauan").val(req.periode_pemantauan).trigger("change");
             $.ajax({
               url: baseUrl + "ajax/lokasiById/x/" + req.uid_lokasi_pemantauan,
@@ -349,11 +666,16 @@
               $("#uid_kabkota").val(req.uid_kabkota).trigger("change");
             }, 1000)
             if (req.shu) {
-              var htmlDownload = '<a title="Download File" class="border-secondary badge badge-dark round" href="' + baseUrl + 'uploads/monitoring/' + req.shu + '" target="_blank" >Download</a>'
+              var shuUrl = baseUrl + 'uploads/monitoring/' + req.shu;
+              var htmlDownload = '<a title="Download File" class="border-secondary badge badge-dark round" href="' + shuUrl + '" target="_blank" >Download</a>'
               $(".shu-download").html(htmlDownload);
               $(".shu-download").show();
+              renderDocPreview(shuUrl, /\.pdf$/i.test(req.shu));
+              showDropzoneFile(req.shu.replace(/^\d+_/, ""));
             } else {
               $(".shu-download").hide();
+              clearDocPreview();
+              resetDropzone();
             }
             $("#uid_lab").val(req.uid_lab? req.uid_lab.split(',') : '').trigger("change");
           }
@@ -405,16 +727,7 @@
     }
   });
   $("#kategori").on("change", function() {
-    var val = $(this).val();
-    if (val == 3) {
-      $(".danau_parameter").fadeIn();
-      // $(".danau_parameter_2").addClass('border-wajib');
-      // $(".danau_parameter_3").removeClass('border-wajib');
-    } else {
-      $(".danau_parameter").fadeOut();
-      // $(".danau_parameter_2").removeClass('border-wajib');
-      // $(".danau_parameter_3").addClass('border-wajib');
-    }
+    toggleKategoriFields($(document), $(this).val());
   });
   $("#modalRekap").on("show.bs.modal", function(event) {
     $("#push-rekap").html("<tr><td colspan='5' style='padding: 0px;'><div class='alert alert-danger text-center'>Menghitung data..</div></td></tr>");
@@ -525,86 +838,4 @@
     });
   }
 </script>
-{/literal}
-
-{literal}
-<script type="text/javascript">
-  function searchData(tableSrc, txtSrc) {
-    if (tableSrc, txtSrc) {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById(txtSrc);
-      filter = input.value.toUpperCase();
-      table = document.getElementById(tableSrc);
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[1];
-        td2 = tr[i].getElementsByTagName("td")[2];
-        if (td && td2) {
-          txtValue = td.textContent || td.innerText;
-          txtValue2 = td2.textContent || td2.innerText;
-          if ((txtValue.toUpperCase().indexOf(filter) > -1) || txtValue2.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
-
-    }
-
-  }
-</script>
-{/literal}
-
-
-{literal}
-  <script type="text/javascript">
-  	$(".checked-status-prioritas").on("click", function(){
-  		let prioritas = ["prioritas","kurang","tidak"];
-  		let sx = $(this).attr("sx");
-  		let sp = $(this).attr("sp");
-  		$.ajax({
-  			url: baseUrl + ctrl + "/indeksSetPrioritas/x/" + sx + "/p/" +sp,
-  			method: "POST",
-  			success: function(request) {
-  				var req = JSON.parse(request);
-  				if (req.statusCode == 200) {
-  					prioritas.forEach((item, i) => {
-  						$(".checked-"+item+"-"+sx).removeClass("bg-success");
-  						$(".checked-"+item+"-"+sx).html("");
-  					});
-
-            if(req.prioritas){
-              setTimeout(()=>{
-                let lsp = sp.toLowerCase();
-                $(".checked-"+lsp+"-"+sx).html("<h2><i class='ft-check'></i></h2>");
-                $(".checked-"+lsp+"-"+sx).addClass("bg-success");
-              },300);
-            }
-
-  				}
-  			}
-  		});
-  	});
-    $(".parameter_kritis").on("change", function(){
-      let sx = $(this).attr("sx");
-      let val = $(this).val();
-      let parameter = "";
-      if(val.length){
-        parameter = val.join(",");
-      }
-      $.ajax({
-  			url: baseUrl + ctrl + "/indeksSetParameter/x/" + sx + "/p/" + btoa(parameter),
-  			method: "POST",
-  			success: function(request) {
-  				var req = JSON.parse(request);
-  				if (req.statusCode == 200) {
-
-  				}else{
-            swal("Informasi","Gagal menyimpan data","warning");
-          }
-  			}
-  		});
-    })
-  </script>
 {/literal}

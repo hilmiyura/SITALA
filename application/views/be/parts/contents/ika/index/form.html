@@ -1,6 +1,345 @@
+<style>
+  /* ---- shell ---- */
+  #tambahData .modal-content {
+    border: none;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 16px 44px rgba(15, 23, 42, .3);
+  }
+  #tambahData .modal-header {
+    background: linear-gradient(135deg, #1cb5c4 0%, #0f7c8c 100%) !important;
+    border: none;
+    padding: 1.1rem 1.5rem;
+  }
+  #tambahData .modal-title {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  #tambahData .modal-title i {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, .18);
+    border-radius: 10px;
+    font-size: 1.05rem;
+  }
+  #tambahData .close {
+    color: #fff;
+    opacity: .85;
+    text-shadow: none;
+  }
+  #tambahData .close:hover {
+    opacity: 1;
+  }
+  #tambahData .modal-footer {
+    border-top: 1px solid #eef1f5;
+    padding: .9rem 1.5rem;
+    background: #fff;
+  }
+  #tambahData .modal-footer .btn {
+    border-radius: 8px;
+    padding: .55rem 1.5rem;
+    font-weight: 600;
+    border: none;
+  }
+  #tambahData .modal-footer .btn-secondary {
+    background: #eef1f5;
+    color: #4b5563;
+  }
+  #tambahData .modal-footer .btn-secondary:hover {
+    background: #e2e7ee;
+    color: #1f2937;
+  }
+  #tambahData #btn-simpan-ika {
+    background: linear-gradient(135deg, #ef4b4d, #c42730);
+    box-shadow: 0 6px 16px rgba(196, 39, 48, .3);
+  }
+
+  /* ---- panes ---- */
+  #tambahData .iku-modal-body {
+    height: 80vh;
+  }
+  #tambahData .iku-preview-pane,
+  #tambahData .iku-form-pane {
+    height: 100%;
+    overflow-y: auto;
+    padding: 1.5rem;
+  }
+  #tambahData .iku-preview-pane {
+    background: #f6f8fb;
+  }
+
+  /* ---- section headers ---- */
+  #tambahData .form-section {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    font-size: .95rem;
+    font-weight: 700;
+    color: #263042;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    margin: 0 0 1.1rem;
+    padding-bottom: .65rem;
+    border-bottom: 2px solid #eef1f5;
+  }
+  #tambahData .iku-form-pane > .form-section:not(:first-child) {
+    margin-top: 1.5rem;
+  }
+  #tambahData .form-section i {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #1cb5c4, #0f7c8c);
+    color: #fff;
+    font-size: .95rem;
+  }
+
+  /* ---- form controls ---- */
+  #tambahData label {
+    font-size: .8rem;
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: .35rem;
+  }
+  #tambahData .form-control {
+    border-radius: 8px;
+    border-color: #dde3ec;
+  }
+  #tambahData .form-control:focus {
+    border-color: #1cb5c4;
+    box-shadow: 0 0 0 3px rgba(28, 181, 196, .15);
+  }
+  #tambahData .form-control[readonly],
+  #tambahData .form-control:disabled {
+    background-color: #f2f4f7;
+    color: #6b7280;
+  }
+  #tambahData .select2-container--default .select2-selection--single,
+  #tambahData .select2-container--default .select2-selection--multiple {
+    border-radius: 8px !important;
+    border-color: #dde3ec !important;
+    min-height: 38px;
+  }
+  #tambahData .input-group-text {
+    border-radius: 0 8px 8px 0;
+    background: #f2f4f7;
+    color: #6b7280;
+    border-color: #dde3ec;
+  }
+
+  /* ---- upload dropzone ---- */
+  #tambahData .ocr-dropzone {
+    position: relative;
+    border: 2px dashed #c9d2de;
+    border-radius: 12px;
+    background: #fff;
+    padding: 1.6rem 1rem;
+    text-align: center;
+    transition: border-color .15s ease, background .15s ease, padding .15s ease;
+  }
+  #tambahData .ocr-dropzone:hover,
+  #tambahData .ocr-dropzone.dragover {
+    border-color: #1cb5c4;
+    background: #f0fbfd;
+  }
+  #tambahData .ocr-dropzone-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+  }
+  #tambahData .ocr-dropzone i {
+    font-size: 28px;
+    color: #1cb5c4;
+    margin-bottom: .35rem;
+    display: block;
+  }
+  #tambahData .ocr-dropzone-title {
+    margin: 0;
+    font-size: .9rem;
+    font-weight: 600;
+    color: #344054;
+  }
+  #tambahData .ocr-dropzone-sub {
+    margin: .2rem 0 0;
+    font-size: .76rem;
+    color: #8a94a6;
+  }
+  #tambahData .ocr-hint {
+    font-size: .76rem;
+    color: #8a94a6;
+    margin: .6rem 0 0;
+  }
+
+  /* ---- dropzone: compact state once a file is chosen ---- */
+  #tambahData .ocr-dropzone.has-file {
+    padding: .6rem .9rem;
+    text-align: left;
+    border-style: solid;
+    border-color: #dde3ec;
+    background: #f8fafc;
+  }
+  #tambahData .ocr-dropzone.has-file:hover {
+    border-color: #1cb5c4;
+    background: #f0fbfd;
+  }
+  #tambahData #ocr-dropzone-selected {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+  #tambahData #ocr-dropzone-selected i {
+    font-size: 18px;
+    color: #1cb5c4;
+    margin: 0;
+    flex: 0 0 auto;
+  }
+  #tambahData .ocr-dropzone-filename {
+    font-size: .85rem;
+    font-weight: 600;
+    color: #344054;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1 1 auto;
+  }
+  #tambahData .ocr-dropzone-change {
+    font-size: .74rem;
+    color: #1c5fa8;
+    font-weight: 600;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* ---- multi-location picker ---- */
+  #tambahData #ocr-multi-panel {
+    margin-top: .85rem;
+  }
+  #tambahData #ocr-multi-panel label {
+    display: block;
+  }
+
+  /* ---- repeated location rows (right pane, "Pilih Semua") ---- */
+  #tambahData .iku-row {
+    border: 1px solid #eef1f5;
+    border-radius: 10px;
+    padding: 1rem 1rem 1.25rem;
+    margin: 0 0 1.25rem;
+    background: #fff;
+  }
+  #tambahData .iku-row-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: .6rem;
+    border-bottom: 2px solid #eef1f5;
+  }
+  #tambahData .iku-row-title {
+    font-size: .9rem;
+    font-weight: 700;
+    color: #263042;
+    margin: 0;
+  }
+  #tambahData .iku-row-remove {
+    font-size: .76rem;
+    color: #c42730;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  /* ---- ocr status banner ---- */
+  #tambahData #ocr-status {
+    border: none;
+    border-left: 4px solid;
+    border-radius: 8px;
+    font-size: .82rem;
+    padding: .65rem .9rem !important;
+  }
+  #tambahData #ocr-status.alert-info { border-left-color: #2f80e0; background: #eef6ff; color: #1c5fa8; }
+  #tambahData #ocr-status.alert-success { border-left-color: #28a745; background: #eefaf1; color: #1e7e34; }
+  #tambahData #ocr-status.alert-warning { border-left-color: #f0ad4e; background: #fff8ec; color: #8a5a00; }
+  #tambahData #ocr-status.alert-danger { border-left-color: #dc3545; background: #fdeeee; color: #a71d2a; }
+
+  /* ---- document preview ---- */
+  #tambahData #doc-preview-wrapper,
+  #tambahData #doc-preview {
+    height: calc(80vh - 340px);
+    min-height: 260px;
+  }
+  #tambahData #doc-preview-wrapper {
+    margin-top: 1rem;
+  }
+  #tambahData #doc-preview {
+    background: #525659;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    border-radius: 10px;
+  }
+  #tambahData #doc-preview iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  #tambahData #doc-preview img {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  #tambahData #doc-preview-empty {
+    padding-top: 12%;
+    color: #98a2b3;
+  }
+  #tambahData #doc-preview-empty i {
+    width: 60px;
+    height: 60px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #eef1f5;
+    color: #98a2b3;
+    font-size: 26px !important;
+    margin-bottom: .75rem;
+  }
+  #tambahData #doc-preview-empty p {
+    max-width: 260px;
+    margin: 0 auto;
+    font-size: .85rem;
+  }
+
+  @media (max-width: 991px) {
+    #tambahData .iku-modal-body {
+      height: auto;
+    }
+    #tambahData .iku-preview-pane,
+    #tambahData .iku-form-pane {
+      height: auto;
+      overflow-y: visible;
+    }
+    #tambahData #doc-preview-wrapper,
+    #tambahData #doc-preview {
+      height: 50vh;
+    }
+  }
+</style>
 <!-- Modal -->
 <div class="modal text-left" id="tambahData" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
+  <div class="modal-dialog" style="max-width: 96vw; width: 96vw; margin: 1rem auto;" role="document">
     <div class="modal-content">
       <div class="modal-header bg-info bg-darken-2 white">
         <h4 class="modal-title white" id="myModalLabel6">
@@ -10,20 +349,52 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
+      <form method="POST" class="form_with_load" action="" enctype="multipart/form-data" novalidate>
         <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
-        <div class="modal-body">
-          <h4 class="form-section">
-            <i class="ft-calendar"></i>Tanggal dan Frekuensi
+        <div class="modal-body p-0">
+          <div class="row no-gutters iku-modal-body">
+            <div class="col-lg-5 iku-preview-pane border-right">
+              <h4 class="form-section mt-0">
+                <i class="ft-magic"></i>Unggah Dokumen (Isi Otomatis via OCR)
+              </h4>
+              <div class="ocr-dropzone" id="ocr-dropzone">
+                <input type="file" id="shu" name="shu" accept=".pdf,.jpg,.jpeg,.png" class="ocr-dropzone-input" />
+                <div id="ocr-dropzone-placeholder">
+                  <i class="ft-upload-cloud"></i>
+                  <p class="ocr-dropzone-title">Klik atau seret dokumen ke sini</p>
+                  <p class="ocr-dropzone-sub">PDF, JPG, atau PNG &middot; maksimal 10 Mb</p>
+                </div>
+                <div id="ocr-dropzone-selected" style="display:none;">
+                  <i class="ft-file-text"></i>
+                  <span class="ocr-dropzone-filename" id="ocr-dropzone-filename"></span>
+                  <span class="ocr-dropzone-change">Ganti dokumen</span>
+                </div>
+              </div>
+              <p class="ocr-hint" id="ocr-hint">Data di sebelah kanan akan terisi otomatis, mohon periksa kembali sebelum menyimpan.</p>
+              <span class="help-block shu-download" style="display:none"></span>
+              <div id="ocr-status" class="alert mb-0" style="display:none;"></div>
+              <div id="ocr-multi-panel" style="display:none;">
+                <label class="mb-1" for="ocr-lokasi-picker">Lokasi Pemantauan Terdeteksi</label>
+                <select class="form-control" id="ocr-lokasi-picker">
+                  <option value="">--PILIH LOKASI--</option>
+                  <option value="all">PILIH SEMUA</option>
+                </select>
+              </div>
+              <div id="doc-preview-wrapper" style="display:none;">
+                <div id="doc-preview"></div>
+              </div>
+              <div id="doc-preview-empty" class="text-center">
+                <i class="ft-file-text"></i>
+                <p>Belum ada dokumen diunggah. Pratinjau dokumen akan tampil di sini untuk dibandingkan dengan isian form.</p>
+              </div>
+            </div>
+            <div class="col-lg-7 iku-form-pane">
+          <h4 class="form-section mt-0">
+            <i class="ft-calendar"></i>Frekuensi Pemantauan
           </h4>
           <div class="form-row mb-1">
-            <div class="col-md-6 mb-1">
-              <label for="name">Tanggal Pemantauan</label>
-              <input type="text" class="form-control tahun-pemantauan pickadate-limits" to="uid_lokasi_pemantauan" id="tanggal" name="form[tanggal]" required />
-            </div>
-            <div class="col-md-6 mb-1">
+            <div class="col-md-12 mb-1">
               <label for="name">Frekuensi Pemantauan</label>
-              <!-- <input type="date" class="form-control" id="tanggal" name="form[tanggal]" value="{$now}" /> -->
               <select class="select2 form-control position-relative" id="periode_pemantauan" name="form[periode_pemantauan]" required style="width:100%;">
                 <option value="">--PILIH--</option>
                 {for $i=1 to 12}
@@ -32,10 +403,28 @@
               </select>
             </div>
           </div>
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1">
+              <label for="name">Laboratorium</label>
+              <select class="select2 form-control position-relative" multiple="true" id="uid_lab" name="form[uid_lab][]" required="" style="width: 100%">
+                <!-- <option value="">--PILIH LABORATORIUM--</option> -->
+                {foreach from=$lab item=v}
+                <option value="{$v.uid}">{$v.kode} - {$v.nama}</option>
+                {/foreach}
+              </select>
+              <small class="text-muted">Berlaku untuk semua lokasi pada dokumen ini.</small>
+            </div>
+          </div>
+          <div id="ocr-single-block">
           <h4 class="form-section">
             <i class="la la-map-marker"></i>Lokasi Pemantauan
           </h4>
           <div class="form-row mb-1">
+            <div class="col-md-6 mb-1">
+              <label for="name">Tanggal Pemantauan</label>
+              <input type="text" class="form-control tahun-pemantauan pickadate-limits" to="uid_lokasi_pemantauan" id="tanggal" name="form[tanggal]" required />
+            </div>
+            <div class="col-md-6 mb-1">&nbsp;</div>
             <div class="col-md-12 mb-1">
               <label for="name">Lokasi Pemantauan</label>
               <select class="select2 form-control position-relative" id="uid_lokasi_pemantauan" name="form[uid_lokasi_pemantauan]" style="width: 100%">
@@ -54,7 +443,7 @@
               <input type="text" class="form-control position-relative" readonly name="form[alamat_detail]" id="alamat_detail" placeholder="Alamat Lokasi" value="" required="" />
             </div>
             {if $me.role_user !=2 && $me.role_user !=3}
-            <div class="col-md-12 mb-1">
+            <div class="col-md-6 mb-1">
               <label for="name">Provinsi</label>
               <select class="select2 form-control position-relative provinsi_select" disabled to="uid_kabkota" id="uid_provinsi" name="form[uid_provinsi]" style="width: 100%" required="">
                 <option value="">--PILIH PROVINSI--</option>
@@ -65,7 +454,7 @@
             </div>
             {/if}
             {if $me.role_user !=3}
-            <div class="col-md-12 mb-1">
+            <div class="col-md-6 mb-1">
               <label for="name">Kab/kota</label>
               <select class="select2 form-control position-relative" disabled id="uid_kabkota" name="form[uid_kabkota]" style="width: 100%" required="">
                 <option value="">--PILIH KAB/KOTA--</option>
@@ -78,36 +467,10 @@
             <div class="col-md-6 mb-1">
               <label for="name">Latitude</label>
               <input type="text" class="form-control position-relative" readonly name="form[latitude]" id="latitude" placeholder="Latitude" value="" required="" />
-              <!-- <div class="valid-tooltip"></div> -->
-              <!-- <p class="help-block">
-                <small class="text-muted">
-                  Format Decimal Degrees. Jika format dalam bentuk DMS (Degress,
-                  Minutes, Seconds) silakan convert dahulu ke format Decimal
-                  Degress. Untuk Bilangan Desimal Gunakan Pemisah Titik.
-                  <br />
-                  Link Converter DMS to Decimal Degress :
-                  <a href="http://www.onlineconversion.com/map_decimaldegrees.htm" target="_blank">klik disini</a>.
-                  <br />
-                  Untuk Lintang Selatan (LS) tambahkan tanda minus (-) di depan
-                  angka.
-                  <br />
-                </small>
-              </p> -->
             </div>
             <div class="col-md-6 mb-1">
               <label for="name">Longitude</label>
               <input type="text" class="form-control position-relative" readonly name="form[longitude]" id="longitude" placeholder="Longitude" value="" required="" />
-              <!-- <div class="valid-tooltip"></div> -->
-              <!-- <p class="help-block">
-                <small class="text-muted">
-                  Format Decimal Degrees. Jika format dalam bentuk DMS (Degress,
-                  Minutes, Seconds) silakan convert dahulu ke format Decimal
-                  Degress. Untuk Bilangan Desimal Gunakan Pemisah Titik.
-                  <br />
-                  Link Converter DMS to Decimal Degress :
-                  <a href="http://www.onlineconversion.com/map_decimaldegrees.htm" target="_blank">klik disini</a>
-                </small>
-              </p> -->
             </div>
           </div>
           <h4 class="form-section"><i class="ft-edit"></i>Pemantauan</h4>
@@ -119,30 +482,6 @@
             </div>
           </div>
           <div class="form-row mb-1">
-            <!-- <div class="col-md-6 mb-1">
-              <label for="name">Tanggal Pemantauan</label>
-              <input type="date" class="form-control" id="tanggal" name="form[tanggal]" value="{$now}" />
-            </div> -->
-            <!-- <div class="col-md-6 mb-1">
-              <label for="name">Periode Pemantauan</label>
-              <input type="date" class="form-control" id="tanggal" name="form[tanggal]" value="{$now}" />
-              <select class="select2 form-control position-relative" id="periode" name="form[periode]" style="width:100%;">
-                <option value="">--PILIH--</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-              </select>
-            </div> -->
-            <!-- <div class="col-md-6 mb-1">
-              <label for="name">Kelas</label>
-              <select class="select2 form-control position-relative" id="uid_rf_bma" name="form[uid_rf_bma]" style="width: 100%">
-                <option value="">--PILIH KELAS--</option>
-                {foreach from=$kelas item=v}
-                <option value="{$v.uid_rf_bma}">Kelas {$v.kelas}</option>
-                {/foreach}
-              </select>
-            </div> -->
             <div class="col-md-12 mb-1">
               <label for="name">KATEGORI <span class="text-danger">*</span></label>
               <select class="select2 form-control position-relative" id="kategori" name="form[kategori]" style="width: 100%" required>
@@ -659,27 +998,573 @@
               </div>
             </div>
           </div>
-          <div class="row">
-            <div class="col-md-6">
-              <label for="name">Upload Sertifikat Hasil Uji</label>
-              <input type="file" class="form-control mb-1" id="shu" name="shu" />
-              <span class="danger">Upload file max 10 Mb.</span><br>
-              <span class="help-block shu-download" style="display:none"></span>
+          </div>
+          <template id="ocr-row-template">
+          <h4 class="form-section">
+            <i class="la la-map-marker"></i>Lokasi Pemantauan
+          </h4>
+          <div class="form-row mb-1">
+            <div class="col-md-6 mb-1">
+              <label for="name">Tanggal Pemantauan</label>
+              <input type="text" class="form-control" id="tanggal" placeholder="YYYY-MM-DD" value="" />
+            </div>
+            <div class="col-md-6 mb-1">&nbsp;</div>
+            <div class="col-md-12 mb-1">
+              <label for="name">Lokasi Pemantauan</label>
+              <select class="select2 form-control position-relative" id="uid_lokasi_pemantauan" style="width: 100%">
+                <option value="">--PILIH LOKASI PEMANTAUAN--</option>
+              </select>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Laboratorium</label>
-              <select class="select2 form-control position-relative" multiple="true" id="uid_lab" name="form[uid_lab][]" required="" style="width: 100%">
-                <!-- <option value="">--PILIH LABORATORIUM--</option> -->
-                {foreach from=$lab item=v}
-                <option value="{$v.uid}">{$v.kode} - {$v.nama}</option>
-                {/foreach}
+              <label for="name">Nama Sungai / Danau</label>
+              <input type="text" class="form-control position-relative" readonly id="alamat" placeholder="Nama Sungai / Danau" value="" />
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Alamat Lokasi</label>
+              <input type="text" class="form-control position-relative" readonly id="alamat_detail" placeholder="Alamat Lokasi" value="" />
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Latitude</label>
+              <input type="text" class="form-control position-relative" readonly id="latitude" placeholder="Latitude" value="" />
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Longitude</label>
+              <input type="text" class="form-control position-relative" readonly id="longitude" placeholder="Longitude" value="" />
+            </div>
+          </div>
+          <h4 class="form-section"><i class="ft-edit"></i>Pemantauan</h4>
+          <div class="form-row mb-1">
+            <div class="col-md-12">
+              <div class="alert alert-danger text-center">
+                Untuk Pengisian Format Ribu tidak menggunakan tanda baca, dan untuk bilangan desimal menggunakan titik (.)
+              </div>
+            </div>
+          </div>
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1">
+              <label for="name">KATEGORI <span class="text-danger">*</span></label>
+              <select class="select2 form-control position-relative" id="kategori" style="width: 100%" required>
+                <option value="">--PILIH KATEGORI--</option>
+                <option value="1">AIR SUNGAI</option>
+                <option value="2">BADAN AIR GAMBUT</option>
+                <option value="3">DANAU/SITU</option>
               </select>
+              <span class="text-danger"><small>Akan terisi otomatis ketika memilih lokasi, jika kategori sudah diupdate dimenu referensi lokasi pemantauan</small></span>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Debit Air</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Debit Air" id="debit" />
+                <div class="input-group-append">
+                  <span class="input-group-text">m3/s</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">pH (Potential Hydrogen)</label>
+              <div class="input-group border-wajib">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ph" />
+                <div class="input-group-append">
+                  <span class="input-group-text"></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">BOD (Biological Oxygen Demand)</label>
+              <div class="input-group border-wajib">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bod" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">COD (Chemical Oxygen Demand)</label>
+              <div class="input-group border-wajib">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cod" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TSS (Total Susppended Solid)</label>
+              <div class="input-group border-wajib">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="tss" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">DO (Dissolved Oxygen)</label>
+              <div class="input-group border-wajib">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="do_p" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <!-- <div class="col-md-6 mb-1">
+              <label for="name">DO-MAX</label>
+              <div class="input-group border-wajib">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="do_max_p" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div> -->
+            <div class="col-md-6 mb-1">
+              <label for="name">NO (Nitrat)<sub class="black">3</sub>-N</label>
+              <div class="input-group danau_parameter_3 border-wajib">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="no3_n" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TOTAL FOSFAT</label>
+              <div class="input-group border-wajib">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="total_phosphat" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">FECAL COLIFORM</label>
+              <div class="input-group border-wajib">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fecal_coliform" />
+                <div class="input-group-append">
+                  <span class="input-group-text">MPN/100 mL</span>
+                </div>
+              </div>
+            </div>
+            <!-- new fields -->
+            <div class="col-md-6 mb-1 danau_parameter" style="display:none">
+              <label for="name">KECERAHAN (TRANSPARANSI)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="kecerahan" />
+                <div class="input-group-append">
+                  <span class="input-group-text">m</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1 danau_parameter" style="display:none">
+              <label for="name">KLOROFIL a</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="klorofil_a" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/m<sup>3</sup></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TOTAL NITROGEN</label>
+              <div class="input-group danau_parameter_2">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="total_nitrogen" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TOTAL COLIFORM</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="total_coliform" />
+                <div class="input-group-append">
+                  <span class="input-group-text">MPN/100 mL</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TEMPERATUR AIR</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="temperatur_air" />
+                <div class="input-group-append">
+                  <span class="input-group-text"><sup>0</sup>C</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TEMPERATUR UDARA</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="temperatur_udara" />
+                <div class="input-group-append">
+                  <span class="input-group-text"><sup>0</sup>C</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">MINYAK LEMAK</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="minyak_lemak" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">DETERGEN TOTAL</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="detergen_total" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">FENOL</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fenol" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TDS (Total Dissolved Solid)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="tds" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">SULFAT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="sulfat" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">KLORIDA</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="klorida" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">NITRIT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="nitrit" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">AMONIAK</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="amoniak" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">FLOURIDA</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="florida" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">BELERANG SBG H<sub>2</sub>S</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="belerang_sbg_h2s" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">SIANIDA</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="sianida" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">KLORIN BEBAS</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="klorin_bebas" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">WARNA</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="warna" />
+                <div class="input-group-append">
+                  <span class="input-group-text">Pt-Co Unit</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">SAMPAH</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="sampah" />
+                <div class="input-group-append">
+                  <span class="input-group-text">-</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Ba (Barium)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ba" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">B (Boron)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bo" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Hg (Hydrargyrum)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="hg" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">As (Arsenik)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="as_" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Se (Selenium)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="se" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Fe (Ferrum)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fe" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Cd (Kadmium)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cd" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Co (Kobalt)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="co" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Mn (Mangan)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="mn" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Ni (Nikel)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ni" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Zn (Zinc)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="zn" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Cu (Cuprum)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cu" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Pb (Plumbum)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="pb" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Cr-6 (Kromium)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cr_6" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">ALDRIN/DIELDRIN</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="aldrin" />
+                <div class="input-group-append">
+                  <span class="input-group-text">µg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">BHC (Benzene Hexachloride)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bhc" />
+                <div class="input-group-append">
+                  <span class="input-group-text">µg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">CHLORDANE</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="chlordane" />
+                <div class="input-group-append">
+                  <span class="input-group-text">µg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">DDT (Dichoro Diphenyl Trichlorethane)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ddt" />
+                <div class="input-group-append">
+                  <span class="input-group-text">µg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">ENDRIN</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="endrin" />
+                <div class="input-group-append">
+                  <span class="input-group-text">µg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">HEPTACHLOR</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="heptachlor" />
+                <div class="input-group-append">
+                  <span class="input-group-text">µg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">LINDANE</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="lindane" />
+                <div class="input-group-append">
+                  <span class="input-group-text">µg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">METHOXYCHLOR</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="methoxychlor" />
+                <div class="input-group-append">
+                  <span class="input-group-text">µg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TOXAPAN</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="toxapan" />
+                <div class="input-group-append">
+                  <span class="input-group-text">µg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">RADIOAKTIVITAS GROSS-A</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="radioaktivitas_gross_a" />
+                <div class="input-group-append">
+                  <span class="input-group-text">Bq/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">RADIOAKTIVITAS GROSS-B</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="radioaktivitas_gross_b" />
+                <div class="input-group-append">
+                  <span class="input-group-text">Bq/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">E-COLI</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="e_coli" />
+                <div class="input-group-append">
+                  <span class="input-group-text">MPN/100ML</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          </template>
+          <div id="ocr-repeater-rows" style="display:none;"></div>
             </div>
           </div>
         </div>
         <div class="modal-footer">
           <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
-          <button type="submit" name="submit" class="btn btn-danger">
+          <button type="submit" name="submit" class="btn btn-danger" id="btn-simpan-ika">
             Simpan
           </button>
         </div>
