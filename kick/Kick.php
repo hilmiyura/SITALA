@@ -1,5 +1,6 @@
 <?php	    
     require_once "globalsetting.php";
+	require_once "apikeys.php";
 	require_once "front/Front.php";
 	
 	class Kick{

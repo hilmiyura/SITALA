@@ -2,3 +2,5 @@
 /uploads/
 *.sql
 .DS_Store
+/config/apikeys.php
+/IKU/
