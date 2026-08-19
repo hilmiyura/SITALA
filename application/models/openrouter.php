@@ -53,17 +53,31 @@
 
 		//Extract structured pelaporan IKU fields from a SHU document (image or pdf)
 		public function extractIku($filePath, $mimeType){
+			return $this->extractDocument("iku", "Ekstrak data dari dokumen SHU/LHP kualitas udara ambien berikut sesuai instruksi.", $filePath, $mimeType);
+		}
+
+		//Extract structured pelaporan IKA fields from a SHU/LHP/LHU document (image or pdf)
+		public function extractIka($filePath, $mimeType){
+			return $this->extractDocument("ika", "Ekstrak data dari dokumen SHU/LHP/LHU kualitas air permukaan berikut sesuai instruksi.", $filePath, $mimeType);
+		}
+
+		//Extract structured pelaporan IKAL fields from a SHU/LHP/LHU document (image or pdf)
+		public function extractIkal($filePath, $mimeType){
+			return $this->extractDocument("ikal", "Ekstrak data dari dokumen SHU/LHP/LHU kualitas air laut berikut sesuai instruksi.", $filePath, $mimeType);
+		}
+
+		private function extractDocument($promptName, $userText, $filePath, $mimeType){
 			$fileData = base64_encode(file_get_contents($filePath));
 
 			$messages = array(
 				array(
 					"role" => "system",
-					"content" => $this->loadPrompt("iku"),
+					"content" => $this->loadPrompt($promptName),
 				),
 				array(
 					"role" => "user",
 					"content" => array(
-						array("type" => "text", "text" => "Ekstrak data dari dokumen SHU/LHP kualitas udara ambien berikut sesuai instruksi."),
+						array("type" => "text", "text" => $userText),
 						$this->buildFilePart($fileData, $mimeType),
 					),
 				),
