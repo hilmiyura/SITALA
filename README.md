@@ -18,9 +18,46 @@ Repo ini tidak berada di bawah git (tidak ada tracking), jadi perubahan berikut 
 
 **Environment**
 - Dijalankan dengan **PHP 7.4** (`brew install php@7.4`), bukan PHP 8 default sistem. Smarty versi lama yang di-bundle di `kick/view/smarty` memakai fungsi `each()` yang sudah dihapus di PHP 8, jadi fatal error di PHP 8.x.
-- Database MySQL local kosong (`sitala_iklh`) — **tidak ada dump/schema SQL di repo ini**, jadi tabel belum ada dan login/data tidak akan berfungsi sampai schema+data di-import.
+- Database MySQL local (`sitala_iklh`) diisi dari dump `sitalakx_iklh.sql` (tidak disertakan di repo ini — file terpisah, ~1GB). Import seperti biasa: `mysql -u root sitala_iklh < sitalakx_iklh.sql`.
 - Cara jalankan:
   ```
   $(brew --prefix php@7.4)/bin/php -S localhost:8000 router.php
   ```
   lalu buka `http://localhost:8000/login`.
+
+**Known issue: error "Coloums of table `v_...` not found" setelah import dump**
+
+Setelah import dump di atas, membuka halaman yang pakai view tertentu (misalnya pelaporan IKA/IKU/IKTL/IKAL) bisa memunculkan error:
+```
+Coloums of table v_pelaporan_ika not found
+```
+atau kalau dicek langsung di MySQL:
+```
+ERROR 1356 (HY000): View 'sitala_iklh.v_pelaporan_ika' references invalid table(s) or
+column(s) or function(s) or definer/invoker of view lack rights to use them
+```
+
+Penyebab: semua VIEW di dump ini (ada 31, prefix `v_`) didefinisikan dengan
+`DEFINER=`sitalakxrg4s`@`localhost`` — user MySQL dari server produksi asal. User itu
+cuma ikut ter-dump sebagai *referensi nama* di definisi view, bukan sebagai akun
+sungguhan — jadi di MySQL local, user tersebut tidak ada, dan semua view gagal diakses
+(termasuk lewat `SHOW COLUMNS`, yang dipakai fungsi `_getProperties()` di banyak
+controller: `ikaController`, `ikuController`, `iktlController`, `ikalController`, dkk).
+
+Fix (jalankan setelah database di-import dari dump):
+```sql
+CREATE USER IF NOT EXISTS 'sitalakxrg4s'@'localhost' IDENTIFIED BY '';
+GRANT ALL PRIVILEGES ON sitala_iklh.* TO 'sitalakxrg4s'@'localhost';
+FLUSH PRIVILEGES;
+```
+Catatan: sekadar membuat user ini **tidak cukup**. View yang sudah kadung dibuat sebelum
+user-nya ada tetap gagal di `SHOW COLUMNS`/introspeksi metadata (meski `SELECT` data
+biasa sudah normal) — MySQL menyimpan status "invalid" di metadata internal view sejak
+pertama dibuat, dan itu tidak otomatis pulih hanya karena user-nya belakangan dibuat.
+Semua view yang sudah ada hasil import perlu di-`CREATE OR REPLACE` ulang (definisi
+persis sama, tidak ada perubahan logika) supaya metadata-nya bersih:
+```bash
+grep -E '^CREATE ALGORITHM=UNDEFINED DEFINER=`[^`]*`@`[^`]*` SQL SECURITY DEFINER VIEW `' sitalakx_iklh.sql \
+  | sed 's/^CREATE ALGORITHM/CREATE OR REPLACE ALGORITHM/' \
+  | mysql -u root sitala_iklh
+```
