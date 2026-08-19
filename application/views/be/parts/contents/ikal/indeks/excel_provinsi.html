@@ -1,0 +1,80 @@
+<style>
+	table thead tr th {
+		border: 1px solid black;
+	}
+
+	td {
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style>
+<table>
+	<thead>
+		<tr>
+			<th>No</th>
+			<th class="v-middle text-center">Provinsi</th>
+			<th class="v-middle text-center">IKAL</th>
+			<th class="v-middle text-center">RATING</th>
+		</tr>
+	</thead>
+	<tbody>
+		{foreach from=$viewp.data item=v}
+		{$v.json_data = $v.json_data|@json_decode:true}
+		{if $v.jenis_indeks == 1}
+		<tr>
+			<td>{counter}</td>
+			<td class="text-center"><b>{$v.nama_provinsi}</b></td>
+			<td class="text-center">{number_format($v.nilai_indeks,2,".","")}</td>
+			<td class="text-center">{if $v.rating_indeks}{$v.rating_indeks}{else}-{/if}</td>
+		</tr>
+		{/if}
+		{/foreach}
+		<tr></tr>
+	</tbody>
+</table>
+<table class="table">
+	<thead class="bg-info bg-darken-2 white">
+		<tr>
+			<th colspan="11" class="text-center">Subtotal Per Parameter</th>
+		</tr>
+		<tr>
+			<th class="text-center" style="width:20px;">No</th>
+			<th class="text-center">Provinsi</th>
+			<th class="text-center" colspan="2">Lokasi Pemantauan</th>
+			<th class="text-center">TSS</th>
+			<th class="text-center">DO</th>
+			<th class="text-center">MINYAK & LEMAK</th>
+			<th class="text-center">AMONIA TOTAL</th>
+			<th class="text-center">ORTOFOSFAT (PO4-P)</th>
+			<th class="text-center">Water Quality Index</th>
+			<th class="text-center">Water Quality Rating</th>
+		</tr>
+	</thead>
+	<tbody>
+		{$kk=1}
+		{foreach from=$viewp.detail item=v key=k}
+		{foreach from=$v.data item=w}
+		{$w.json_data = $w.json_data|@json_decode:true}
+		<!-- <tr>
+
+        	</tr> -->
+		<tr>
+			<td>{$kk++}</td>
+			<td>
+				<b>{$w.kode_lokasi}</b><br>
+				{$viewp.data[$k].nama_provinsi}
+			</td>
+			<td class="text-center"><b>{$w.alamat}</b></td>
+			<td class="text-center"><b>{$w.alamat_detail}</b></td>
+			<td class="text-center">{number_format($w.json_data.subtotal.tss,2,".","")}</td>
+			<td class="text-center">{number_format($w.json_data.subtotal.do_p,2,".","")}</td>
+			<td class="text-center">{number_format($w.json_data.subtotal.minyak_dan_lemak,2,".","")}</td>
+			<td class="text-center">{number_format($w.json_data.subtotal.amonia_total,2,".","")}</td>
+			<td class="text-center">{number_format($w.json_data.subtotal.orto_fosfat,2,".","")}</td>
+			<td class="text-center">{$w.json_data.wqi|number_format:2:".":""}</td>
+			<td class="text-center">{$w.json_data.wqr}</td>
+		</tr>
+		{/foreach}
+		{/foreach}
+	</tbody>
+</table>

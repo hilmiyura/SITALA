@@ -1,0 +1,353 @@
+<!-- Modal -->
+<div class="modal text-left" id="tambahData" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data Lokasi Pemantauan
+        </h4>
+        <button type="button" class="close closeMapsLocationPointer" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+        <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
+        <input type="hidden" name="form[kode_lokasi]" id="kode_lokasi" />
+        <div class="modal-body">
+          <!-- <div class="form-row">
+            <div class="col-md-12 mb-2">
+              <label>Kode Lokasi
+                <small class="text-muted">Contoh : U-JB-168-99999999 untuk kode akan generate otomatis setelah dibuat</small>
+              </label>
+              <input type="text" class="form-control position-relative code-location-inputmask" id="kode_lokasi" placeholder="Kode Lokasi" value="" />
+            </div>
+          </div> -->
+          <div class="form-row">
+            <div class="col-md-12 mb-2">
+              <label for="name">Komponen Pelaporan </label>
+              <select class="select2 form-control position-relative" id="uid_rf_component" name="form[uid_rf_component]" style="width: 100%" required>
+                <option value="">--PILIH KOMPONEN PELAPORAN--</option>
+                {if $me.komponen == "IKU"}
+                  {foreach from=$komponen item=v}
+                    {if $v.uid_rf_component == 1}
+                      <option value="{$v.uid_rf_component}">{$v.name}</option>
+                    {/if}
+                  {/foreach}
+                {elseif $me.komponen == "IKA"}
+                  {foreach from=$komponen item=v}
+                    {if $v.uid_rf_component == 2}
+                      <option value="{$v.uid_rf_component}">{$v.name}</option>
+                    {/if}
+                  {/foreach}
+                {elseif $me.komponen == "IKAL"}
+                  {foreach from=$komponen item=v}
+                    {if $v.uid_rf_component == 5}
+                      <option value="{$v.uid_rf_component}">{$v.name}</option>
+                    {/if}
+                  {/foreach}
+                {else}
+                  {foreach from=$komponen item=v}
+                    <option value="{$v.uid_rf_component}">{$v.name}</option>
+                  {/foreach}
+                {/if}
+
+              </select>
+            </div>
+            <div class="col-md-12 mb-2 uid_rf_sumber_pencemar" style="display:none;">
+              <label for="name">Sumber Pencemar (Untuk IKU)</label>
+              <select class="select2 form-control position-relative" id="uid_rf_sumber_pencemar" name="form[uid_rf_sumber_pencemar]" style="width: 100%">
+                <option value="">--PILIH SUMBER PENCEMAR--</option>
+                {foreach from=$sumber_pencemar item=v}
+                <option value="{$v.uid}">{$v.name}</option>
+                {/foreach}
+              </select>
+            </div>
+
+            <div class="col-md-12 mb-2 kategori_pelaporan_ika" style="display:none;">
+              <label for="name">Kategori (Untuk IKA)</label>
+              <select class="select2 form-control position-relative" id="kategori_pelaporan_ika" name="form[kategori_pelaporan_ika]" style="width: 100%">
+                <option value="">--PILIH KATEGORI--</option>
+                <option value="1">AIR SUNGAI</option>
+                <option value="2">BADAN AIR GAMBUT</option>
+                <option value="3">DANAU/SITU</option>
+              </select>
+            </div>
+
+            <div class="col-md-12 mb-2 uid_sungai" style="display:none;">
+              <label for="name">Sungai (Untuk IKA)</label>
+              <select class="form-control position-relative sungai-src" id="uid_sungai" name="form[uid_sungai]" style="width: 100%">
+                <option value="">--PILIH SUNGAI--</option>
+                <!-- {foreach from=$sungai item=v}
+                <option value="{$v.uid}" sungai="{$v.nama}">{$v.nama} - DAS {if $v.nama_das}{$v.nama_das} - {$v.kode_das}{else}BELUM DI PILIH{/if}</option>
+                {/foreach} -->
+              </select>
+            </div>
+
+            <div class="col-md-12 mb-2">
+              <label for="name">Pelaksana Pemantauan</label>
+              <select class="select2 form-control position-relative" id="uid_rf_pelaksana" name="form[uid_rf_pelaksana]" style="width: 100%" required>
+                <option value="">--PILIH PELAKSANA PEMANTAUAN--</option>
+                {foreach from=$pelaksana item=v}
+                <option value="{$v.kode}">{$v.name}</option>
+                {/foreach}
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-6 mb-1">
+              <label for="name">Nama Lokasi</label>
+              <input type="text" class="form-control position-relative" name="form[alamat]" id="alamat" placeholder="Nama Lokasi" value="" required="" />
+              <small class="text-muted danger text-uppercase"><b>untuk IKA diisi dengan nama sungai / danau</b></small>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Nama Perusahaan</label>
+              <input type="text" class="form-control position-relative" name="form[nama_perusahaan]" id="nama_perusahaan" placeholder="Nama Perusahaan" value=""/>
+              <small class="text-muted danger text-uppercase"><b>*lengkapi jika titik dipantau/kerjasama dengan perusahaan</b></small>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-12 mb-2">
+              <label for="name">Alamat detail</label>
+              <input type="text" class="form-control position-relative" name="form[alamat_detail]" id="alamat_detail" placeholder="Alamat Lokasi" value="" required="" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-12 mb-2">
+              <label for="name">Provinsi</label>
+              <!-- <input type="text" class="form-control position-relative" id="uid_provinsi" /> -->
+              <select class="form-control select2 position-relative provinsi_select3" to="uid_kabkota" id="uid_provinsi" name="form[uid_provinsi]" required="" style="width:100%">
+                <option value="">--PILIH PROVINSI--</option>
+                {foreach from=$provinsi item=i}
+                <option value="{$i.kd_propinsi}"> {$i.nama_propinsi} </option>
+                {/foreach}
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-12 mb-2">
+              <label for="name">Kabupaten/Kota</label>
+              <!-- <input type="text" class="form-control position-relativ" id="uid_kabkota" /> -->
+              <select class="form-control select2 position-relative" id="uid_kabkota" name="form[uid_kabkota]" required="" style="width:100%">
+                <option value="">--PILIH KABKOTA--</option>
+                {foreach from=$kabkota item=i}
+                <option value="{$i.kd_kota}"> {$i.nama_kabkot} </option>
+                {/foreach}
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-12 mb-2">
+              <label for="tahun">Tahun</label>
+              <select class="form-control select2 position-relative" id="tahun" name="form[tahun][]" multiple required="" style="width:100%">
+                {for $foo=2015 to ($thisYear+5)}
+                <option value="{$foo}" {if is_numeric(array_search($foo,$form.tahun)) } selected {/if}> {$foo} </option>
+                {/for}
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-12 mb-2">
+              <div id="mapsPointer" style="height: 400px;"></div>
+            </div>
+            <div class="col-md-12 mb-2">
+              <span class="text-info">Geser lokasi untuk memindahkan titik koordinat atau gunakan lokasi saat ini <a class="pointer setLokasi" ><b>Klik Disini</b></a></span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-12 mb-6">
+              <label for="name">Latitude</label>
+              <input type="text" class="form-control position-relative" name="form[latitude]" id="latitude" placeholder="Latitude" value="" required="" />
+              <!-- <div class="valid-tooltip"></div> -->
+              <p class="help-block">
+                <small class="text-muted">
+                  Format Decimal Degrees. Jika format dalam bentuk DMS (Degress,
+                  Minutes, Seconds) silakan conver dahulu ke format Decimal
+                  Degress. Untuk Bilangan Desimal Gunakan Pemisah Titik.
+                  <br />
+                  Link Converter DMS to Decimal Degress :
+                  <a href="http://www.onlineconversion.com/map_decimaldegrees.htm" target="_blank">klik disini</a>.
+                  <br />
+                  Untuk Lintang Selatan (LS) tambahkan tanda minus (-) di depan
+                  angka.
+                  <br />
+                </small>
+              </p>
+            </div>
+            <!-- </div>
+                    <div class="form-row"> -->
+            <div class="col-md-12 mb-6">
+              <label for="name">Longitude</label>
+              <input type="text" class="form-control position-relative" name="form[longitude]" id="longitude" placeholder="Longitude" value="" required="" />
+              <!-- <div class="valid-tooltip"></div> -->
+              <p class="help-block">
+                <small class="text-muted">
+                  Format Decimal Degrees. Jika format dalam bentuk DMS (Degress,
+                  Minutes, Seconds) silakan conver dahulu ke format Decimal
+                  Degress. Untuk Bilangan Desimal Gunakan Pemisah Titik.
+                  <br />
+                  Link Converter DMS to Decimal Degress :
+                  <a href="http://www.onlineconversion.com/map_decimaldegrees.htm" target="_blank">klik disini</a>
+                </small>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="submit" name="submit" class="btn btn-danger">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- form excel -->
+<div class="modal text-left" id="tambahDataExcel" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data Lokasi Pemantauan
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" class="form_with_load" action="{$baseUrl}{$ctrl}/{$act}" enctype="multipart/form-data">
+        <div class="modal-body">
+          <h4 class="form-section"><i class="ft-edit"></i>Lokasi Pemantauan</h4>
+          <div class="form-row mb-1">
+            <!-- {if $me.role_user !=2 && $me.role_user != 3}
+            <div class="col-md-12 mb-1">
+              <label for="name">Provinsi</label>
+              <select class="select2 form-control position-relative provinsi_select" to="uid_kabkota_excel" name="form[uid_provinsi]" style="width: 100%" required="">
+                <option value="">--PILIH PROVINSI--</option>
+                {foreach from=$provinsi item=v}
+                <option value="{$v.kd_propinsi}">{$v.nama_propinsi}</option>
+                {/foreach}
+              </select>
+            </div>
+            {/if} -->
+            <!-- {if $me.role_user !=3}
+            <div class="col-md-12 mb-1">
+              <label for="name">Kab/kota</label>
+              <select class="select2 form-control position-relative" id="uid_kabkota_excel" name="form[uid_kabkota]" style="width: 100%" required="">
+                <option value="">--PILIH KAB/KOTA--</option>
+                {foreach from=$kabkota item=v}
+                <option value="{$v.kd_kota}">{$v.nama_kabkot}</option>
+                {/foreach}
+              </select>
+            </div>
+            {/if} -->
+            <div class="col-md-6 mb-1">
+              <label for="name"> File Excel </label>
+              <div class="input-group">
+                <input type="file" name="file_excel" required="" />
+                <span class="danger">format file excel harus (.xls)</span>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name"> </label>
+              <div class="input-group">
+                <span><a href="{$baseUrl}temp/format_excel/lokasi_upload_v2.xls?={$time}">Download format excel</a></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white closeMapsLocationPointer" data-dismiss="modal">Close</a>
+          <button type="submit" name="submit-excel" class="btn btn-danger">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- form taging data -->
+<div class="modal text-left" id="copyDataLokasi" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Copy Data Lokasi Pemantauan
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" class="form_with_load" enctype="multipart/form-data">
+        <div class="modal-body">
+          <h4 class="form-section"><i class="ft-edit"></i>Lokasi Pemantauan</h4>
+          <div class="form-row mb-1">
+            <div class="col-md-6">
+              <label for="dari-tahun">Dari Tahun</label>
+              <select class="form-control select2 position-relative" id="dari-tahun" style="width:100%">
+                <option value="">--PILIH DARI TAHUN--</option>
+                {for $foo=2017 to ($thisYear+5)}
+                <option value="{$foo}"> {$foo} </option>
+                {/for}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="">Ke Tahun</label>
+              <select class="form-control select2 position-relative" id="ke-tahun" style="width:100%">
+                <option value="">--PILIH KE TAHUN--</option>
+                {for $foo=2017 to ($thisYear+5)}
+                <option value="{$foo}"> {$foo} </option>
+                {/for}
+              </select>
+            </div>
+          </div>
+          <div class="form-row mb-1">
+            <div class="col-md-12">
+              <label for="">Komponen Pelaporan</label>
+              <select class="form-control select2" id="komponen-pelaporan" style="width:100%">
+                <option value=""> --PILIH KOMPONEN PELAPORAN-- </option>
+                {foreach from=$komponen item=i}
+                <option value="{$i.uid_rf_component}"> {$i.name} </option>
+                {/foreach}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <a type="button" id="copy-data" class="btn btn-danger white">Simpan</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{if isset($listExport)}
+<div class="modal text-left" id="unduhDataExcel" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-download-cloud"></i> Download Excel
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row d-flex">
+          {foreach from=$listExport item=v key=k}
+          <div class="list-group col-md-3" style="margin-left: 15px; padding: 0;">
+            <a href="{$baseUrl}lokasiPemantauan/dataExcel/offset/{$v.offset_start}/search/{$search_json}/print/{time()}" class="list-group-item">
+              <i class="ft-file"></i> EXCEL {$k}
+              <p><small>(BARIS : {$v.offset_start}-{$v.offset_end})</small></p>
+            </a>
+          </div>
+          {/foreach}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}

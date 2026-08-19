@@ -1,0 +1,258 @@
+<style>
+  table thead tr th {
+    border: 1px solid black;
+  }
+
+  table tbody tr td {
+    border: 1px solid black;
+    vertical-align: top;
+  }
+</style>
+<table>
+  <thead>
+    <tr style="color: white;">
+      <th rowspan="2" bgcolor="#1E9FC4">NO</th>
+      <th colspan="2" bgcolor="#1E9FC4">TANGGAL</th>
+      <th colspan="3" bgcolor="#1E9FC4">VERIFIKASI</th>
+      <th colspan="3" bgcolor="#1E9FC4">TANGGAL VERIFIKASI</th>
+      <th rowspan="2" bgcolor="#1E9FC4">LEVEL</th>
+      <th colspan="3" bgcolor="#1E9FC4">CATATAN PELAPORAN</th>
+
+      <th rowspan="2" bgcolor="#1E9FC4">TANGGAL PEMANTAUAN</th>
+      <th rowspan="2" bgcolor="#1E9FC4">PERIODE PEMANTAUAN</th>
+      <th rowspan="2" bgcolor="#1E9FC4">DURASI PEMANTAUAN</th>
+      <th rowspan="2" bgcolor="#1E9FC4">KODE LOKASI</th>
+      <th rowspan="2" bgcolor="#1E9FC4">NAMA LOKASI</th>
+      <th rowspan="2" bgcolor="#1E9FC4">ALAMAT LOKASI</th>
+      <th rowspan="2" bgcolor="#1E9FC4">KABUPATEN/KOTA</th>
+      <th rowspan="2" bgcolor="#1E9FC4">PROVINSI</th>
+      <th colspan="2" bgcolor="#1E9FC4">TITIK KOORDINAT</th>
+
+      <th rowspan="2" bgcolor="#1E9FC4">METODE PEMANTAUAN</th>
+      <th rowspan="2" bgcolor="#1E9FC4">PERUNTUKAN</th>
+      <th rowspan="2" bgcolor="#1E9FC4">SHU</th>
+
+      <th colspan=3" bgcolor="#1E9FC4">NILAI PEMANTAUAN</th>
+    </tr>
+    <tr style="color: white;">
+      <th bgcolor="#1E9FC4">INPUT DATA</th>
+      <th bgcolor="#1E9FC4">UPDATE DATA</th>
+      <th bgcolor="#1E9FC4">PROVINSI</th>
+      <th bgcolor="#1E9FC4">REGIONAL</th>
+      <th bgcolor="#1E9FC4">PUSAT</th>
+      <th bgcolor="#1E9FC4">PROVINSI</th>
+      <th bgcolor="#1E9FC4">REGIONAL</th>
+      <th bgcolor="#1E9FC4">PUSAT</th>
+      <th bgcolor="#1E9FC4">PROVINSI</th>
+      <th bgcolor="#1E9FC4">REGIONAL</th>
+      <th bgcolor="#1E9FC4">PUSAT</th>
+      <th bgcolor="#1E9FC4">LATITUDE</th>
+      <th bgcolor="#1E9FC4">LONGITUDE</th>
+      <th bgcolor="#1E9FC4">
+        NO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+        <sup>(Nitrogen Dioksida)</sup>
+      </th>
+      <th bgcolor="#1E9FC4">
+        SO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+        <sup>(Sulfur Dioksida)</sup>
+      </th>
+      <th bgcolor="#1E9FC4">
+				PM<sub class="white">2.5</sub> <sup>(µg/m3)</sup><br>
+				<sup>(Partikulat)</sup>
+			</th>
+    </tr>
+  </thead>
+  <tbody>
+    {foreach from=$viewExcel.data item=v}
+    <tr>
+      <td>{$offset++}</td>
+      <td>
+        {date('Y-m-d',$v.crdate)}
+      </td>
+      <td>
+        {if $v.chdate}
+        {date('Y-m-d',$v.chdate)}
+        {else}
+        -
+        {/if}
+      </td>
+      {if $lockActionYear == 0}
+      <td>
+        {if $v.role_user == 3}
+        {if $v.v_provinsi == 0}
+        unverified
+        {elseif $v.v_provinsi == 1}
+        verified
+        {else}
+        Rejected
+        {/if}
+        {else}
+        --
+        {/if}
+      </td>
+      <td>
+        {if $v.role_user == 2}
+        {if $v.v_regional == 0}
+        unverified
+        {elseif $v.v_regional == 1}
+        verified
+        {else}
+        Rejected
+        {/if}
+        {else}
+        --
+        {/if}
+      </td>
+      <td>
+        {if $v.v_pusat == 0}
+        unverified
+        {elseif $v.v_pusat == 1}
+        verified
+        {else}
+        Rejected
+        {/if}
+      </td>
+      {else}
+      <td colspan="3">
+        pelaporan {$lockActionYear} ditutup
+      </td>
+      {/if}
+      <td>
+        {if $v.v_provinsi_date}
+        {$v.v_provinsi_date}
+        {else}
+        --
+        {/if}
+      </td>
+      <td>
+        {if $v.v_regional_date}
+        {$v.v_regional_date}
+        {else}
+        --
+        {/if}
+      </td>
+      <td>
+        {if $v.v_pusat_date}
+        {$v.v_pusat_date}
+        {else}
+        --
+        {/if}
+      </td>
+      <td>
+        {$roleUser = $functions->roleUser($v.role_user)}
+        {$roleUser.name}
+      </td>
+      <td>
+        <!-- {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if} -->
+        {if $me.role_user <= 1}
+          <!-- <strong>Pusat</strong> : {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if} -->
+        {elseif $me.role_user == 4 && $v.role_user == 2}
+          <!-- <strong>Regional</strong> : {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if} -->
+        {elseif $me.role_user == 2 && $v.role_user == 3}
+          {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+          {if $v.catatan_provinsi_select}<br style="mso-data-placement:same-cell;" />{$v.catatan_provinsi_select}{/if}
+        {/if}
+
+        {if $me.role_user == 1 || $me.role_user == 0}
+          {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+          {if $v.catatan_provinsi_select}<br style="mso-data-placement:same-cell;" />{$v.catatan_provinsi_select}{/if}
+        {elseif $me.role_user == 2}
+        <!-- <hr>
+        <strong>Regional</strong> : {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+        <hr>
+        <strong>Pusat</strong> : {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if} -->
+
+        {elseif $me.role_user == 4}
+          {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+          {if $v.catatan_provinsi_select}<br style="mso-data-placement:same-cell;" />{$v.catatan_provinsi_select}{/if}
+        {else}
+          {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+          {if $v.catatan_provinsi_select}<br style="mso-data-placement:same-cell;" />{$v.catatan_provinsi_select}{/if}
+        {/if}
+      </td>
+      <td>
+        {if $me.role_user <= 1}
+          <!-- <strong>Pusat</strong> : {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if} -->
+        {elseif $me.role_user == 4 && $v.role_user == 2}
+          {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+          {if $v.catatan_regional_select}<br style="mso-data-placement:same-cell;" />{$v.catatan_regional_select}{/if}
+        {elseif $me.role_user == 2 && $v.role_user == 3}
+          <!-- <strong>Provinsi</strong> : {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if} -->
+        {/if}
+
+        {if $me.role_user == 1 || $me.role_user == 0}
+          {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+          {if $v.catatan_regional_select}<br style="mso-data-placement:same-cell;" />{$v.catatan_regional_select}{/if}
+
+        {elseif $me.role_user == 2}
+          {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+          {if $v.catatan_regional_select}<br style="mso-data-placement:same-cell;" />{$v.catatan_regional_select}{/if}
+
+        {elseif $me.role_user == 4}
+        <!-- <hr>
+        <strong>Provinsi </strong> : {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+        <hr>
+        <strong>Pusat </strong> : {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if} -->
+        {else}
+          {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+          {if $v.catatan_regional_select}<br style="mso-data-placement:same-cell;" />{$v.catatan_regional_select}{/if}
+        {/if}
+      </td>
+      <td>
+        {if $me.role_user <= 1}
+          {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}
+          {if $v.catatan_verifikator_select}<br style="mso-data-placement:same-cell;" />{$v.catatan_verifikator_select}{/if}
+        {elseif $me.role_user == 4 && $v.role_user == 2}
+          <!-- <strong>Regional</strong> : {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if} -->
+        {elseif $me.role_user == 2 && $v.role_user == 3}
+          <!-- <strong>Provinsi</strong> : {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if} -->
+        {/if}
+
+        {if $me.role_user == 1 || $me.role_user == 0}
+        <!-- <hr>
+        <strong>Regional</strong> : {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+        <hr>
+        <strong>Provinsi</strong> : {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if} -->
+
+        {elseif $me.role_user == 2}
+          {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}
+          {if $v.catatan_verifikator_select}<br style="mso-data-placement:same-cell;" />{$v.catatan_verifikator_select}{/if}
+
+        {elseif $me.role_user == 4}
+          {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}
+          {if $v.catatan_verifikator_select}<br style="mso-data-placement:same-cell;" />{$v.catatan_verifikator_select}{/if}
+        {else}
+          {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}
+          {if $v.catatan_verifikator_select}<br style="mso-data-placement:same-cell;" />{$v.catatan_verifikator_select}{/if}
+        {/if}
+      </td>
+      <td>'{$format->dateFormat($v.tanggal)}</td>
+      <td>{$v.periode_pemantauan}</td>
+      <td>{$v.durasi_pemantauan} Hari</td>
+      <td>{$v.kode_lokasi}</td>
+      <td>{$v.alamat}</td>
+      <td>{$v.alamat_detail}</td>
+      <td>{$v.nama_kabkota}</td>
+      <td>{$v.nama_provinsi}</td>
+      <td>'{$v.latitude}</td>
+      <td>'{$v.longitude}</td>
+      <td>{$v.metode}</td>
+      <td>{$v.peruntukan}</td>
+      <td>
+        {if $v.shu}
+        ADA SHU
+        {else}
+        TIDAK ADA SHU
+        {/if}
+      </td>
+      <td align="center">'{$v.no2}</td>
+      <td align="center">'{$v.so2}</td>
+      <td align="center">'{$v.pm25}</td>
+    </tr>
+    {foreachelse}
+    <tr style="color: white;">
+      <td colspan="12" align="center" bgcolor="#FA535D">BELUM ADA DATA</td>
+    </tr>
+    {/foreach}
+  </tbody>
+</table>

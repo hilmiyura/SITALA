@@ -1,0 +1,99 @@
+<div class="table-responsive table-border freeze-table">
+  {if $view}
+  <table class="table" id="dataTableProvinsi">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th>No</th>
+        <th class="v-middle text-center">Provinsi</th>
+        <th class="v-middle text-center">IKAL</th>
+        <th class="v-middle text-center">RATING</th>
+        <th class="v-middle text-center" style="width: 300px">
+          #
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {$cnProvinsi = 1}
+      {foreach from=$view item=v}
+      {$v.json_data = $v.json_data|@json_decode:true}
+      {if $v.jenis_indeks == 1}
+      <tr>
+        <td>{$cnProvinsi}</td>
+        <td class="text-center">
+          <!-- <b>{$v.kode_lokasi}</b><br> -->
+          <b>{$v.nama_provinsi}</b>
+        </td>
+        <td class="text-center">
+          {number_format($v.nilai_indeks,2,".","")}
+          <br>--<br>
+          <span class="nilai-indeks-{$v.uid_indeks_ikal}-prov"></span>
+        </td>
+        <td class="text-center">
+          {if $v.rating_indeks}{$v.rating_indeks}{else}-{/if}
+          <br>--<br>
+          <span class="rating-indeks-{$v.uid_indeks_ikal}-prov"></span>
+        </td>
+        <td class="text-center">
+          <button type="button" data-uid="{$v.uid_indeks_ikal}" id="btn-hitung-simulasi-prov" class="btn btn-sm {if $activeBtn == $v.uid_indeks_ikal  || $v.status_hitung == 1} btn-success {else} btn-warning {/if}">
+            <small class="white">Hitung</small>
+          </button>
+          <a class="btn btn-sm btn-dark detail-data-{$v.uid_indeks_ikal}-simulasi detail-data-simulasi" data-uid="{$v.uid_provinsi}" tahun="{$v.tahun}" style="display:none;">
+            <small class="white">Detail Data</small>
+          </a>
+        </td>
+      </tr>
+      <tr class="tr-detail-{$v.uid_provinsi}" style="display:none">
+        <td colspan="8" style="padding: 15px;">
+          <table class="table" style="font-size:smaller;">
+            <thead class="bg-info bg-darken-2 white">
+              <tr>
+                <th colspan="9" class="text-center">Subtotal Per Parameter</th>
+              </tr>
+              <!-- <tr>
+                      <th class="text-center" style="width:20px;">No</th>
+                      <th class="text-center">Lokasi Pemantauan</th>
+                      <th class="text-center">TSS <sup>mg/L</sup></th>
+                      <th class="text-center">DO <sup>mg/L</sup></th>
+                      <th class="text-center">MINYAK & LEMAK <sup>µg/L</sup></th>
+                      <th class="text-center">AMONIA TOTAL <sup>mg/L</sup></th>
+                      <th class="text-center">ORTOFOSFAT (PO4-P) <sup>mg/L</sup></th>
+                      <th class="text-center">Water Quality Index</th>
+                      <th class="text-center">Water Quality Rating</th>
+                    </tr> -->
+              <tr>
+                <th class="text-center" style="width:20px;">No</th>
+                <th class="text-center">Lokasi Pemantauan</th>
+                <th class="text-center">TSS</th>
+                <th class="text-center">DO</th>
+                <th class="text-center">MINYAK & LEMAK</th>
+                <th class="text-center">AMONIA TOTAL</th>
+                <th class="text-center">ORTOFOSFAT (PO4-P)</th>
+                <th class="text-center">Water Quality Index</th>
+                <th class="text-center">Water Quality Rating</th>
+              </tr>
+            </thead>
+            <tbody class="tbody-detail-{$v.uid_provinsi}">
+            </tbody>
+            <tbody>
+              <tr>
+                <td colspan="2">
+                  <a class="btn btn-sm btn-danger hide-detail-data-simulasi" data-uid="{$v.uid_provinsi}">
+                    <small class="white">Tutup Detail Data</small>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <p style="display: none">{$cnProvinsi++}</p>
+      {/if}
+      {/foreach}
+    </tbody>
+  </table>
+  {else}
+  <div class="alert alert-danger text-center">
+    <strong>Tidak Ada Data</strong>
+  </div>
+  {/if}
+</div>

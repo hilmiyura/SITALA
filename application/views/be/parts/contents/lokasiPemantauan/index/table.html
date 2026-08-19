@@ -1,0 +1,117 @@
+{if $me.uid_users == 1 || $me.uid_users == 2 || $me.uid_users == 681 || $me.uid_users == 693 || ($me.komponen == "IKA" || $me.komponen == "IKU" || $me.komponen == "IKAL") }
+<div class="row mb-1">
+  <div class="col-md-12">
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow openMapsLocationPointer" data-toggle="modal" data-target="#tambahData">
+      <i class="ft-plus-circle"></i> Tambah Data
+    </button>
+    {if $uploadexcel == 1}
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahDataExcel">
+      <i class="ft-upload-cloud"></i> Upload Excel
+    </button>
+    {/if}
+    {if $dev == 1}
+    {/if}
+    {if $me.komponen != "IKA" && $me.komponen != "IKU" && $me.komponen != "IKAL"}
+      <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#copyDataLokasi">
+        <i class="ft-copy"></i> Copy Data Lokasi
+      </button>
+    {/if}
+  </div>
+</div>
+{/if}
+{include file="parts/block/block_search_lokasi_pemantauan.html"}
+<!-- <div id="map"></div> -->
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th colspan="2" class="text-center" style="width: 70px">#</th>
+        <th rowspan="2" class="v-middle">Status Lokasi</th>
+        <th rowspan="2" class="v-middle">Kode Lokasi</th>
+        <th rowspan="2" class="v-middle">Pelaksana Pemantauan</th>
+        <th rowspan="2" class="v-middle">Tahun</th>
+        <th rowspan="2" class="v-middle" style="width: 280px">Komponen Pelaporan</th>
+        <th rowspan="2" class="v-middle text-center">
+          Nama Lokasi <br>
+          (Untuk IKA nama sungai/danau)
+        </th>
+        <th rowspan="2" class="v-middle text-center">Nama Sungai - DAS <br>
+          (Untuk IKA nama sungai/danau)</th>
+        <th rowspan="2" class="v-middle">Sumber Pencemar</th>
+        <th rowspan="2" class="v-middle">Alamat</th>
+        <th colspan="2" class="text-center">Koordinat</th>
+      </tr>
+      <tr>
+        <th width="50" class="text-center">Action</th>
+        <th width="10" class="text-center">No</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v}
+      <tr>
+        {if $me.role_user == 0 || ($me.role_user == 1 && $aksesAdmin) || ($me.komponen == "IKU" && $v.uid_rf_component == 1) || ($me.komponen == "IKA" && $v.uid_rf_component == 2) || ($me.komponen == "IKAL" && $v.uid_rf_component == 5)}
+          <th class="text-center">
+            <button class="badge badge-danger round delete-dialog" data-uid="{$v.$primaryKey}" data-ajax="{$ctrl}/deletedData" data-komponen-uid={$v.uid_rf_component}>
+              <a href="javascript:void(0);" title="Delete">
+                <i class="ft-trash-2"></i>
+              </a>
+            </button>
+            <button class="badge badge-warning round openMapsLocationPointer" data-toggle="modal" data-target="#tambahData" data-uid="{$v.$primaryKey}" title="Edit">
+              <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+            </button>
+          </th>
+        {else}
+        <th class="text-center">
+          --
+        </th>
+        {/if}
+
+        <th class="text-center">{counter}</th>
+        <td>
+          {if $v.digunakan}
+          <span class="badge badge-success">DIGUNAKAN</span>
+          {else}
+          <span class="badge badge-danger">BELUM DIGUNAKAN</span>
+          {/if}
+        </td>
+        <td>{$v.kode_lokasi}</td>
+        <td>{$v.name_pelaksana}</td>
+        <td>{$v.tahun}</td>
+        <td>{$v.icon} {$v.name}</td>
+        <td>
+          {strip_tags($v.alamat)}
+        </td>
+        <td>
+          {if $v.uid_rf_component == 2}
+            {if $v.nama_sungai}
+              <b><span id="text-sungai-{$v.$primaryKey}">{$v.nama_sungai} - DAS: {if $v.nama_das}{$v.nama_das}{else}-{/if} ({if $v.kode_das}{$v.kode_das}{else}-{/if})</span></b>
+              <br>
+            {/if}
+            <!-- {if $me.kategori == 0}
+              <select class="form-control sungai-src" name="" idt="{$v.$primaryKey}"></select>
+            {/if} -->
+          {/if}
+        </td>
+        <td class="text-center">{if $v.name_pencemar}{$v.name_pencemar}{else}--{/if}</td>
+        <td>
+          {strip_tags($v.alamat_detail)}<br> {if $v.nama_kabkota}{$v.nama_kabkota},{/if} Provinsi {$v.nama_provinsi}
+        </td>
+        <td>{$v.latitude}</td>
+        <td>{$v.longitude}</td>
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="10" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+  {include file="parts/block/block_pagination.html"}
+</div>

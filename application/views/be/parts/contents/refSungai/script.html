@@ -1,0 +1,169 @@
+{literal}
+	<script type="text/javascript">
+		reset = ()=>{
+			$("#uid").val("");
+			$("#nama").val("");
+			$("#uid_das").val("");
+			$("#uid_kabkota").val("").trigger("change");;
+
+			// $("#uid_kabkota").val("").trigger("change");
+			// $("#uid_das_filter").val("");
+		}
+
+		$('#tambahData').on('show.bs.modal', function (event) {
+			reset();
+			var button = $(event.relatedTarget) // Button that triggered the modal
+			var userBy = button.data('uid');
+			if(userBy){
+				$.ajax({
+					url		: baseUrl+ctrl+"/editData/x/"+userBy,
+					method	: "GET",
+					success	: function(req){
+						if(req.uid){
+							getListDas(req.uid_das);
+
+							$("#uid").val(req.uid);
+							$("#nama").val(req.nama);
+							$("#uid_das").val(req.uid_das);
+							$("#uid_kabkota").val(req.uid_provinsi+"-"+req.uid_kabkota).trigger("change");
+							console.log(req.uid_provinsi+"-"+req.uid_kabkota);
+							// $("#uid_kabkota").val(req.uid_provinsi+"-"+req.uid_kabkota).trigger("change");
+						}
+					}
+				});
+			}else{
+				getListDas(0);
+			}
+		});
+
+		function getListDas(uid_das){
+			if(uid_das){
+				$.ajax({
+					url: baseUrl + 'ajax/das/'+"?i="+uid_das,
+		      dataType: 'json',
+					method: 'GET',
+					success:function(data){
+						$.each(data, function(index, va) {
+							valText = va.text + ' - ' + va.kode;
+							if(va.id == uid_das){
+								var option = new Option(valText, va.id, true, true);
+						    $('#uid_das').append(option).trigger('change');
+							}
+						});
+
+					}
+				});
+			}
+
+			$('.das-src').select2({
+		    placeholder: 'Menampilkan 50 data, cari berdasarkan nama,kode das',
+		    allowClear: true,
+				delay: 250,
+		    ajax: {
+		      url: baseUrl + 'ajax/das/'+"?i="+uid_das,
+		      dataType: 'json',
+		      processResults: function(data) {
+						var results = [];
+	          var valText = '';
+						$.each(data, function(index, va) {
+							valText = va.text + ' - DAS : ' + va.kode;
+							results.push({
+								id: va.id,
+								text: valText,
+								das: va.text
+							});
+						});
+		        return {
+		          results: results
+		        };
+		      }
+		    },
+				templateResult: function (item) {
+	        if (!item.id) return item.das;
+	        return $('<span>')
+	            .text(item.text)
+	            .attr('das', item.text);
+		    },
+		    templateSelection: function (item) {
+		        return item.text || item.text;
+		    },
+				dropdownParent: $('#tambahData'),
+		  });
+		}
+
+		$('.select2').select2({
+			dropdownParent: $('#tambahData'),
+		});
+
+		$(document).ready(function () {
+			if (searchData) {
+				var searchDecode = decodeURIComponent(searchData);
+				var search = JSON.parse(searchDecode);
+			} else {
+				var search = '';
+			}
+			
+			if (search != '') {
+				setTimeout(() => getListDasFilter(search.uid_das), 100);
+				$("#uid_das_filter").val(req.uid_das);
+			} else {
+				setTimeout(() => getListDasFilter(0), 100);
+			}
+		});
+
+		function getListDasFilter(uid_das){
+			if(uid_das){
+				$.ajax({
+					url: baseUrl + 'ajax/das/'+"?i="+uid_das,
+		      dataType: 'json',
+					method: 'GET',
+					success:function(data){
+						$.each(data, function(index, va) {
+							valText = va.text + ' - ' + va.kode;
+							if(va.id == uid_das){
+								var option = new Option(valText, va.id, true, true);
+						    $('#uid_das_filter').append(option).trigger('change');
+							}
+						});
+
+					}
+				});
+			}
+
+			$('.das-filter-src').select2({
+		    placeholder: 'Menampilkan 50 data, cari berdasarkan nama,kode das',
+		    allowClear: true,
+				delay: 250,
+		    ajax: {
+		      url: baseUrl + 'ajax/das/'+"?i="+uid_das,
+		      dataType: 'json',
+		      processResults: function(data) {
+						var results = [];
+	          var valText = '';
+						$.each(data, function(index, va) {
+							valText = va.text + ' - DAS : ' + va.kode;
+							results.push({
+								id: va.id,
+								text: valText,
+								das: va.text
+							});
+						});
+		        return {
+		          results: results
+		        };
+		      }
+		    },
+				templateResult: function (item) {
+	        if (!item.id) return item.das;
+	        return $('<span>')
+	            .text(item.text)
+	            .attr('das', item.text);
+		    },
+		    templateSelection: function (item) {
+		        return item.text || item.text;
+		    }
+		  });
+		}
+
+	</script>
+{/literal}

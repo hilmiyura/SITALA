@@ -1,0 +1,57 @@
+{include file="parts/block/block_button_nav_monitoring_lokasi.html"}
+{include file="parts/block/block_search_monitoring_lokasi_pemantauan.html"}
+<!-- <h3 style="margin-left:10px;">Lokasi Pemantauan IKAL</h3> -->
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th rowspan="2" class="v-middle" style="width: 70px">No</th>
+        <th rowspan="2" class="v-middle">Kode Lokasi</th>
+        <!-- <th rowspan="2" class="v-middle">Pelaksana Pemantauan</th> -->
+        <th rowspan="2" class="v-middle">Tahun</th>
+        <!-- <th rowspan="2" class="v-middle" style="width: 280px">Komponen Pelaporan</th> -->
+        <th rowspan="2" class="v-middle text-center">
+          Nama Lokasi <br>
+          (Untuk IKA nama sungai/danau)
+        </th>
+        <th rowspan="2" class="v-middle">Alamat</th>
+        <th rowspan="2" class="v-middle">Kabupaten/Kota</th>
+        <th rowspan="2" class="v-middle">Provinsi</th>
+        <th colspan="2" class="text-center">Koordinat</th>
+      </tr>
+      <tr>
+        <th>Latitude</th>
+        <th>Longitude</th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v}
+      <tr>
+        <th class="text-center">{counter}</th>
+        <td>{$v.kode_lokasi}</td>
+        <!-- <td>{$v.name_pelaksana}</td> -->
+        <td>{$v.tahun}</td>
+        <!-- <td>{$v.icon} {$v.name}</td> -->
+        <td class="text-center">{strip_tags($v.alamat)}</td>
+        <td>
+          {strip_tags($v.alamat_detail)}
+        </td>
+        <td>{if $v.nama_kabkota}{$v.nama_kabkota}{/if}</td>
+        <td>{$v.nama_provinsi}</td>
+        <td>{$v.latitude}</td>
+        <td>{$v.longitude}</td>
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="10" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+  {include file="parts/block/block_pagination.html"}
+</div>

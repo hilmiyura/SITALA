@@ -1,0 +1,817 @@
+<style>
+	table thead tr th {
+		border: 1px solid black;
+	}
+
+	table tbody tr td {
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style>
+<table>
+	<thead>
+		<tr style="color: white;">
+			<th rowspan="2" bgcolor="#1E9FC4">NO</th>
+			<th rowspan="2" bgcolor="#1E9FC4">LEVEL</th>
+			<th rowspan="2" bgcolor="#1E9FC4">TANGGAL PEMANTAUAN</th>
+			<th rowspan="2" bgcolor="#1E9FC4">PERIODE PEMANTAUAN</th>
+			<th rowspan="2" bgcolor="#1E9FC4">KODE LOKASI</th>
+			<th rowspan="2" bgcolor="#1E9FC4">NAMA LOKASI</th>
+			<th rowspan="2" bgcolor="#1E9FC4">ALAMAT LOKASI</th>
+			<th rowspan="2" bgcolor="#1E9FC4">KABUPATEN/KOTA</th>
+			<th rowspan="2" bgcolor="#1E9FC4">PROVINSI</th>
+			<th rowspan="2" bgcolor="#1E9FC4">LATITUDE</th>
+			<th rowspan="2" bgcolor="#1E9FC4">LONGITUDE</th>
+			<th rowspan="2" bgcolor="#1E9FC4">KATEGORI</th>
+			<th rowspan="2" bgcolor="#1E9FC4">NAMA DAS</th>
+			<th rowspan="2" bgcolor="#1E9FC4">NAMA SUNGAI</th>
+			<th rowspan="2" bgcolor="#1E9FC4">SHU</th>
+			<th colspan="54" bgcolor="#1E9FC4">NILAI PEMANTAUAN</th>
+		</tr>
+		<tr style="color: white;">
+			<th bgcolor="#1E9FC4">
+				Debit Air <sup>(m3/s)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				pH <sup></sup><br>
+				<sup>(Potential Hydrogen)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				BOD <sup>(mg/L)</sup><br>
+				<sup>(Biological Oxygen Demand)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				COD <sup>(mg/L)</sup><br>
+				<sup>(Chemical Oxygen Demand)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				TSS <sup>(mg/L)</sup><br>
+				<sup>(Total Susppended Solid)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				DO <sup>(mg/L)</sup><br>
+				<sup>(Dissolved Oxygen)</sup>
+			</th>
+			<!-- <th bgcolor="#1E9FC4">DO-MAX <sup>mg/L</sup> </th> -->
+			<th bgcolor="#1E9FC4">
+				NO<sub>3</sub>-N <sup>(mg/L)</sup><br>
+				<sup>(Nitrat)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">TOTAL FOSFAT <sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">FECAL COLIFORM<sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">KECERAHAN <sup>m</sup> </th>
+			<th bgcolor="#1E9FC4">KLOROFIL <sup>mg/m<sup>3</sup></sup> </th>
+			<th bgcolor="#1E9FC4">TOTAL COLIFORM<sup>MPN/100 mL</sup> </th>
+			<th bgcolor="#1E9FC4">TEMPERATUR AIR <sup><sup>0</sup>C</sup> </th>
+			<th bgcolor="#1E9FC4">TEMPERATUR UDARA <sup><sup>0</sup>C</sup> </th>
+			<th bgcolor="#1E9FC4">MINYAK LEMAK<sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">DETERGEN <sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">FENOL <sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">
+				TDS <sup>(mg/L)</sup><br>
+				<sup>(Total Dissolved Solid)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">SULFAT <sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">KLORIDA <sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">NITRIT <sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">AMONIAK <sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">
+				TOTAL N <sup>(mg/L)</sup><br>
+				<sup>(Total Nitrogen)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">FLOURIDA <sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">BELERANG <sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">SIANIDA <sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">KLORIN <sup>mg/L</sup> </th>
+			<th bgcolor="#1E9FC4">WARNA <sup>Pt-Co Unit</sup> </th>
+			<th bgcolor="#1E9FC4">SAMPAH <sup>-</sup> </th>
+			<th bgcolor="#1E9FC4">
+				Ba <sup>(mg/L)</sup><br>
+				<sup>(Barium)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				B <sup>mg/L</sup><br>
+				<sup>(Boron)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				Hg <sup>mg/L</sup><br>
+				<sup>(Hydrargyrum)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				As <sup>mg/L</sup><br>
+				<sup>(Arsenik)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				Se <sup>mg/L</sup><br>
+				<sup>(Selenium)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				Fe <sup>mg/L</sup><br>
+				<sup>(Ferrum)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				Cd <sup>mg/L</sup><br>
+				<sup>(Kadmium)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				Co <sup>mg/L</sup><br>
+				<sup>(Kobalt)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				Mn <sup>mg/L</sup><br>
+				<sup>(Mangan)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				Ni <sup>mg/L</sup><br>
+				<sup>(Nikel)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				Zn <sup>mg/L</sup><br>
+				<sup>(Zinc)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				Cu <sup>mg/L</sup><br>
+				<sup>(Cuprum)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				Pb <sup>mg/L</sup><br>
+				<sup>(Plumbum)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">
+				Cr-6 <sup>mg/L</sup><br>
+				<sup>(Kromium)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">ALDRIN <sup>µg/L</sup> </th>
+			<th bgcolor="#1E9FC4">
+				BHC <sup>(µg/L)</sup><br>
+				<sup>(Benzene Hexachloride)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">CHLORDANE <sup>(µg/L)</sup> </th>
+			<th bgcolor="#1E9FC4">
+				DDT <sup>(µg/L)</sup><br>
+				<sup>(Dichoro Diphenyl Trichlorethane)</sup>
+			</th>
+			<th bgcolor="#1E9FC4">ENDRIN <sup>µg/L</sup> </th>
+			<th bgcolor="#1E9FC4">HEPTACHLOR <sup>µg/L</sup> </th>
+			<th bgcolor="#1E9FC4">LINDANE <sup>µg/L</sup> </th>
+			<th bgcolor="#1E9FC4">METHOXYCHLOR <sup>µg/L</sup> </th>
+			<th bgcolor="#1E9FC4">TOXAPAN <sup>µg/L</sup> </th>
+			<th bgcolor="#1E9FC4">RADIOAKTIVITAS G-A <sup>Bq/L</sup> </th>
+			<th bgcolor="#1E9FC4">RADIOAKTIVITAS G-B <sup>Bq/L</sup> </th>
+			<th bgcolor="#1E9FC4">E-COLI <sup>MPN/100ML</sup> </th>
+		</tr>
+	</thead>
+	<tbody>
+		{foreach from=$viewExcel.data item=data}
+		<tr>
+			<td>{$offset++}</td>
+			<td>
+				{$roleUser = $functions->roleUser($data.role_user)}
+				{$roleUser.name}
+			</td>
+			<td>{$data.tanggal}</td>
+			<!-- <td>'{$format->dateFormat($data.tanggal)}</td> -->
+			<td>{$data.periode_pemantauan}</td>
+			<td>{$data.kode_lokasi}</td>
+			<td>{$data.alamat}</td>
+			<td>{$data.alamat_detail}</td>
+			<td>{$data.nama_kabkota}</td>
+			<td>{$data.nama_provinsi}</td>
+			<td>'{$data.latitude}</td>
+			<td>'{$data.longitude}</td>
+			<td>
+				{if $data.kategori == 1}
+				AIR SUNGAI
+				{elseif $data.kategori == 2}
+				BADAN AIR GAMBUT
+				{elseif $data.kategori == 3}
+				DANAU/SITU
+				{/if}
+			</td>
+			<td>{$data.titik_kode_das} - {$data.titik_nama_das}</td>
+			<td>{$data.titik_nama_sungai}</td>
+			<td>
+				{if $data.shu}
+				ADA SHU
+				{else}
+				TIDAK ADA SHU
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.debit > 0}
+				'{$data.debit}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.ph > 0}
+          {if $data.ph > 9}
+            <span style="color: red;">'{$data.ph}</span>
+          {else}
+            '{$data.ph}
+          {/if}
+        {else}
+        -
+        {/if}
+			</td>
+			<td align="center">
+				{if $data.bod > 0}
+				{if $data.bod > 3}
+				<span style="color: red;">'{$data.bod}</span>
+				{else}
+				'{$data.bod}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.cod > 0}
+				{if $data.cod > 25}
+				<span style="color: red;">'{$data.cod}</span>
+				{else}
+				'{$data.cod}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.tss > 0}
+				{if $data.tss > 50}
+				<span style="color: red;">'{$data.tss}</span>
+				{else}
+				'{$data.tss}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.do_p > 0}
+				{if $data.do_p > 4}
+				<span style="color: red;">'{$data.do_p}</span>
+				{else}
+				'{$data.do_p}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<!-- <td align="center">{if $data.do_max_p > 0}'{$data.do_max_p}{else}-{/if}</td> -->
+			<td align="center">
+				{if $data.no3_n > 0}
+				{if $data.no3_n > 10}
+				<span style="color: red;">'{$data.no3_n}</span>
+				{else}
+				'{$data.no3_n}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.total_phosphat > 0}
+				{if $data.total_phosphat > 0.2}
+				<span style="color: red;">'{$data.total_phosphat}</span>
+				{else}
+				'{$data.total_phosphat}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.fecal_coliform > 0}
+				{if $data.fecal_coliform > 1000}
+				<span style="color: red;">'{$data.fecal_coliform}</span>
+				{else}
+				'{$data.fecal_coliform}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.kecerahan > 0}
+				{if $data.kecerahan > 4}
+				<span style="color: red;">'{$data.kecerahan}</span>
+				{else}
+				'{$data.kecerahan}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.klorofil_a > 0}
+				{if $data.klorofil_a > 50}
+				<span style="color: red;">'{$data.klorofil_a}</span>
+				{else}
+				'{$data.klorofil_a}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.total_coliform > 0}
+				{if $data.total_coliform > 5000}
+				<span style="color: red;">'{$data.total_coliform}</span>
+				{else}
+				'{$data.total_coliform}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.temperatur_air > 0}
+				{if $data.temperatur_air > -0}
+				<span style="color: red;">'{$data.temperatur_air}</span>
+				{else}
+				'{$data.temperatur_air}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.temperatur_udara > 0}
+				{if $data.temperatur_udara > -0}
+				<span style="color: red;">'{$data.temperatur_udara}</span>
+				{else}
+				'{$data.temperatur_udara}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.minyak_lemak > 0}
+				{if $data.minyak_lemak > 1}
+				<span style="color: red;">'{$data.minyak_lemak}</span>
+				{else}
+				'{$data.minyak_lemak}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.detergen_total > 0}
+				{if $data.detergen_total > 0.2}
+				<span style="color: red;">'{$data.detergen_total}</span>
+				{else}
+				'{$data.detergen_total}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.fenol > 0}
+				{if $data.fenol > 000.5}
+				<span style="color: red;">'{$data.fenol}</span>
+				{else}
+				'{$data.fenol}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.tds > 0}
+				{if $data.tds > 1000}
+				<span style="color: red;">'{$data.tds}</span>
+				{else}
+				'{$data.tds}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.sulfat > 0}
+				{if $data.sulfat > 300}
+				<span style="color: red;">'{$data.sulfat}</span>
+				{else}
+				'{$data.sulfat}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.klorida > 0}
+				{if $data.klorida > 300}
+				<span style="color: red;">'{$data.klorida}</span>
+				{else}
+				'{$data.klorida}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.nitrit > 0}
+				{if $data.nitrit > 0.06}
+				<span style="color: red;">'{$data.nitrit}</span>
+				{else}
+				'{$data.nitrit}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.amoniak > 0}
+				{if $data.amoniak > 0.2}
+				<span style="color: red;">'{$data.amoniak}</span>
+				{else}
+				'{$data.amoniak}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $v.total_nitrogen > 0}
+					{if $v.kategori == 3}
+						{if $v.total_nitrogen > 0.75}
+							<span style="color: red;">'{$v.total_nitrogen}</span>
+						{else}
+							'{$v.total_nitrogen}
+						{/if}
+					{else}
+						{if $v.total_nitrogen > 15}
+							<span style="color: red;">'{$v.total_nitrogen}</span>
+						{else}
+							'{$v.total_nitrogen}
+						{/if}
+					{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.florida > 0}
+				{if $data.florida > 1.5}
+				<span style="color: red;">'{$data.florida}</span>
+				{else}
+				'{$data.florida}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.belerang_sbg_h2s > 0}
+				{if $data.belerang_sbg_h2s > 0.002}
+				<span style="color: red;">'{$data.belerang_sbg_h2s}</span>
+				{else}
+				'{$data.belerang_sbg_h2s}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.sianida > 0}
+				{if $data.sianida > 0.02}
+				<span style="color: red;">'{$data.sianida}</span>
+				{else}
+				'{$data.sianida}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.klorin_bebas > 0}
+				{if $data.klorin_bebas > 0.03}
+				<span style="color: red;">'{$data.klorin_bebas}</span>
+				{else}
+				'{$data.klorin_bebas}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.warna > 0}
+				{if $data.warna > 50}
+				<span style="color: red;">'{$data.warna}</span>
+				{else}
+				'{$data.warna}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.sampah > 0}
+				{if $data.sampah > -0}
+				<span style="color: red;">'{$data.sampah}</span>
+				{else}
+				'{$data.sampah}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.ba > 0}
+				{if $data.ba > -0}
+				<span style="color: red;">'{$data.ba}</span>
+				{else}
+				'{$data.ba}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.bo > 0}
+				{if $data.bo > 1}
+				<span style="color: red;">'{$data.bo}</span>
+				{else}
+				'{$data.bo}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.hg > 0}
+				{if $data.hg > 0.002}
+				<span style="color: red;">'{$data.hg}</span>
+				{else}
+				'{$data.hg}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.as_ > 0}
+				{if $data.as_ > 0.05}
+				<span style="color: red;">'{$data.as_}</span>
+				{else}
+				'{$data.as_}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.se > 0}
+				{if $data.se > 0.05}
+				<span style="color: red;">'{$data.se}</span>
+				{else}
+				'{$data.se}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.fe > 0}
+				{if $data.fe > -0}
+				<span style="color: red;">'{$data.fe}</span>
+				{else}
+				'{$data.fe}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.cd > 0}
+				{if $data.cd > 0.01}
+				<span style="color: red;">'{$data.cd}</span>
+				{else}
+				'{$data.cd}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.co > 0}
+				{if $data.co > 0.2}
+				<span style="color: red;">'{$data.co}</span>
+				{else}
+				'{$data.co}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.mn > 0}
+				{if $data.mn > -0}
+				<span style="color: red;">'{$data.mn}</span>
+				{else}
+				'{$data.mn}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.ni > 0}
+				{if $data.ni > 0.05}
+				<span style="color: red;">'{$data.ni}</span>
+				{else}
+				'{$data.ni}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.zn > 0}
+				{if $data.zn > 0.05}
+				<span style="color: red;">'{$data.zn}</span>
+				{else}
+				'{$data.zn}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.cu > 0}
+				{if $data.cu > 0.02}
+				<span style="color: red;">'{$data.cu}</span>
+				{else}
+				'{$data.cu}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.pb > 0}
+				{if $data.pb > 0.03}
+				<span style="color: red;">'{$data.pb}</span>
+				{else}
+				'{$data.pb}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.cr_6 > 0}
+				{if $data.cr_6 > 0.05}
+				<span style="color: red;">'{$data.cr_6}</span>
+				{else}
+				'{$data.cr_6}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.aldrin > 0}
+				{if $data.aldrin > -0}
+				<span style="color: red;">'{$data.aldrin}</span>
+				{else}
+				'{$data.aldrin}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.bhc > 0}
+				{if $data.bhc > 210}
+				<span style="color: red;">'{$data.bhc}</span>
+				{else}
+				'{$data.bhc}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.chlordane > 0}
+				{if $data.chlordane > -0}
+				<span style="color: red;">'{$data.chlordane}</span>
+				{else}
+				'{$data.chlordane}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.ddt > 0}
+				{if $data.ddt > 2}
+				<span style="color: red;">'{$data.ddt}</span>
+				{else}
+				'{$data.ddt}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.endrin > 0}
+				{if $data.endrin > 4}
+				<span style="color: red;">'{$data.endrin}</span>
+				{else}
+				'{$data.endrin}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.heptachlor > 0}
+				{if $data.heptachlor > -0}
+				<span style="color: red;">'{$data.heptachlor}</span>
+				{else}
+				'{$data.heptachlor}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.lindane > 0}
+				{if $data.lindane > -0}
+				<span style="color: red;">'{$data.lindane}</span>
+				{else}
+				'{$data.lindane}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.methoxychlor > 0}
+				{if $data.methoxychlor > -0}
+				<span style="color: red;">'{$data.methoxychlor}</span>
+				{else}
+				'{$data.methoxychlor}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.toxapan > 0}
+				{if $data.toxapan > -0}
+				<span style="color: red;">'{$data.toxapan}</span>
+				{else}
+				'{$data.toxapan}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.radioaktivitas_gross_a > 0}
+				{if $data.radioaktivitas_gross_a > 0.1}
+				<span style="color: red;">'{$data.radioaktivitas_gross_a}</span>
+				{else}
+				'{$data.radioaktivitas_gross_a}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.radioaktivitas_gross_b > 0}
+				{if $data.radioaktivitas_gross_b > 1}
+				<span style="color: red;">'{$data.radioaktivitas_gross_b}</span>
+				{else}
+				'{$data.radioaktivitas_gross_b}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+			<td align="center">
+				{if $data.e_coli > 0}
+				{if $data.e_coli > 1}
+				<span style="color: red;">'{$data.e_coli}</span>
+				{else}
+				'{$data.e_coli}
+				{/if}
+				{else}
+				-
+				{/if}
+			</td>
+		</tr>
+		{foreachelse}
+		<tr style="color: white;">
+			<td colspan="61" align="center" bgcolor="#FA535D">BELUM ADA DATA</td>
+		</tr>
+		{/foreach}
+	</tbody>
+</table>

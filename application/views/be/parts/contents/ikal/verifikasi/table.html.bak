@@ -1,0 +1,149 @@
+{include file="parts/block/block_search.html"}
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th rowspan="2" class="v-middle text-center" style="width: 70px">No</th>
+        <th colspan="2" class="text-center">Tanggal</th>
+        <th colspan="2" class="text-center">Verifikasi</th>
+        <th rowspan="2" class="v-middle">Level</th>
+        <th rowspan="2" class="v-middle">Catatan Pelaporan</th>
+        <th rowspan="2" class="v-middle">Pemantauan</th>
+        <th rowspan="2" class="v-middle">Provinsi</th>
+        <!-- <th rowspan="2" class="v-middle">Kab/Kota</th> -->
+        <th rowspan="2" class="v-middle">Peruntukan</th>
+        <th colspan="2" class="text-center">Titik Koordinat</th>
+        <th colspan="5" class="text-center">Nilai Pemantauan</th>
+      </tr>
+      <tr>
+        <th>Input Data</th>
+        <th>Update Data</th>
+        <!-- <th class="text-center">Provinsi</th> -->
+        <th class="text-center">Regional</th>
+        <th class="text-center">Pusat</th>
+        <th class="text-center">Latitude</th>
+        <th class="text-center">Longitude</th>
+        <th class="text-center">
+          TSS <sup>(mg/L)</sup><br>
+          <sup>(Total Susppended Solid)</sup>
+        </th>
+        <th class="text-center">
+          DO <sup>(mg/L)</sup><br>
+          <sup>(Dissolved Oxygen)</sup>
+        </th>
+        <th class="text-center">MINYAK & LEMAK <sup>(µg/L)</sup></th>
+        <th class="text-center">AMONIA TOTAL <sup>(mg/L)</sup></th>
+        <th class="text-center">ORTOFOSFAT (PO4-P) <sup>(mg/L)</sup></th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {$showBtnCatatan = 0}
+      {foreach from=$view item=v}
+
+      {if $me.role_user == 4 && $v.role_user == 2}
+      {$showBtnCatatan = 1}
+      {elseif $me.role_user == 2 && $v.role_user == 3}
+      {$showBtnCatatan = 1}
+      {elseif $me.role_user == 0 || $me.role_user == 1}
+      {$showBtnCatatan = 1}
+      {/if}
+      <tr>
+        <td class="text-center">{counter}</td>
+        <td class="pr-1">
+          {date('Y-m-d',$v.crdate)}
+        </td>
+        <td class="pr-1">
+          {if $v.chdate}
+          {date('Y-m-d',$v.chdate)}
+          {else}
+          -
+          {/if}
+        </td>
+        <!-- <th class="text-center">
+          {if ($me.role_user == 2 || $me.role_user == 0) && $lockAction == 0}
+            <button {if !$v.v_provinsi} style="display:none;" {/if} class="badge badge-info v_provinsi_verify{$v.$primaryKey}  unverify" data-verify="v_provinsi"  data-uid="{$v.$primaryKey}" title="Verifikasi"><a href="javascript:void(0);">verified</a></button>
+            <button {if $v.v_provinsi} style="display:none;" {/if} class="badge badge-danger v_provinsi_unverify{$v.$primaryKey}  verify" data-verify="v_provinsi"  data-uid="{$v.$primaryKey}" title="Verifikasi"><a href="javascript:void(0);">unverified</a></button>
+          {else}
+            <div {if !$v.v_provinsi} style="display:none;" {/if} class="badge badge-info " title="Verifikasi">verified</div>
+            <div {if $v.v_provinsi} style="display:none;" {/if} class="badge badge-danger " title="Verifikasi">unverified</div>
+          {/if}
+        </th> -->
+        {if $lockActionYear == 0}
+        <th class="text-center">
+          {if $v.role_user == 2}
+          {if ($me.role_user == 4 || $me.role_user == 0) && $lockAction == 0}
+          <button {if !$v.v_regional} style="display:none;" {/if} class="badge badge-info v_regional_verify{$v.$primaryKey}  unverify" data-verify="v_regional" data-uid="{$v.$primaryKey}" title="Verifikasi"><a
+              href="javascript:void(0);">verified</a></button>
+          <button {if $v.v_regional} style="display:none;" {/if} class="badge badge-danger v_regional_unverify{$v.$primaryKey}  verify" data-verify="v_regional" data-uid="{$v.$primaryKey}" title="Verifikasi"><a
+              href="javascript:void(0);">unverified</a></button>
+          {else}
+          <div {if !$v.v_regional} style="display:none;" {/if} class="badge badge-info" title="Valid">verified</div>
+          <div {if $v.v_regional} style="display:none;" {/if} class="badge badge-danger" title="Invalid">unverified</div>
+          {/if}
+          {/if}
+        </th>
+        <th class="text-center">
+          {if ($me.role_user == 1 || $me.role_user == 0) && $lockAction == 0}
+          <button {if !$v.v_pusat} style="display:none;" {/if} class="badge badge-info v_pusat_verify{$v.$primaryKey}  unverify" data-verify="v_pusat" data-uid="{$v.$primaryKey}" title="Verifikasi"><a href="javascript:void(0);">verified</a></button>
+          <button {if $v.v_pusat} style="display:none;" {/if} class="badge badge-danger v_pusat_unverify{$v.$primaryKey}  verify" data-verify="v_pusat" data-uid="{$v.$primaryKey}" title="Verifikasi"><a
+              href="javascript:void(0);">unverified</a></button>
+          {else}
+          <div {if !$v.v_pusat} style="display:none;" {/if} class="badge badge-info" title="Valid">verified</div>
+          <div {if $v.v_pusat} style="display:none;" {/if} class="badge badge-danger" title="Invalid">unverified</div>
+          {/if}
+        </th>
+        {else}
+        <th colspan="2" class="text-center">
+          <span class="badge badge-dark">pelaporan {$lockActionYear} ditutup</span>
+        </th>
+        {/if}
+        <td class="text-center">
+          {$roleUser = $functions->roleUser($v.role_user)}
+          <div class="badge badge-{$roleUser.color}">{$roleUser.name}</div>
+        </td>
+        <td>
+          {if $showBtnCatatan && $lockActionYear == 0}
+          <a href="javascript:();" data-toggle="modal" data-target="#catatanVerifikator" data-uid="{$v.$primaryKey}" class="badge badge-primary catatan-verifikator"> <i class="ft-edit"></i> Tambah catatan</a>
+          <br><br>
+          {/if}
+          <span id="catatan-{$v.$primaryKey}-short">{if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}</span>
+          <!-- <span id="catatan-{$v.$primaryKey}-long" style="display:none"></span> -->
+        </td>
+        <td>
+          <b>{$v.kode_lokasi}</b><br>
+          {$v.alamat}<br />
+          {$v.alamat_detail}<br />
+          <div class="badge badge-success">
+            {$format->dateFormat($v.tanggal)}
+          </div><br>
+          {if $v.shu}
+          <a title="Download File" class="border-secondary badge badge-warning" href="{$baseUrl}uploads/monitoring/{$v.shu}" target="_blank">DOWNLOAD SHU</a>
+          {else}
+          <label class="border-secondary badge badge-danger">TIDAK ADA SHU</label>
+          {/if}
+        </td>
+        <td>{$v.nama_provinsi}</td>
+        <td>{$v.peruntukan}</td>
+        <td>{$v.latitude}</td>
+        <td>{$v.longitude}</td>
+        <td>{$v.tss}</td>
+        <td>{$v.do_p}</td>
+        <td>{$v.minyak_dan_lemak}</td>
+        <td>{$v.amonia_total}</td>
+        <td>{$v.orto_fosfat}</td>
+        {foreachelse}
+      </tr>
+
+      <tr>
+        <td colspan="18" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+</div>
+{include file="parts/block/block_pagination.html"}

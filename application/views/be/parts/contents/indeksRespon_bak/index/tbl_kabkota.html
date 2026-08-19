@@ -1,0 +1,75 @@
+<table class="table">
+  <thead class="bg-info bg-darken-2 white">
+    <tr>
+      <th colspan="2" class="text-center" style="width: 70px">#</th>
+      <th rowspan="2" class="v-middle text-center">Tahun</th>
+      <th rowspan="2" class="v-middle text-center">Kabupaten/Kota</th>
+      <th rowspan="2" class="v-middle text-center">Provinsi</th>
+      <th colspan="5" class="v-middle text-center">(%) Pengisian</th>
+    </tr>
+    <tr>
+      <th width="50" class="text-center">Action</th>
+      <th width="10" class="text-center">No</th>
+      <th class="text-center">Langit Biru</th>
+      <th class="text-center">Program Kali Bersih</th>
+      <th class="text-center">Indonesia Hijau</th>
+      <th class="text-center">Gambut Lestari</th>
+    </tr>
+  </thead>
+  <tbody>
+    {counter start=$page print=false}
+    {foreach from=$view item=v}
+    <tr>
+      {if $me.uid_users == $v.users_uid}
+      <th class="text-center">
+        <button class="badge badge-danger round delete-dialog" data-uid="{$v.min_index}" data-ajax="{$ctrl}/deletedData">
+          <a href="javascript:void(0);" title="Delete">
+            <i class="ft-trash-2"></i>
+          </a>
+        </button>
+        <button class="badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.min_index}" title="Edit">
+          <a href="{$baseUrl}{$ctrl}/respon/parent/{$v.min_index}/tipe/{$v.min_tipe}/tahun/{$v.tahun}"><i class="ft-edit"></i></a>
+        </button>
+        <button class="badge badge-success round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.min_index}" title="Lihat">
+          {if $v.uid_kabkota != 0}
+          <a
+            href="{$baseUrl}{$ctrl}/respon2/parent/{$v.min_index}/parent2/{$v.parent[1]}/parent3/{$v.parent[2]}/parent4/{$v.parent[3]}/parent5/{$v.parent[4]}/tipe/{$v.min_tipe}/tipe2/2/tipe3/3/tipe4/4/tipe5/5/tahun/{$v.tahun}/nama_propinsi/{$v.nama_propinsi}/nama_kabkot/{$v.nama_kabkot}">
+            <i class="ft-eye"></i>
+          </a>
+          {else}
+          <a href="{$baseUrl}{$ctrl}/respon2/parent/{$v.min_index}/tipe/{$v.min_tipe}/tahun/{$v.tahun}/nama_propinsi/{$v.nama_propinsi}">
+            <i class="ft-eye"></i>
+          </a>
+          {/if}
+        </button>
+      </th>
+      {else}
+      <th class="text-center">
+        --
+      </th>
+      {/if}
+
+      <th class="text-center">{counter}</th>
+      <td class="text-center">{$v.tahun}</td>
+      <td class="text-center">{$v.nama_kabkot}</td>
+      <td class="text-center">{$v.nama_propinsi}</td>
+      <!-- 1. LANGIT BIRU -->
+      <td class="text-center">{if $v.isian[1].persen_mengisi}{$v.isian[1].persen_mengisi}%{else}-{/if}</td>
+      <!-- 3. PROGRAM KALI BERSIH -->
+      <td class="text-center">{if $v.isian[3].persen_mengisi}{$v.isian[3].persen_mengisi}%{else}-{/if}</td>
+      <!-- 4. INDONESIA HIJAU -->
+      <td class="text-center">{if $v.isian[4].persen_mengisi}{$v.isian[4].persen_mengisi}%{else}-{/if}</td>
+      <!-- 5. GAMBUT LESTARI -->
+      <td class="text-center">{if $v.isian[5].persen_mengisi}{$v.isian[5].persen_mengisi}%{else}-{/if}</td>
+    </tr>
+    {foreachelse}
+    <tr>
+      <td colspan="9" class="p-0">
+        <div class="alert alert-danger text-center">
+          <strong>Tidak Ada Data</strong>
+        </div>
+      </td>
+    </tr>
+    {/foreach}
+  </tbody>
+</table>

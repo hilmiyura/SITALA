@@ -1,0 +1,58 @@
+<style>
+	table thead tr th {
+		border: 1px solid black;
+	}
+
+	table tbody tr td {
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style>
+<table>
+  <thead>
+    <tr style="color: white;">
+      <th rowspan="2" class="v-middle" bgcolor="#1E9FC4">#</th>
+      <th rowspan="2" class="v-middle" bgcolor="#1E9FC4">Kode Lokasi</th>
+      <th rowspan="2" class="v-middle" bgcolor="#1E9FC4">Alamat</th>
+      <th rowspan="2" class="v-middle" bgcolor="#1E9FC4">Peruntukan</th>
+      <th rowspan="2" class="v-middle" bgcolor="#1E9FC4">Kab/Kota</th>
+      <th rowspan="2" class="v-middle" bgcolor="#1E9FC4">Provinsi</th>
+      <th colspan="2" align="center" bgcolor="#1E9FC4">Titik Koordinat</th>
+      <th colspan="5" align="center" bgcolor="#1E9FC4">NILAI</th>
+    </tr>
+    <tr style="color: white;">
+      <th bgcolor="#1E9FC4">Latitude</th>
+      <th bgcolor="#1E9FC4">Longitude</th>
+      <th align="center" bgcolor="#1E9FC4">IKU</th>
+      <th align="center" bgcolor="#1E9FC4">KATEGORI</th>
+      <th align="center" bgcolor="#1E9FC4">SO2</th>
+      <th align="center" bgcolor="#1E9FC4">NO2</th>
+      <th align="center" bgcolor="#1E9FC4">PM25</th>
+    </tr>
+  </thead>
+  <tbody>
+    {foreach from=$viewExcel.data item=v}
+    <tr>
+      <td align="center">{counter}</td>
+      <td>{$v.kode_lokasi}</td>
+      <td>{$v.alamat_detail}</td>
+      <td>{$v.alamat}</td>
+      <td>{$v.nama_kabkot}</td>
+      <td>{$v.nama_propinsi}</td>
+      <td>'{$v.latitude}</td>
+      <td>'{$v.longitude}</td>
+      <td align="center">'{$v.iku}</td>
+      <td align="center">{$v.iku_kategori}</td>
+      <td align="center">'{$v.indeks_so2}</td>
+      <td align="center">'{$v.indeks_no2}</td>
+      <td align="center">'{$v.indeks_pm25}</td>
+    </tr>
+    {foreachelse}
+    <tr style="color: white;">
+      <td {if $search.tampil_data !=3}colspan="11" {else}colspan="6" {/if} align="center" bgcolor="#FA535D">
+        Tidak Ada Data
+      </td>
+    </tr>
+    {/foreach}
+  </tbody>
+</table>

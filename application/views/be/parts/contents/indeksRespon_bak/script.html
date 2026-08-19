@@ -1,0 +1,61 @@
+{literal}
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#export-data-excel1").click(function() {
+			let dates = new Date($.now());
+			let files = dates.getTime() + '-indeks-respon-langit-biru.xlsx';
+			let table = $('#table-lb');
+			TableToExcel.convert(table[0], {
+				name: files,
+				sheet: {
+					name: 'Indeks Respon Langit Biru'
+				}
+			});
+		});
+		$("#export-data-excel2").click(function() {
+			let dates = new Date($.now());
+			let files = dates.getTime() + '-indeks-respon-pantai-bersih.xlsx';
+			let table = $('#table-pb');
+			TableToExcel.convert(table[0], {
+				name: files,
+				sheet: {
+					name: 'Indeks Respon Pantai Bersih'
+				}
+			});
+		});
+		$("#export-data-excel3").click(function() {
+			let dates = new Date($.now());
+			let files = dates.getTime() + '-indeks-respon-program-kali-bersih.xlsx';
+			let table = $('#table-pkb');
+			TableToExcel.convert(table[0], {
+				name: files,
+				sheet: {
+					name: 'Indeks Respon Program Kali Bersih'
+				}
+			});
+		});
+		$("#export-data-excel4").click(function() {
+			let dates = new Date($.now());
+			let files = dates.getTime() + '-indeks-respon-indonesia-hijau.xlsx';
+			let table = $('#table-ih');
+			TableToExcel.convert(table[0], {
+				name: files,
+				sheet: {
+					name: 'Indeks Respon Indonesia Hijau'
+				}
+			});
+		});
+		$("#export-data-excel5").click(function() {
+			let dates = new Date($.now());
+			let files = dates.getTime() + '-indeks-respon-gambut-lestari.xlsx';
+			let table = $('#table-gl');
+			TableToExcel.convert(table[0], {
+				name: files,
+				sheet: {
+					name: 'Indeks Respon Gambut Lestari'
+				}
+			});
+		});
+	});
+</script>
+{/literal}

@@ -1,0 +1,16 @@
+<ul class="nav nav-tabs">
+  <li class="nav-item">
+    <a class="nav-link  {if !$showN}active{/if}" id="base-tab4" data-toggle="tab" aria-controls="tab4" href="#tab4" aria-expanded="false">Provinsi</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {if $showN } active {/if}" id="base-tab5" data-toggle="tab" aria-controls="tab5" href="#tab5" aria-expanded="false">Nasional</a>
+  </li>
+</ul>
+<div class="tab-content px-0 pt-1">
+  <div class="tab-pane {if !$showN}active{/if}" id="tab4" aria-labelledby="base-tab4">
+    {include file="parts/contents/ikal/indeks/simulasiIndeksProvinsi.html"}
+  </div>
+  <div class="tab-pane {if $showN } active {/if}" id="tab5" aria-labelledby="base-tab5">
+    {include file="parts/contents/ikal/indeks/simulasiIndeksNasional.html"}
+  </div>
+</div>

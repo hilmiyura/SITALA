@@ -1,0 +1,42 @@
+{include file="parts/contents/$ctrl/$act/search.html"}
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table table-bordered" style="width:100%;">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th class="text-center" style="width:1%">#</th>
+        <th class="v-middle" style="width:5%">PROVINSI</th>
+        <th class="v-middle" style="width:5%">KAB/KOTA</th>
+        <th class="v-middle" style="width:1%">TAHUN</th>
+        <th class="v-middle" style="width:6%">IKEG</th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v}
+      <tr {if !$v.nama_kabkota} style="background-color: #e2ecf3;" {/if}>
+        <td class="text-center">{counter}</td>
+        <td>{if $v.nama_kabkota}{$v.nama_provinsi}{else}<b>{$v.nama_provinsi}</b>{/if}</td>
+        <td>{if $v.nama_kabkota}{$v.nama_kabkota}{else}{/if}</td>
+        <td class="text-center">{$v.tahun}</td>
+        <td>
+          {if $me.role_user <= 1 || $me.komponen == "PKG"}
+            <input type="text" types="number" class="form-control numberFormat onset-type " fd="ikeg" tahun="{$search.tahun}" prov="{$v.uid_provinsi}" kab="{$v.uid_kabkota}" value="{$v.ikeg}" placeholder="Indeks Gambut" style="width:100%;">
+            <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+          {else}
+            {$v.ikeg}
+          {/if}
+        </td>
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="12" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+  {include file="parts/block/block_pagination.html"}
+</div>

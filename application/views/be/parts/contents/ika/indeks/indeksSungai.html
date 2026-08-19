@@ -1,0 +1,104 @@
+<div class="table-responsive table-border">
+  <section id="form-repeater">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-content collapse show">
+            <div class="card-body">
+              <div class="repeater-default">
+                <div data-repeater-list="car">
+                  <form class="form row form_with_load" method="POST" enctype="multipart/form-data" action="">
+                    <div class="form-group mb-1 col-sm-12 col-md-6">
+                      <label for="priority">Lokasi Sungai</label>
+                      <br>
+                      <select class="form-control select2" name="form[lokasi]" style="width: 100%;" required>
+                        <option value=""> --PILIH LOKASI SUNGAI-- </option>
+                        {foreach from=$lokasi item=v}
+                          <option value="{$v.uid_lokasi_pemantauan}" {if $vSungai.lokasi == $v.uid_lokasi_pemantauan}selected{/if} >{$v.alamat}-{$v.nama_provinsi}-{$v.nama_kabkota}</option>
+                        {/foreach}
+                      </select>
+                    </div>
+                    <div class="form-group mb-1 col-sm-12 col-md-3">
+                      <label for="priority">Tahun</label>
+                      <br>
+                      <select class="form-control select2" name="form[tahun]" style="width: 100%;" required>
+                        <option value=""> --PILIH TAHUN-- </option>
+                        {for $foo=2015 to $thisYear}
+                          <option value="{$foo}" {if $foo == $vSungai.tahun}selected{/if}> {$foo} </option>
+                        {/for}
+                      </select>
+                    </div>
+                    <div class="form-group col-sm-12 col-md-2 text-center mt-2">
+                      <button type="submit" name="countSungai" class="btn btn-danger">
+                        Hitung
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {if $vSungai}
+  <table class="table">
+    <tr>
+      <th colspan="3" class="text-upper">INDEKS KUALITAS AIR {$vSungai.lokasi_data.alamat}-{$vSungai.lokasi_data.nama_provinsi}-{$vSungai.lokasi_data.nama_kabkota} {number_format($vSungai.nilai_indeks,2,".","")}</th>
+    </tr>
+    <tr>
+      <td colspan="3" class="border-bottom-none"></td>
+    </tr>
+    <tr>
+      <th colspan="3">JUMLAH TITIK</th>
+    </tr>
+    <tr>
+      <td>Memenuhi</td>
+      <td>:</td>
+      <td>{number_format($vSungai.jumlah_titik_memenuhi,2,".","")}</td>
+    </tr>
+    <tr>
+      <td>Ringan</td>
+      <td>:</td>
+      <td>{number_format($vSungai.jumlah_titik_ringan,2,".","")}</td>
+    </tr>
+    <tr>
+      <td>Sedang</td>
+      <td>:</td>
+      <td>{number_format($vSungai.jumlah_titik_sedang,2,".","")}</td>
+    </tr>
+    <tr>
+      <td>Berat</td>
+      <td>:</td>
+      <td>{number_format($vSungai.jumlah_titik_berat,2,".","")}</td>
+    </tr>
+    <tr >
+      <td colspan="3" class="border-bottom-none"></td>
+    </tr>
+    <tr>
+      <th colspan="3">NILAI INDEKS PER MUTU</th>
+    </tr>
+    <tr>
+      <td>Memenuhi</td>
+      <td>:</td>
+      <td>{number_format($vSungai.nilai_mutu_memenuhi,2,".","")}</td>
+    </tr>
+    <tr>
+      <td>Ringan</td>
+      <td>:</td>
+      <td>{number_format($vSungai.nilai_mutu_ringan,2,".","")}</td>
+    </tr>
+    <tr>
+      <td>Sedang</td>
+      <td>:</td>
+      <td>{number_format($vSungai.nilai_mutu_sedang,2,".","")}</td>
+    </tr>
+    <tr>
+      <td>Berat</td>
+      <td>:</td>
+      <td>{number_format($vSungai.nilai_mutu_berat,2,".","")}</td>
+    </tr>
+  </table>
+  {/if}
+</div>

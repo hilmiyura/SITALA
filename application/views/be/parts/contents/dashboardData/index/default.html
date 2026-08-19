@@ -1,0 +1,50 @@
+<!-- <div class="push-content-dashboard">
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <img class="mb-0" width="150" src="assets/app-assets/images/logo/clock.gif">
+      <h3>Hi, {$me.name}</h3>
+      <h4>Data sedang disiapkan...</h4>
+    </div>
+  </div>
+</div> -->
+
+<!-- <div class="row">
+  <div class="col-lg-12 mb-3">
+    <div class="heading-elements float-right">
+        <div class="btn-group">
+          <button class="btn btn-danger btn-sm dropdown-toggle" type="button" id="dropdownMenuButton6" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            PILIH TAHUN
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton6" x-placement="top-start">
+            {foreach from=$years item=Y}
+            <a class="dropdown-item show-data-tahun" tahun="{$Y}">TAHUN {$Y}</a>
+            {/foreach}
+          </div>
+        </div>
+      </div>
+  </div>
+</div> -->
+{if $maintenance == 1}
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header text-center">
+        DASHBOARD UNDER MAINTENACE
+      </div>
+    </div>
+  </div>
+</div>
+{else}
+{include file="parts/contents/{$ctrl}/{$act}/dashboard_box_1.html"}
+{if $news}
+  <!-- {include file="parts/contents/{$ctrl}/{$act}/dashboard_maps2.html"} -->
+{/if}
+{include file="parts/contents/{$ctrl}/{$act}/dashboard_maps.html"}
+{include file="parts/contents/{$ctrl}/{$act}/dashboard_box_2.html"}
+{include file="parts/contents/{$ctrl}/{$act}/dashboard_box_3.html"}
+{include file="parts/contents/{$ctrl}/{$act}/dashboard_gc_1.html"}
+{include file="parts/contents/{$ctrl}/{$act}/dashboard_info.html"}
+{if $update_profile == 1}
+{include file="parts/contents/{$ctrl}/{$act}/dashboard_modal.html"}
+{/if}
+{/if}

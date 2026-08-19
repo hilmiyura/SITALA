@@ -1,0 +1,158 @@
+<div class="content-wrapper">
+  <div class="content-wrapper-before" style="height: 40%;"></div>
+  <div class="content-header row">
+  </div>
+  <div class="content-body">
+    <div id="user-profile">
+      <div class="row">
+        <div class="col-sm-12 col-xl-12">
+          <div class="media d-flex m-1 ">
+            <div class="align-left p-1">
+              <a href="#" class="profile-image">
+                <img src="assets/app-assets/images/portrait/small/usr-1.jpeg" class="rounded-circle img-border height-100" alt="Card image">
+              </a>
+            </div>
+            <div class="media-body text-left  mt-1">
+              <h3 class="font-large-1 white">{$form.name}
+                <span class="font-medium-1 white">(
+                  {if $form.role_user == 1}
+                  User Pusat
+                  {else if $form.role_user == 2}
+                  User Provinsi {$form.nama_provinsi}
+                  {else if $form.role_user == 3}
+                  User {$form.nama_kabkota}
+                  {else if $form.role_user == 4}
+                  User P3E Regional {$form.ur_regional}
+                  {else}
+                  Administrator
+                  {/if}
+                  )</span>
+              </h3>
+              <!-- <p class="white">
+                <i class="ft-map-pin white"> </i> Indonesia
+              </p> -->
+              <p class="white">
+                {if $form.active}
+                <i class="ft-user-check"> </i> {$form.username}
+                {else}
+                <i class="ft-user-x"> </i> {$form.username}
+                {/if}
+              </p>
+              <p class="white">
+                <i class="ft-clock"> </i>{$form.last_access} - {$me.ip} - (last Login)
+              </p>
+              <!-- <p class="white text-bold-300 d-none d-sm-block">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sed odio risus. Integer sit amet dolor elit. Suspendisse
+                ac neque in lacus venenatis convallis. Sed eu lacus odio</p> -->
+
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-xl-6">
+          <div class="media d-flex m-1 ">
+
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12">
+          <!--Project Timeline div starts-->
+          <div id="timeline">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-wrap bar-primary">
+                  <div class="card-title">Form Profile</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-block">
+                  <form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+                    <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
+                    <div class="modal-body">
+                      <div class="form-row">
+                        <div class="col-md-5 mb-3">
+                          <label for="name">Nama</label>
+                          <input readonly="readonly" type="text" class="form-control position-relative" name="form[name]" id="name" placeholder="Nama" value="{$form.name}" required="" />
+                        </div>
+                        <div class="col-md-5 mb-3">
+                          <label for="name">Password</label>
+                          <input type="text" class="form-control position-relative" name="form[password]" id="password" placeholder="Password" value="{$form.password}" required="" />
+                        </div>
+                        <div class="col-md-2">
+                          <input type="submit" name="submit" class="btn btn-danger position-relative " value="SUBMIT" style="margin-top:27px;">
+                        </div>
+
+
+                        <!-- {if $me.role_user == 2 || $me.role_user == 3}
+                          <div class="col-md-6 mb-3">
+                            <label for="name">Kepala Daerah</label>
+                            <input type="text" class="form-control position-relative" name="form[kepala_daerah]" id="kepala_daerah" placeholder="Kepala Daerah" value="{$form.kepala_daerah}" />
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="name">Ketua DPRD</label>
+                            <input type="text" class="form-control position-relative" name="form[kepala_dprd]" id="kepala_dprd" placeholder="Ketua DPRD" value="{$form.kepala_dprd}" />
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="name">Luas Wilayah</label>
+                            <div class="input-group">
+                              <input type="text" class="form-control position-relative" name="form[luas_wilayah]" id="luas_wilayah" placeholder="luas_wilayah" value="{$form.luas_wilayah}" />
+                              <div class="input-group-append">
+                                <span class="input-group-text">Km<sup>2</sup></span>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="name">Populasi</label>
+                            <div class="input-group">
+                              <input type="text" class="form-control position-relative" name="form[populasi]" id="populasi" placeholder="populasi" value="{$form.populasi}" />
+                            </div>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="name">Pendapatan Per Kapita</label>
+                            <input type="text" class="form-control position-relative" name="form[gdp]" id="gdp" placeholder="gdp" value="{$form.gdp}" />
+                          </div>
+                          {if $me.role_user == 3}
+                            <div class="col-md-6 mb-3">
+                              <label for="name">Kategori Daerah</label>
+                              <select class="form-control select2" name="form[kategori_daerah]" id="kategori_daerah">
+                                <option value="">-- PILIH KATEGORI DAERAH --</option>
+                                <option value="TERTINGGAL" {if $form.kategori_daerah=='TERTINGGAL' }selected{/if}>TERTINGGAL
+                                </option>
+                                <option value="TIDAK TERTINGGAL" {if $form.kategori_daerah=='TIDAK TERTINGGAL' }selected{/if}>TIDAK TERTINGGAL</option>
+                              </select>
+                            </div>
+                          {/if}
+                          <div class="col-md-6 mb-3">
+                            <label for="name">SK Pelaksana</label>
+                            <input type="file" class="form-control mb-1" id="sk_pelaksana" name="sk_pelaksana" />
+                            <span class="danger">Upload file max 10 Mb.</span><br>
+                            <span class="help-block">
+                              {if $form.sk_pelaksana}
+                              <a class="btn btn-sm btn-success" target="_blank" href="{$baseUrl}uploads/sk_pelaksana/{$form.sk_pelaksana}"><i class="fa fa-download"></i>Download</a>
+                              {/if}
+                            </span>
+                          </div> -->
+
+                          <div class="col-md-12 mb-3">
+                            {include file="parts/contents/$ctrl/$act/detailPeriode.html"}
+                          </div>
+                        {/if}
+                      </div>
+                    </div>
+                    <!-- <div class="modal-footer">
+                      <button type="submit" name="submit" class="btn btn-danger">
+                        Update
+                      </button>
+                    </div> -->
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--Project Timeline div ends-->
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,4 @@
+/temp/
+/uploads/
+*.sql
+.DS_Store

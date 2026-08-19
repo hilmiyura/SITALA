@@ -1,0 +1,116 @@
+<script type="text/javascript">
+  setTimeout(()=>{
+    var status   = $(".USData").val();
+    if(status){
+      $(".on-type").attr("disabled",true);
+      $(".on-type-block").attr("disabled", false);
+      $(".on-change").attr("disabled",true);
+      $(".on-verif").attr("disabled",false);
+    }
+  },500);
+  $(".hitung-data").on("click", function(){
+    var idx = $(this).attr("idx");
+    $.ajax({
+      url: baseUrl + 'iktlRhl/countData/x/'+idx,
+      type: 'POST',
+      success: function(response) {
+        var res = JSON.parse(response);
+        if(res.statusCode == 200){
+          toastr.success(res.message, 'Success');
+        }else{
+          toastr.error(res.message, 'Warning');
+        }
+      }
+    });
+  })
+  $(".reject-all-data").on("click", function(){
+    var idx = $(this).attr("idx");
+    $.ajax({
+      url: baseUrl + 'iktlRhl/rejectAll/x/'+idx,
+      type: 'POST',
+      success: function(response) {
+        var res = JSON.parse(response);
+        if(res.statusCode == 200){
+          toastr.success(res.message, 'Success');
+          setTimeout(()=>{
+            location.reload();
+          },1000);
+        }else{
+          toastr.error(res.message, 'Warning');
+        }
+      }
+    });
+  });
+  $(".on-type").on("focusout", function(){
+    var field = $(this).attr("name");
+    var value = $(this).val();
+    var idx   = $(this).attr("idx");
+    var status   = $(".USData").val();
+    var block   = $(this).attr("on-type-block");
+
+    if(!status){
+      updateForm(field,value,idx);
+    }else if (block) {
+      updateForm(field,value,idx);
+    }else{
+      // toastr.error('Data tidak bisa diupdate!', 'Warning');
+    }
+  });
+  $(".on-change").on("change", function(){
+    var field = $(this).attr("name");
+    var value = $(this).val();
+    var idx   = $(this).attr("idx");
+    var status   = $(".USData").val();
+    if(!status){
+      updateForm(field,value,idx);
+    }else{
+      if(field == "verify"){
+        updateForm(field,value,idx);
+      }
+      // toastr.error('Data tidak bisa diupdate!', 'Warning');
+    }
+  });
+  $(".on-checked-div").on("click", function(){
+    var field = $(this).attr("name");
+    var value = $(this).attr("value");
+    var idx   = $(this).attr("idx");
+    $("#checked-"+idx+"-1").removeClass("bg-success");
+    $("#checked-"+idx+"-2").removeClass("bg-danger");
+    $("#checked-"+idx+"-1").html("");
+    $("#checked-"+idx+"-2").html("");
+    if(value == 1){
+      $("#checked-"+idx+"-1").addClass("bg-success");
+      $("#checked-"+idx+"-2").removeClass("bg-danger");
+      $("#checked-"+idx+"-1").html("<i class='ft-check'>");
+    }else if (value == 2) {
+      $("#checked-"+idx+"-1").removeClass("bg-success");
+      $("#checked-"+idx+"-2").addClass("bg-danger");
+      $("#checked-"+idx+"-2").html("<i class='ft-x'>");
+    }
+    if(field == "verify"){
+      updateForm(field,value,idx);
+    }
+  });
+
+  function updateForm(field, value, idx){
+    var formSubmit = {
+      field:field,
+      value:value,
+      idx:idx
+    }
+    $.ajax({
+      url: baseUrl + 'iktlRhl/updateData',
+      type: 'POST',
+      data: formSubmit,
+      success: function(response) {
+        var res = JSON.parse(response);
+        if(res.statusCode == 200){
+          toastr.success(res.message, 'Success');
+        }else{
+          toastr.error(res.message, 'Warning');
+        }
+      }
+    });
+  }
+
+</script>

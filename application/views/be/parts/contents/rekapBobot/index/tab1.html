@@ -1,0 +1,65 @@
+<div role="tabpanel" class="tab-pane active" id="tab1">
+  <div class="row">
+    <div class="col-md-12 mb-1 mt-1">
+      <button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-excel1"><i class="ft-download"></i> Download Excel</button>
+      <button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-csv1"><i class="ft-download"></i> Download CSV</button>
+    </div>
+  </div>
+  <div class="table-responsive ">
+    <table class="table table-bordered" id="table-lb">
+      <tr class="bg-info text-white">
+        <th data-b-a-s="thin" data-f-bold="true" data-fill-color="f6f8fa" data-a-h="center" class="text-center" colspan="27">REKAP BOBOT INDEKS RESPON</th>
+      </tr>
+      <tr class="text-center bg-info text-white">
+        <th rowspan="2" width="10">No</th>
+        <th rowspan="2">Provinsi/Kabkota</th>
+        <th rowspan="2">Gambut</th>
+        <th colspan="2">Langit Biru</th>
+        <th colspan="2">Pantai Bersih</th>
+        <th colspan="2">Kali Bersih</th>
+        <th colspan="2">Indonesia Hijau</th>
+        <th colspan="2">Gambut Lestari</th>
+        <th rowspan="2">Nilai <br>IR (%)</th>
+      </tr>
+      <tr class="text-center bg-info text-white">
+        <th>Nilai</th>
+        <th>Nilai<br>/Bobot</th>
+        <th>Nilai</th>
+        <th>Nilai<br>/Bobot</th>
+        <th>Nilai</th>
+        <th>Nilai<br>/Bobot</th>
+        <th>Nilai</th>
+        <th>Nilai<br>/Bobot</th>
+        <th>Nilai</th>
+        <th>Nilai<br>/Bobot</th>
+      </tr>
+      {counter start=$page print=false}
+      {foreach from=$view1 item=v}
+      <tr>
+        <th class="text-center">{counter}</th>
+        <th class="text-left">{if $v.nama_kabkot}{$v.nama_kabkot}{else}Provinsi {$v.nama_propinsi}{/if}</th>
+        <th class="text-center">{if $v.gambut && $v.nama_kabkot==''}Gambut{elseif $v.gambut_kabkota}Gambut{else}--{/if}</th>
+        <td class="text-center">{round($v.lb_all, 2)}</td>
+        <td class="text-center"><strong>{$v.lb_final}</strong></td>
+        <td class="text-center">{round($v.pb_all, 2)}</td>
+        <td class="text-center"><strong>{$v.pb_final}</strong></td>
+        <td class="text-center">{round($v.kb_all, 2)}</td>
+        <td class="text-center"><strong>{$v.kb_final}</strong></td>
+        <td class="text-center">{round($v.ih_all, 2)}</td>
+        <td class="text-center"><strong>{$v.ih_final}</strong></td>
+        <td class="text-center">{round($v.gl_all, 2)}</td>
+        <td class="text-center"><strong>{$v.gl_final}</strong></td>
+        <td class="text-center bg-success text-white"><strong>{$v.nilai_final}</strong></td>
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="26" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </table>
+  </div>
+</div>

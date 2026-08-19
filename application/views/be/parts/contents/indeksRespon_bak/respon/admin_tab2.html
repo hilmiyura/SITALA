@@ -1,0 +1,61 @@
+<table class="table table-bordered" id="table-pb" data-cols-width="50,50,20,30">
+  <tr class="bg-info text-white">
+    <th data-b-a-s="thin" data-f-bold="true" data-fill-color="f6f8fa" data-a-h="center" class="text-center">INDIKATOR</th>
+    <th data-b-a-s="thin" data-f-bold="true" data-fill-color="f6f8fa" data-a-h="center" class="text-center">KETERANGAN</th>
+    <th data-b-a-s="thin" data-f-bold="true" data-fill-color="f6f8fa" data-a-h="center" class="text-center">ISIAN</th>
+    <th data-b-a-s="thin" data-f-bold="true" data-fill-color="f6f8fa" data-a-h="center" class="text-center">BUKTI</th>
+  </tr>
+  {foreach from=$irf_pantaibersih item=v key=k}
+  <form method="POST" enctype="multipart/form-data">
+    <tr class="cursor-pointer" data-toggle="collapse" href=".collapse2-{$v.id}" role="button" aria-expanded="false" aria-controls=".collapse2-{$v.id}">
+      <td data-a-wrap="true" data-a-v="top" colspan="4" class="bg-light"><b>{$v.indikator}</b></td>
+    </tr>
+    {foreach from=$v.child1 item=v1}
+    {if $v1.indikator != '-'}
+    <tr class="collapse collapse2-{$v.id} show">
+      <td data-a-wrap="true" data-a-v="top" colspan="4"><b>{$v1.indikator}<b></td>
+    </tr>
+    {/if}
+    {foreach from=$v1.child2 item=v2}
+    <tr class="collapse collapse2-{$v.id} show">
+      <td data-a-wrap="true" data-a-v="top" rowspan="{$v2.tchild3}" width="25%">{$v2.indikator}</td>
+    </tr>
+    {foreach from=$v2.child3 item=v3}
+    <tr class="collapse collapse2-{$v.id} show">
+      <td data-a-wrap="true" data-a-v="top" width="25%">{$v3.indikator}</td>
+      <td data-a-wrap="true" data-a-v="top">
+        <input type="hidden" name="form[parent_uid][]" value="{$parent}">
+        <input type="hidden" name="form[ref_uid][]" value="{$v3.id}">
+        <input type="hidden" name="form[tipe][]" value="{$tipe}">
+        <input type="hidden" name="form[indeks_uid][]" value="{$data_ir2[$v3.id].indeks_uid}">
+        {if $v3.input_type == 1}
+        {$data_ir2[$v3.id].isian[0]}
+        {else if $v3.input_type == 2}
+        {$data_ir2[$v3.id].isian[0]} / {$data_ir2[$v3.id].isian[1]}
+        {else}
+        {foreach from=$pilihan item=c}
+        {if $data_ir2[$v3.id].isian[0]==$c}{$c}{/if}
+        {/foreach}
+        {/if}
+      </td>
+      <td data-a-wrap="true" data-a-v="top" width="10%">
+        {if $v3.bukti}
+        {foreach from=$v3.bukti item=b key=k2}
+        {$b}
+        {if $data_ir2[$v3.id].bukti[$k2]}
+        <a title="Download File" class="btn btn-primary btn-sm" href="{$baseUrl}uploads/respon/{$data_ir2[$v3.id].bukti[$k2]}" target="_blank">LAMPIRAN</a>
+        {else}
+        <br>
+        <span class="badge badge-danger badge-sm">Tidak Ada Lampiran</span>
+        {/if}
+        <hr>
+        {/foreach}
+        {/if}
+      </td>
+    </tr>
+    {/foreach}
+    {/foreach}
+    {/foreach}
+  </form>
+  {/foreach}
+</table>

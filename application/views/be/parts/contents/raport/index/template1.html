@@ -1,0 +1,395 @@
+<div class="container p-5">
+  <div class="row mb-1">
+    <div class="col-md-2">
+
+    </div>
+    <div class="col-md-3">
+      {if !$contentOnly}
+      <a href="javascript:();" class="btn btn-sm btn-success printPdf" keyQr="{$keyQr}"> <i class="fa fa-print"></i> Cetak Raport</a>
+      <br><span id="info-print-raport" class="text-warning"></span>
+      {/if}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-2">
+
+    </div>
+    <div class="col-md-10">
+      <div class="pt-1 border" id="pdfTemplate" style="    width: 93%;">
+        <div id="pdfTemplateCreate" class="" style="width:765px">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-3">
+                <img src="assets/app-assets/images/logo/logo-klhk-new.png?={time()}" alt="" style="width: 75px;">
+              </div>
+              <div class="col-md-6 text-center">
+                <span><b>PROFIL INDEKS KUALITAS LINGKUNGAN HIDUP</b></span>
+                {if $dataShow == 1}
+                  <h2><b>Provinsi {$dataRaport.indeks.nama_provinsi}</b></h2>
+                  <h5><b>&emsp;</b></h5>
+                {elseif $dataShow == 2}
+                  <h2><b>{$dataRaport.indeks.nama_kabkota}</b></h2>
+                  <h5><b>Provinsi {$dataRaport.indeks.nama_provinsi}</b></h5>
+                {/if}
+                <h5>{$tahunRaport}</h5>
+              </div>
+              <div class="col-md-3 text-right">
+                <img src="assets/app-assets/images/{$dataRaport.indeks.logo}" alt="" style="height:75px;">
+              </div>
+            </div>
+            <hr style="border: 2px solid black; margin-top: 0px !important;">
+            {if $group == 'iklh'}
+              <div class="row mb-1 fs-12">
+                <div class="col-md-6">
+                  <table>
+                    <tr>
+                      <td class="text-dark">Kepala Daerah</td>
+                      <td class="text-dark">:</td>
+                      <td>{$dataRaport.indeks.user.kepala_daerah}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-dark">Luas Wilayah</td>
+                      <td class="text-dark">:</td>
+                      <td>{$dataRaport.indeks.user.luas_wilayah} Km<sup>2</sup> </td>
+                    </tr>
+                    <tr>
+                      <td class="text-dark">Populasi</td>
+                      <td class="text-dark">:</td>
+                      <td>{$dataRaport.indeks.user.populasi} Jiwa</td>
+                    </tr>
+                  </table>
+                </div>
+                <div class="col-md-6 p-0">
+                  <table class="">
+                    <tr>
+                      <td class="text-dark">Kepala DPRD</td>
+                      <td>:</td>
+                      <td>{$dataRaport.indeks.user.kepala_dprd}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-dark">Kategori Daerah</td>
+                      <td>:</td>
+                      <td>{$dataRaport.indeks.user.kategori_daerah}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-dark">Pendapatan Per Kapita</td>
+                      <td>:</td>
+                      <td>{$dataRaport.indeks.user.gdp}</td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            {/if}
+            <div class="row mb-1">
+                {if $urlQr && $group != "iklh"}
+                  <div class="col-md-7">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <img style="width:80px;" class="push-qr" src="{$urlQr}" alt="">
+                      </div>
+                      <div class="col-md-10">
+                        <div class="text-dark text-center">
+                          <b>{$dataRaport.indeks.aspek}</b>
+                        </div>
+                        <div class="text-center text-dark">
+                          <h1><b>{number_format($dataRaport.indeks.nilai_indeks,2,".","")}</b></h1>
+                          {$ratings = $functions->rating($rating,number_format($dataRaport.indeks.nilai_indeks,2,".",""))}
+                          <b><span class="text-{$ratings.color}">{$ratings.rating}</span></b>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {else}
+                  <div class="col-md-6">
+                    <div style="width:65% !important;">
+                      <div class="text-dark text-center">
+                        <b>{$dataRaport.indeks.aspek}</b>
+                      </div>
+                      <div class="text-center text-dark">
+                        <h1><b>{number_format($dataRaport.indeks.nilai_indeks,2,".","")}</b></h1>
+                        {$ratings = $functions->rating($rating,number_format($dataRaport.indeks.nilai_indeks,2,".",""))}
+                        <b><span class="text-{$ratings.color}">{$ratings.rating}</span></b>
+                      </div>
+                    </div>
+                  </div>
+                {/if}
+                {if $urlQr && $group != "iklh"}
+                  <div class="col-md-5 p-0">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <table class="text-dark">
+                          <tr>
+                            <td colspan="3" class="text-dark" ><b>Peringkat</b></td>
+                          </tr>
+                          <tr class="text-dark fs-12">
+                            <td>Nasional</td>
+                            <td>:</td>
+                            <td>{$dataRaport.indeks.peringkat_nasional} {if $group != ''} dari {$dataRaport.indeks.peringkat_nasional_dari} {/if} {if $dataShow == 1}Provinsi{elseif $dataShow == 2}Kabupaten/Kota{/if}</td>
+                          </tr>
+                          <tr class="fs-12">
+                            <td>{if $dataShow == 2}Provinsi{/if}</td>
+                            <td>{if $dataShow == 2}:{/if}</td>
+                            <td>{if $dataShow == 2}{$dataRaport.indeks.peringkat} {if $group != ''} dari {$dataRaport.indeks.peringkat_dari} {/if}Kabupaten/Kota{/if}</td>
+                          </tr>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                {else}
+                  <div class="col-md-6 p-0">
+                    <table class="text-dark">
+                      <tr>
+                        <td colspan="3" class="text-dark" ><b>Peringkat</b></td>
+                      </tr>
+                      <tr class="text-dark fs-12">
+                        <td>Nasional</td>
+                        <td>:</td>
+                        <td>{$dataRaport.indeks.peringkat_nasional} {if $group != ''} dari {$dataRaport.indeks.peringkat_nasional_dari} {/if} {if $dataShow == 1}Provinsi{elseif $dataShow == 2}Kabupaten/Kota{/if}</td>
+                      </tr>
+                      <tr class="fs-12">
+                        <td>{if $dataShow == 2}Provinsi{/if}</td>
+                        <td>{if $dataShow == 2}:{/if}</td>
+                        <td>{if $dataShow == 2}{$dataRaport.indeks.peringkat} {if $group != ''} dari {$dataRaport.indeks.peringkat_dari} {/if}Kabupaten/Kota{/if}</td>
+                      </tr>
+                    </table>
+                  </div>
+                {/if}
+            </div>
+            {if $group == 'iklh' && $dataShow == "2"}
+            <div class="row mb-1">
+              <div class="col-md-12">
+                <div class="w-100 border">
+                  <div class=" text-center">
+                    <span><b>Posisi {$dataRaport.indeks.aspek}</b></span>
+                    <div id="chartdivLine" style="height:220px;width:100%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {else}
+              <div class="row mb-1">
+                <div class="col-md-8">
+                  <div class="w-100 border">
+                    <div class=" text-center">
+                      <span><b>Posisi {$dataRaport.indeks.aspek}</b></span>
+                      <div id="chartdivLine" style="height:220px;width:100%"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4 pl-0">
+                  <div class="w-100 border">
+                    <div class=" text-center">
+                      <span><b>Tren {$dataRaport.indeks.aspek}</b></span>
+                      <div id="chartdivScatter" style="height:220px;width:100%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {/if}
+            {if $group != 'ikl'}
+              <div class="row mb-1">
+                <div class="col-md-6">
+                  {if $dataShow == 1 || $dataShow == 2}
+                    <table border="1" style="border-collapse: collapse; width: 100%;">
+                      <tr>
+                        <td class="text-center" colspan="4"><span><b>Data Pemantauan</b></span></td>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td class="text-dark text-left">Titik Pantau</td>
+                        <td class="text-dark text-left">Data Masuk</td>
+                        <td class="text-dark text-left">Data Terverifikasi</td>
+                      </tr>
+                      {$totalA = 0}
+                      {$totalB = 0}
+                      {$totalC = 0}
+                      {foreach from=$dataRaport['titikPantau'] item=$v }
+                        {if $dataShow == 2 && $v.nama == "LAUT"}
+                        {else}
+                          <tr>
+                            <td class="text-dark text-left">{$v.nama}</td>
+                            <td class="text-dark text-center">{$v.jumlah_titik_pantau}{$totalA = $totalA+$v.jumlah_titik_pantau}</td>
+                            <td class="text-dark text-center">{$v.jumlah_data_masuk}{$totalB = $totalB+$v.jumlah_data_masuk}</td>
+                            <td class="text-dark text-center">{$v.jumlah_data_terverifikasi}{$totalC = $totalC+$v.jumlah_data_terverifikasi}</td>
+                          </tr>
+                        {/if}
+                      {/foreach}
+                      <tr>
+                        <td><b>TOTAL</b></td>
+                        <td class="text-center"><b>{$totalA}</b></td>
+                        <td class="text-center"><b>{$totalB}</b></td>
+                        <td class="text-center"><b>{$totalC}</b></td>
+                      </tr>
+                    </table>
+                  {/if}
+                </div>
+                <div class="col-md-6 pl-0">
+                  <div class="w-100 border">
+                    <div class=" text-center">
+                      <div class="text-center">
+                        <span><b>Indeks Respon {$dataRaport.indeks.aspek_indeks}</b></span>
+                      </div>
+                      <div id="chartdivRadar" style="height:220px;width:100%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-1">
+                <div class="col-md-6">
+                  <div class="w-100 border">
+                    <div class="container">
+                      <div class="text-center">
+                        <span><b>Sebaran Titik Pemantauan</b></span>
+                      </div>
+                      {if $dataRaport.indeks.peta_sebaran}
+                        <div style="height:238px;width:100%">
+                          <img style="width:100%; height:230px; max-height:230px;" src="{$baseUrl}uploads/peta_sebaran/{$dataRaport.indeks.peta_sebaran}" alt="">
+                        </div>
+                      {else}
+                        <div id="mapsData" style="height:238px;width:100%"></div>
+                      {/if}
+                      <!-- <div id="mapsData" style="height:238px;width:100%">
+                        {if $dataRaport.indeks.peta_sebaran}
+                        <img style="width:100%; height:230px; max-height:230px;" src="{$baseUrl}uploads/peta_sebaran/{$dataRaport.indeks.peta_sebaran}" alt="">
+                        {/if}
+                        {if $dev == 1 && $group == 'iku'}
+                        {else}
+                          {if $dataRaport.indeks.peta_sebaran}
+                          <img style="width:100%; height:230px; max-height:230px;" src="{$baseUrl}uploads/peta_sebaran/{$dataRaport.indeks.peta_sebaran}" alt="">
+                          {/if}
+                        {/if}
+                      </div> -->
+                      <!-- {if $dev == 1 && $group == 'iku'}
+                        <table class="" style="display: block; border: none !important; width:100%; position:absolute;top: 228px; left:35px" id="tbl-legenda-raport">
+                          <tbody style="border-style: hidden;">
+                            <tr>
+                              <td class="text-center"
+                                style="color: #fff; background: #ff4050;border-radius: 45px;width: 15% !important;padding: 1px;height: 10px;font-size: 6px;">transportasi</td>
+                              <td class="text-center"
+                                style="color: #1a0d08; background: #f2f260;border-radius: 45px;width: 15% !important;padding: 1px;height: 10px;font-size: 6px;">industri</td>
+                              <td class="text-center"
+                                style="color: #fff; background: #62d962;border-radius: 45px;width: 15% !important;padding: 1px;height: 10px;font-size: 6px;">perkantoran</td>
+                              <td class="text-center"
+                                style="color: #fff; background: #5858fa;border-radius: 45px;width: 15% !important;padding: 1px;height: 10px;font-size: 6px;">pemukiman</td>
+                              <td class="text-center"
+                                style="color: #fff; background: #ff9800;border-radius: 45px;width: 10% !important;padding: 1px;height: 10px;font-size: 6px;">-</td>
+                              <td class="text-center"
+                                style="color: #fff; background: #1a0d08;border-radius: 45px;width: 15% !important;padding: 1px;height: 10px;font-size: 6px;">tidak digunakan</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      {/if} -->
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 pl-0">
+                  <div class="w-100 border">
+                    <div class="container">
+                      {if $group == 'iklh' }
+                        <div class="text-center">
+                          <span><b>&emsp;</b></span>
+                        </div>
+                        <div id="" style="height:238px;width:100%" class="fs-12 text-center">
+                        {if $urlQr}
+                          <img class="push-qr" src="{$urlQr}" alt="">
+                        {/if}
+                        </div>
+                      {else}
+                        <div class="text-center">
+                          <span><b>Rekomendasi</b></span>
+                        </div>
+                        <div id="" style="height:238px;width:100%" class="fs-12">
+                        <span>{$dataRaport.indeks.rekomendasi|truncate:700:"...":true}</span>
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {else}
+              <div class="row mb-1">
+                <div class="col-md-6">
+                  <div class="w-100 border">
+                    <div class=" text-center">
+                      <div class="text-center">
+                        <span><b>Indeks Respon {$dataRaport.indeks.aspek_indeks}</b></span>
+                      </div>
+                      <div id="chartdivRadar" style="height:220px;width:100%"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 pl-0">
+                  <div class="w-100 border">
+                    <div class=" text-center">
+                      {if $dataRaport.indeks.gambut == 1}
+                        <div class="text-center">
+                          <span><b>Indeks Respon Ekosistem Gambut</b></span>
+                        </div>
+                        <div id="chartdivRadar2" style="height:220px;width:100%"></div>
+                      {else}
+                        <div class="text-center">
+                          <span><b>&emsp;</b></span>
+                        </div>
+                        <div id="-" style="height:220px;width:100%"></div>
+                      {/if}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-1">
+                <div class="col-md-6">
+                  <div class="w-100 border">
+                    <div class="container">
+                      <div class="text-center">
+                        {if $group=='ikl'}
+                          <span><b>Kualitas Tutupan Lahan</b></span>
+                        {else}
+                          <span><b>Sebaran Titik Pemantauan</b></span>
+                        {/if}
+                      </div>
+                      <div id="mapsData" style="height:238px;width:100%">
+                        {if $dev == 1 && $group == 'iku'}
+                        {else}
+                          {if $dataRaport.indeks.peta_sebaran}
+                            <img style="width:100%; height:230px; max-height:230px;" src="{$baseUrl}uploads/peta_sebaran/{$dataRaport.indeks.peta_sebaran}" alt="">
+                          {/if}
+                        {/if}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 pl-0">
+                  <div class="w-100 border">
+                    <div class="container">
+                      {if $group == 'iklh' }
+                        <div class="text-center">
+                          <span><b>&emsp;</b></span>
+                        </div>
+                        <div id="" style="height:238px;width:100%" class="fs-12 text-center">
+                          {if $urlQr}
+                            <img class="push-qr" src="{$urlQr}" alt="">
+                          {/if}
+                        </div>
+                      {else}
+                        <div class="text-center">
+                          <span><b>Rekomendasi</b></span>
+                        </div>
+                        <div id="" style="height:238px;width:100%" class="fs-12">
+                          <span>{$dataRaport.indeks.rekomendasi|truncate:700:"...":true}</span>
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {/if}
+
+            <div class="row mt-2">
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,40 @@
+<table>
+  <thead>
+    <tr style="color: white;">
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">NO</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">STATUS VERIFIKASI</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">NAMA LAB</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">ALAMAT</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">PROVINSI</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">KABUPATEN/KOTA</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">NO TELEPON</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">EMAIL</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">NO AKREDITASI</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">SERTIFIKAT AKREDITASI</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">TANGGAL BERLAKU MULAI</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">TANGGAL BERLAKU SELESAI</th>
+    </tr>
+  </thead>
+  <tbody>
+    {foreach from=$viewExcel.data item=data}
+    <tr>
+      <td style="border: 1px solid black;vertical-align:top;">{counter}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{if $data.verifikasi == 1}VALID{elseif $data.verifikasi == 2}INVALID{else}--{/if}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.nama}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.alamat}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.nama_provinsi}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.nama_kabkota}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.no_telepon}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.email}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.no_akreditasi}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.sertifikat_akreditasi_kan}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.tanggal_berlaku_awal}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.tanggal_berlaku_akhir}</td>
+    </tr>
+    {foreachelse}
+    <tr style="color: white;">
+      <td colspan="11" align="center" bgcolor="#FA535D" style="border: 1px solid black;vertical-align:top;">BELUM ADA DATA</td>
+    </tr>
+    {/foreach}
+  </tbody>
+</table>

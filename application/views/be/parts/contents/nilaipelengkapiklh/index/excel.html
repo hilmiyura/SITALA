@@ -1,0 +1,44 @@
+<!-- <style>
+	table thead tr th {
+		border: 1px solid black;
+	}
+
+	table tbody tr td {
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style> -->
+<table>
+  <thead>
+    <tr style="color: white;">
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">NO</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">PROVINSI</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">KAB/KOTA</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">TAHUN</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">IKU PM25 SATELIT</th>
+    </tr>
+  </thead>
+  <tbody>
+    {foreach from=$viewExcel.data item=data}
+    <tr>
+      <td style="border: 1px solid black;vertical-align:top;">{counter}</td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $data.nama_kabkota}{$data.nama_provinsi}{else}<b>{$data.nama_provinsi}</b>{/if}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $data.nama_kabkota}{$data.nama_kabkota}{else}{/if}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.tahun}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.iku_pm25_satelit}
+      </td>
+    </tr>
+    {foreachelse}
+    <tr style="color: white;">
+      <td colspan="9" align="center" bgcolor="#FA535D" style="border: 1px solid black;vertical-align:top;">BELUM ADA DATA</td>
+    </tr>
+    {/foreach}
+  </tbody>
+</table>

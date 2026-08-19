@@ -1,0 +1,508 @@
+<!-- Modal -->
+<div class="modal text-left" id="tambahData" role="dialog" data-backdrop="static" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data IKTL
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form class="form_with_load" id="form-ikl-submit" method="POST" action="" enctype="multipart/form-data">
+        <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
+        <div class="modal-body">
+          <h4 class="form-section"><i class="ft-calendar"></i>Tanggal</h4>
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1">
+              <label for="name">Tanggal Pemantauan</label>
+              <input type="text" class="form-control pickadate-limits" id="tanggal" name="form[tanggal]" />
+            </div>
+          </div>
+          {if $me.role_user != 3}
+          <h4 class="form-section">
+            <i class="la la-map-marker"></i>Lokasi Pemantauan
+          </h4>
+          {/if}
+          <div class="form-row mb-1">
+            {if $me.role_user !=2 && $me.role_user !=3}
+            <div class="col-md-12 mb-1">
+              <label for="name">Provinsi</label>
+              <select class="select2 form-control position-relative provinsi_select" to="uid_kabkota" id="uid_provinsi" name="form[uid_provinsi]" style="width: 100%" required="">
+                <option value="">--PILIH PROVINSI--</option>
+                {foreach from=$provinsi item=v}
+                <option value="{$v.kd_propinsi}">{$v.nama_propinsi}</option>
+                {/foreach}
+              </select>
+            </div>
+            {/if}
+            {if $me.role_user !=3}
+            <div class="col-md-12 mb-1">
+              <label for="name">Kab/kota</label>
+              <select class="select2 form-control position-relative" id="uid_kabkota" name="form[uid_kabkota]" style="width: 100%" required="">
+                <option value="">--PILIH KAB/KOTA--</option>
+                {foreach from=$kabkota item=v}
+                <option value="{$v.kd_kota}">{$v.nama_kabkot}</option>
+                {/foreach}
+              </select>
+            </div>
+            {/if}
+          </div>
+          <h4 class="form-section"><i class="ft-edit"></i>Pemantauan</h4>
+          <h5 class="form-section text-uppercase text-center">Diisi oleh pusat</h5>
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1">
+              <div class="alert alert-danger text-center">
+                Untuk Pengisian Format Ribu tidak menggunakan tanda baca, dan untuk bilangan desimal menggunakan titik
+                (.)
+              </div>
+            </div>
+            {include file="parts/contents/iktl/index/form_pusat_field.html"}
+          </div>
+          <h5 class="form-section text-uppercase text-center">Diisi oleh kabupaten/kota</h5>
+          <div class="form-row mb-1">
+            <div class="col-md-6 mb-1" style="display:none;" info="2025 dihide">
+              <label for="name">Kebun Raya (Data LIPI)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="kebun_raya_data_lipi" name="form[kebun_raya_data_lipi]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">RTH</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="rth" name="form[rth]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">RHL <sub>(Rehabilitasi Hutan dan Lahan dari APBN)</sub></label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="rhl" name="form[rhl]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1" style="display:none" info="2025 dihide">
+              <label for="name">Taman Kehati</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="taman_kehati" name="form[taman_kehati]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1" style="display:none" info="2025 dihide">
+              <label for="name">Tutupan Vegetasi Relevan Lainnya</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="tutupan_vegetasi" name="form[tutupan_vegetasi]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-12 mb-1">
+              <label for="name">Catatan</label>
+              <textarea type="text" class="form-control" name="form[catatan]" id="catatan" rows="5"></textarea>
+            </div>
+            <div class="col-md-12 mb-1">
+              <div class="alert alert-danger text-center">
+                Untuk saat ini hanya dapat upload 1 file, <br> jika lebih dari 1 file mohon digabung terlebih dahulu
+                dalam 1 folder kemudian di zip/rar.
+              </div>
+            </div>
+            <!-- <div class="col-md-6 mb-1">
+              <input type="file" class="form-control mb-1" id="lampiran_rth" name="lampiran_rth" />
+              <label for="name">Lampiran RTH</label><br>
+              <span class="danger">Format upload file (.xls/.xlsx/.zip/.rar) max 10 Mb.</span><br>
+              <span class="help-block lampiran-rth-download" style="display:none"></span>
+            </div>
+            <div class="col-md-6 mb-1">
+              <input type="file" class="form-control mb-1" id="lampiran_tutupan" name="lampiran_tutupan" />
+              <label for="name">Lampiran Tutupan Vegetasi</label><br>
+              <span class="danger">Format upload file (.xls/.xlsx/.zip/.rar) max 10 Mb.</span><br>
+              <span class="help-block lampiran-tutupan-download" style="display:none"></span>
+            </div> -->
+            <div class="col-md-6 mb-1">
+              <input type="file" class="form-control mb-1" id="lampiran_kml" name="lampiran_kml" />
+              <label for="name">Lampiran Peta KML/SHP (data RTH)</label><br>
+              <span class="danger">Format upload file (.zip/.rar/.kml/.kmz/.shp) max 10 Mb.</span><br>
+              <span class="help-block lampiran-kml-download" style="display:none"></span>
+              <!-- <div class="alert alert-warning">
+                Format upload file (.pdf/.zip/.rar)
+              </div> -->
+            </div>
+            <div class="col-md-6 mb-1">
+              <input type="file" class="form-control mb-1" id="lampiran_kml_rhl" name="lampiran_kml_rhl" />
+              <label for="name">Lampiran Peta KML/SHP (data RHL)</label><br>
+              <span class="danger">Format upload file (.zip/.rar/.kml/.kmz/.shp) max 10 Mb.</span><br>
+              <span class="help-block lampiran-kml-rhl-download" style="display:none"></span>
+              <!-- <div class="alert alert-warning">
+                Format upload file (.pdf/.zip/.rar)
+              </div> -->
+            </div>
+            <div class="col-md-12 mb-1">
+              <input type="file" class="form-control mb-1" id="lampiran" name="lampiran" />
+              <label for="name">Lampiran SK Penetapan RTH/Tutupan Vegetasi Relevan Lainnya (PDF)</label><br>
+              <span class="danger">Format upload file (.pdf/.zip/.rar) max 10 Mb.</span><br>
+              <span class="help-block lampiran-download" style="display:none"></span>
+              <!-- <div class="alert alert-warning">
+                Format upload file (.pdf/.zip/.rar)30
+              </div> -->
+            </div>
+            <!-- <div class="col-md-6 mb-1">
+              <label for="name">Lampiran Tabel RTH</label>
+              <input type="file" class="form-control mb-1" id="lampiran_dtp" name="lampiran_dtp" />
+              <span class="help-block lampiran-download-dtp" style="display:none"></span>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name white">Download</label><br>
+              <a title="Download Format Tabel RTH" class="btn btn-success" href="{$baseUrl}uploads/Format_Tabel_RTH.xlsx"><i class="fa fa-file-excel-o"></i> Format Tabel RTH</a>
+            </div> -->
+          </div>
+          <div class="modal-footer">
+            <a type="button" class="btn grey btn-secondary white" id="button-ikl-close" data-dismiss="modal">Close</a>
+            <button type="submit" name="submit" id="button-ikl-submit" class="btn btn-danger">
+              Simpan
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal text-left" id="rincianRth" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel7">
+          <i class="ft-download-cluod"></i> Rincian RTH
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12 mb-1">
+            <div class="alert alert-danger text-center">
+              Untuk Pengisian Format Ribu tidak menggunakan tanda baca, dan untuk bilangan desimal menggunakan titik (.)
+            </div>
+          </div>
+          <div class="repeater-data_rth" style="overflow-x: auto;">
+            <div class="table-responsive table-border freeze-table">
+              <table class="table">
+                <thead class="bg-info bg-darken-2 white">
+                  <tr>
+                    <th>Jenis RTH</th>
+                    <th>Luas</th>
+                    <th>Nama RTH</th>
+                    <th>Nama Desa</th>
+                    <th>Nama Kecamtan</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Sumber Dana</th>
+                    <th>Nomor SK</th>
+                    <th>Keterangan</th>
+                    <th class="text-center">#</th>
+                  </tr>
+                </thead>
+                <tbody data-repeater-list="data_rth">
+                  <tr data-repeater-item>
+                    <td class="p-0">
+                      <select class="custom-select form-control border-0 m-0 position-relative jenis_rth" name="jenis_rth" style="width: 100%" required="">
+                        <option value="">-- PILIH JENIS RTH --</option>
+                        <option value="1">Kebun Raya</option>
+                        <option value="2">Taman Kehati</option>
+                        <option value="3">Hutan Kota</option>
+                        <option value="4">Taman Kota</option>
+                        <option value="5">Taman Hutan Raya</option>
+                        <option value="6">Media Jalan</option>
+                        <option value="7">Sabuk Hijau</option>
+                        <option value="8">Jalur di Bawah Tegangan Tinggi Listrik</option>
+                        <option value="9">Sempadan Sungai</option>
+                        <option value="10">Daerah Peyangga</option>
+                        <option value="11">Kebun Binatang</option>
+                        <option value="12">Arboretum</option>
+                        <option value="13">Taman Rekreasi</option>
+                      </select>
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 luas_rth" placeholder="Luas" name="luas_rth" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 nama_rth" placeholder="Nama RTH" name="nama_rth" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 nama_desa" placeholder="Nama Desa" name="nama_desa" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 nama_kecamatan" placeholder="Nama Kecamatan" name="nama_kecamatan" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 koordinat_lintang" placeholder="Koordinat Lintang" name="koordinat_lintang" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 koordinat_bujur" placeholder="Koordinat Bujur" name="koordinat_bujur" />
+                    </td>
+                    <td class="p-0">
+                      <select class="custom-select form-control border-0 m-0 position-relative sumber_dana" name="sumber_dana" style="width: 100%" required="">
+                        <option value="">-- PILIH SUMBER DANA --</option>
+                        <option value="1">APBN</option>
+                        <option value="2">APBD</option>
+                        <option value="3">SWASTA</option>
+                      </select>
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 nomor_sk" placeholder="Nomor SK" name="nomor_sk" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 keterangan" placeholder="Keterangan" name="keterangan" />
+                      <input type="text" style="display:none;" class="form-control border-0 m-0 verify" readonly name="verify" />
+                    </td>
+                    <td class="text-center">
+                      <button type="button" class="btn btn-danger btn-sm rem-file" data-repeater-delete>
+                        <i class="ft-x"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="text-center">
+                <button data-repeater-create type="button" class="btn btn-primary btn-sm"><i class="ft ft-plus"></i>
+                  TAMBAH RINCIAN RTH</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="button" name="submit-rth" id="simpan-rth" class="btn btn-danger" data-dismiss="modal">
+            Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal text-left" id="rincianTutupan" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel8">
+          <i class="ft-download-cluod"></i> Rincian Tutupan Vegetasi Relevan Lainnya
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12 mb-1">
+            <div class="alert alert-danger text-center">
+              Untuk Pengisian Format Ribu tidak menggunakan tanda baca, dan untuk bilangan desimal menggunakan titik (.)
+            </div>
+          </div>
+          <div class="repeater-data_tutupan" style="overflow-x: auto;">
+            <div class="table-responsive table-border freeze-table">
+              <table class="table">
+                <thead class="bg-info bg-darken-2 white">
+                  <tr>
+                    <th>Jenis Tutupan</th>
+                    <th>Luas</th>
+                    <th>Nama Tutupan</th>
+                    <th>Nama Desa</th>
+                    <th>Nama Kecamtan</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Sumber Dana</th>
+                    <th>Nomor SK</th>
+                    <th>Keterangan</th>
+                    <th class="text-center">#</th>
+                  </tr>
+                </thead>
+                <tbody data-repeater-list="data_tutupan">
+                  <tr data-repeater-item>
+                    <td class="p-0">
+                      <select class="custom-select form-control border-0 m-0 position-relative jenis_tutupan" name="jenis_tutupan" style="width: 100%" required="">
+                        <option value="">-- PILIH JENIS Tutupan Vegetasi Relevan Lainnya --</option>
+                        <option value="1">Hutan Adat</option>
+                        <option value="2">Hutan Rakyat</option>
+                        <option value="3">Pepohonan lainnya yang relevan</option>
+                        <option value="4">Taman Lingkungan (Taman RT / RW / Kelurahan / Kecamatan)</option>
+                        <option value="5">Pekarangan (Perumahan / Perkantoran / Pertokoan)</option>
+                      </select>
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 luas_tutupan" placeholder="Luas" name="luas_tutupan" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 nama_tutupan" placeholder="Nama Tutupan" name="nama_tutupan" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 nama_desa" placeholder="Nama Desa" name="nama_desa" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 nama_kecamatan" placeholder="Nama Kecamatan" name="nama_kecamatan" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 koordinat_lintang" placeholder="Koordinat Lintang" name="koordinat_lintang" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 koordinat_bujur" placeholder="Koordinat Bujur" name="koordinat_bujur" />
+                    </td>
+                    <td class="p-0">
+                      <select class="custom-select form-control border-0 m-0 position-relative sumber_dana" name="sumber_dana" style="width: 100%" required="">
+                        <option value="">-- PILIH SUMBER DANA --</option>
+                        <option value="1">APBN</option>
+                        <option value="2">APBD</option>
+                        <option value="3">SWASTA</option>
+                      </select>
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 nomor_sk" placeholder="Nomor SK" name="nomor_sk" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 keterangan" placeholder="Keterangan" name="keterangan" />
+                    </td>
+                    <td class="text-center">
+                      <button type="button" class="btn btn-danger btn-sm rem-file" data-repeater-delete>
+                        <i class="ft-x"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="text-center">
+                <button data-repeater-create type="button" class="btn btn-primary btn-sm"><i class="ft ft-plus"></i>
+                  TAMBAH RINCIAN TUTUPAN</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="button" name="submit-tutupan" id="simpan-tutupan" class="btn btn-danger" data-dismiss="modal">
+            Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- form excel -->
+{if $me.role_user <= 1}
+<div class="modal text-left" id="tambahDataExcel" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data IKL
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
+        <div class="modal-body">
+          <h4 class="form-section"><i class="ft-edit"></i>Pemantauan</h4>
+          <div class="alert alert-danger text-center">
+            Untuk Pengisian Format Ribu tidak menggunakan tanda baca, decimal menggunakan tanda (.)
+          </div>
+          <div class="form-row mb-1">
+            <div class="col-md-6 mb-1">
+              <label for="name"> File Excel </label>
+              <div class="input-group">
+                <input type="file" name="file_excel" required="" />
+                <span class="danger">format file excel harus (.xls)</span>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name"> </label>
+              <div class="input-group">
+                <span><a href="{$baseUrl}temp/format_excel/ikl-template.xls?={$time}">Download format excel</a></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="submit" name="submit-excel" class="btn btn-danger">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{/if}
+{if isset($listExport)}
+<div class="modal text-left" id="unduhDataExcel" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-download-cloud"></i> Download Excel
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          {foreach from=$listExport item=v key=k}
+          <div class="list-group col-md-3" style="margin-left: 15px; margin-bottom: 15px; padding: 0;">
+            <a href="{$baseUrl}iktl/dataExcel/offset/{$v.offset_start}/search/{$search_json}/print/{time()}" class="list-group-item">
+              <i class="ft-file"></i> EXCEL {$k}
+              <p><small>(BARIS : {$v.offset_start}-{$v.offset_end})</small></p>
+            </a>
+          </div>
+          {/foreach}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}
+<!-- modal catatan -->
+<div class="modal text-left" id="catatanVerifikator" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Catatan pelaporan
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
+        <div class="modal-body">
+          <!-- <h4 class="form-section">
+            <i class="la la-map-marker"></i>Catatan pelaporan
+          </h4> -->
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1">
+              <label for="name">Isi Catatan *</label>
+              <input type="hidden" id="id-pelaporan" name="" value="">
+              <textarea name="catatan_verifikator" id="catatan-verifikator-txt" class="form-control" rows="8" cols="80"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <a href="javascript:();" data-toggle="modal" data-target="#catatanVerifikator" name="submit" class="btn btn-danger simpan-catatan-verifikator">Simpan</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,158 @@
+{if $me.role_user != 3}
+<div class="row">
+	{if $me.role_user != 3 && $me.role_user != 2 && $me.role_user != 4 && $me.role_user != 6 && $lockAction == 0 && $lockActionYear == 0}
+		<div class="col-sm-8">
+			<input type="text" class="form-control mb-1" id="seachFieldKabkota" onkeyup="searchData('dataTableKabkota','seachFieldKabkota')" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+		</div>
+		<div class="col-sm-4 float-md-right">
+			<form method="POST" class="form_with_load float-md-right" action="" enctype="multipart/form-data">
+				<input type="hidden" name="form[uid_indeks_kabkota_all]" value="{$viewk_idx}" />
+				<div class="btn-group" role="group" aria-label="Basic example">
+					<button type="submit" name="submitAllKabkota" class="btn btn-warning float-md-right"><i class="ft-book"></i> HITUNG SEMUA</button>
+					<a href="{$baseUrl}{$ctrl}/exportData/ex/kabkota/y/{$search.tahun}" target="_blank" class="btn btn-success float-md-right"><i class="ft-download"></i> EXPORT EXCEL</a>
+				</div
+			</form>
+		</div>
+	{else}
+		<div class="col-sm-10">
+			<input type="text" class="form-control mb-1" id="seachFieldKabkota" onkeyup="searchData('dataTableKabkota','seachFieldKabkota')" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+		</div>
+		<div class="col-sm-2 float-md-right">
+			<a href="{$baseUrl}{$ctrl}/exportData/ex/kabkota/y/{$search.tahun}" target="_blank" class="btn btn-success float-md-right"><i class="ft-download"></i> EXPORT EXCEL</a>
+		</div>
+	{/if}
+</div>
+{/if}
+<div class="table-responsive table-border freeze-table">
+	{if $view}
+	<table class="table" id="dataTableKabkota">
+		<thead class="bg-info bg-darken-2 white">
+			<tr>
+				<th rowspan="2 " class="v-middle">No</th>
+				<th rowspan="2" class="v-middle text-center">Kabupaten/Kota</th>
+				<!-- <th colspan="8" class="text-center">PARAMETER / BAKUMUTU (Ci/Lij)</th> -->
+				<th colspan="4" class="text-center">JUMLAH TITIK</th>
+				<th colspan="4" class="text-center">NILAI INDEKS PER MUTU</th>
+				<th rowspan="2" class="v-middle text-center">IKA</th>
+				<th rowspan="2" class="v-middle text-center">IKA INA</th>
+				<th rowspan="2" class="v-middle text-center">IKA INA MUTU</th>
+				<th rowspan="2" class="v-middle text-center">TARGET IKA</th>
+				<th rowspan="2" class="v-middle text-center">Hitung Terakhir</th>
+				{if $me.role_user != 3 && $me.role_user != 2 && $me.role_user != 4}
+				<th rowspan="2" class="v-middle text-center" style="width: 200px;">Action</th>
+				{/if}
+				{if $raportShow}
+				<th rowspan="2" class="v-middle text-center">Rekomendasi</th>
+				{/if}
+				<th rowspan="2" class="v-middle text-center">Peta Sebaran</th>
+				<th rowspan="2" class="v-middle text-center">Raport</th>
+			</tr>
+			<tr>
+				<th>Memenuhi</th>
+				<th>Ringan</th>
+				<th>Sedang</th>
+				<th>Berat</th>
+				<th>Memenuhi</th>
+				<th>Ringan</th>
+				<th>Sedang</th>
+				<th>Berat</th>
+				<!-- <th class="v-middle">PH</th>
+	                <th class="v-middle">BOD</th>
+	                <th class="v-middle">COD</th>
+	                <th class="v-middle">TSS</th>
+	                <th class="v-middle">DO</th>
+	                <th class="v-middle">NO<sub class="white">3</sub>-N</th>
+	                <th class="v-middle">TOTAL PHOSPHAT</th>
+	                <th class="v-middle">FECAL COLIFORM</th>
+	                	<th class="v-middle">RATAAN</th>
+	                	<th class="v-middle">MAKSIMUM</th>
+	                	<th class="v-middle">IPj</th> -->
+			</tr>
+		</thead>
+		<tbody>
+			{$cnKabkota = 1}
+			{foreach from=$view item=v}
+			{$v.json_data = $v.json_data|@json_decode:true}
+			{if $v.jenis_indeks == 0}
+			<tr>
+				<td>{$cnKabkota}</td>
+				<td>
+					<!-- <b>{$v.kode_lokasi}</b><br> -->
+					<a class="show-titik" data-uid={$v.uid_indeks_ika} data-nama="{$v.nama_kabkota}" href="javascript:void(0)" data-toggle="modal" data-target="#modalTitikLokasi" style="color:#6b6f80;">
+						<b>{$v.nama_kabkota}</b><br>
+					</a>
+					Provinsi {$v.nama_provinsi}
+				</td>
+				<td class="text-center">{$v.jumlah_titik_memenuhi}</td>
+				<td class="text-center">{$v.jumlah_titik_ringan}</td>
+				<td class="text-center">{$v.jumlah_titik_sedang}</td>
+				<td class="border-right-td text-center">{$v.jumlah_titik_berat}</td>
+				<td class="text-center">{number_format($v.nilai_mutu_memenuhi,2,".","")}</td>
+				<td class="text-center">{number_format($v.nilai_mutu_ringan,2,".","")}</td>
+				<td class="text-center">{number_format($v.nilai_mutu_sedang,2,".","")}</td>
+				<td class="text-center">{number_format($v.nilai_mutu_berat,2,".","")}</td>
+				<td class="text-center">{number_format($v.nilai_indeks,2,".","")}</td>
+				<td class="text-center">{number_format($v.nilai_indeks_ina,2,".","")}</td>
+				<td class="text-center">{$v.nilai_indeks_ina_mutu}</td>
+				<td class="text-center">{number_format($v.target,2,".","")}</td>
+				<td class="text-center">
+					{if $v.nilai_indeks > 0}
+					{date("Y-m-d H:i:s", $v.chdate)}
+					{/if}
+				</td>
+				{if $me.role_user != 3 && $me.role_user != 2 && $me.role_user != 4 && $me.role_user != 6}
+				<td class="text-center">
+					{if $lockAction == 0 && $lockActionYear == 0}
+					<form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+						<input type="hidden" name="form[uid_indeks_ika]" value="{$v.uid_indeks_ika}" />
+						<input type="hidden" name="scrollTo" class="scrollTobtn" />
+						<button type="submit" name="submit" class="btn btn-sm {if $activeBtn == $v.uid_indeks_ika  || $v.status_hitung == 1} btn-success {else} btn-warning {/if}">
+							<small class="white">Hitung</small>
+						</button>
+					</form>
+					{else}
+					--
+					{/if}
+				</td>
+				{/if}
+				{if $raportShow}
+					<td>
+						{if $v.nilai_indeks > 0}
+						<a href="javascript:();" data-toggle="modal" data-target="#catatanRekomendasi" tahun="{$v.tahun}" provinsi="{$v.uid_provinsi}" kabkota="{$v.uid_kabkota}" aspek="ika" data-uid="{$v.$primaryKey}" class="badge badge-primary catatan-rekomendasi"> <i class="ft-edit"></i>Rekomendasi</a>
+						<br>
+						{/if}
+						<span id="catatan-{$v.tahun}-{$v.uid_provinsi}-{$v.uid_kabkota}-ika-short">{$v.rekomendasi|truncate:40:'...':true:true}</span>
+
+					</td>
+				{/if}
+				<td>
+					{if $v.nilai_indeks > 0 && $raportShow}
+					<form method="POST" enctype=" multipart/form-data">
+						<input type="file" class="default file-maps" id="file-{$v.tahun}-{$v.uid_provinsi}-{$v.uid_kabkota}-ika" tahun="{$v.tahun}" provinsi="{$v.uid_provinsi}" kabkota="{$v.uid_kabkota}" aspek="ika">
+						<span class="text-danger"><small>*Format file yang diunggah adalah jpg,jpeg,png dengan dimensi 319 x 225 </small></span>
+					</form>
+					{/if}
+					<div id="div-url-{$v.tahun}-{$v.uid_provinsi}-{$v.uid_kabkota}-ika">
+						{if $v.peta_sebaran}
+						<br>
+						<a href="{$baseUrl}uploads/peta_sebaran/{$v.peta_sebaran}" target="_blank" class="badge badge-info">Lihat</a>
+						{/if}
+					</div>
+				</td>
+				<td>
+					{if $v.nilai_indeks > 0}
+					<a href="{$baseUrl}raport/index/x/ika/k/{$v.uid_kabkota}/p/{$v.uid_provinsi}/t/{$v.tahun}" target="_blank" class="btn btn-outline-info btn-sm"> <i class="ft-book"></i> Lihat Raport</a>
+					{/if}
+				</td>
+			</tr>
+			<p style="display: none">{$cnKabkota++}</p>
+			{/if}
+			{/foreach}
+		</tbody>
+	</table>
+	{else}
+	<div class="alert alert-danger text-center">
+		<strong>Tidak Ada Data</strong>
+	</div>
+	{/if}
+</div>

@@ -1,0 +1,473 @@
+{literal}
+<script type="text/javascript">
+	var scrollTobtn = '{/literal}{$scrollTobtn}{literal}';
+	$(document).ready(function() {
+		$('#primary').on('show.bs.modal', function(event) {
+			$(".select-year-indeks").val("").trigger("change");
+			$(".simulasi-content").html("");
+		});
+
+		$(document).on("click", "#btn-hitung-simulasi-kabkota", function(event) {
+			var uid = $(this).attr("data-uid");
+			var year = $(this).attr("data-year");
+			if (uid) {
+				$.ajax({
+					url: baseUrl + "simulasiHitungIKU/hitungKabkota/x/" + uid + "/y/" + year,
+					method: "GET",
+					success: function(request) {
+						var res = JSON.parse(request);
+						if (res.statusCode == 200) {
+							if (res.data) {
+								if(year <= 2024){
+									var indeksIku = (res.data.indeksIku > 100 ? 100 : res.data.indeksIku.toFixed(2));
+									$(".rpp-no2-" + uid + "-kabkota").html(res.data.rpp.no2.toFixed(2));
+									$(".rpp-so2-" + uid + "-kabkota").html(res.data.rpp.so2.toFixed(2));
+									$(".idbm-no2-" + uid + "-kabkota").html(res.data.idbm.no2.toFixed(2));
+									$(".idbm-so2-" + uid + "-kabkota").html(res.data.idbm.so2.toFixed(2));
+									$(".rataan-indeks-" + uid + "-kabkota").html(res.data.rataanIndeks.toFixed(2));
+									$(".iku-" + uid + "-kabkota").html(indeksIku);
+								}else if (year <= 2025) {
+									var indeksIkuIna = (res.data.indeksIkuIna > 100 ? 100 : res.data.indeksIkuIna.toFixed(2));
+									$(".rpp-no2-" + uid + "-kabkota").html(res.data?.indeksIkuInaDetail?.no2?.rataan_konsentrasi?.toFixed(2));
+									$(".rpp-so2-" + uid + "-kabkota").html(res.data?.indeksIkuInaDetail?.so2?.rataan_konsentrasi?.toFixed(2));
+									$(".rpp-pm25-" + uid + "-kabkota").html(res.data?.indeksIkuInaDetail?.pm25?.rataan_konsentrasi?.toFixed(2));
+									$(".idbm-no2-" + uid + "-kabkota").html(res.data?.indeksIkuInaDetail?.no2?.indeks_konsentrasi?.toFixed(2));
+									$(".idbm-so2-" + uid + "-kabkota").html(res.data?.indeksIkuInaDetail?.so2?.indeks_konsentrasi?.toFixed(2));
+									$(".idbm-pm25-" + uid + "-kabkota").html(res.data?.indeksIkuInaDetail?.pm25?.indeks_konsentrasi?.toFixed(2));
+									$(".rataan-indeks-" + uid + "-kabkota").html(res.data?.rataanIndeksIna.toFixed(2));
+									$(".iku-ina-" + uid + "-kabkota").html(indeksIkuIna);
+								}
+							}
+						}
+					}
+				});
+			}
+		});
+
+		$(document).on("click", "#btn-hitung-simulasi-prov", function(event) {
+			var uid = $(this).attr("data-uid");
+			var year = $(this).attr("data-year");
+
+			if (uid) {
+				$.ajax({
+					url: baseUrl + "simulasiHitungIKU/hitungProv/x/" + uid,
+					method: "GET",
+					success: function(request) {
+						var res = JSON.parse(request);
+						if (res.statusCode == 200) {
+							if (res.data) {
+								if(year <= 2024){
+									var indeksIku = (res.data.indeksIku > 100 ? 100 : res.data.indeksIku.toFixed(2));
+									$(".rpp-no2-" + uid + "-prov").html(res.data.rpp.no2.toFixed(2));
+									$(".rpp-so2-" + uid + "-prov").html(res.data.rpp.so2.toFixed(2));
+									$(".idbm-no2-" + uid + "-prov").html(res.data.idbm.no2.toFixed(2));
+									$(".idbm-so2-" + uid + "-prov").html(res.data.idbm.so2.toFixed(2));
+									$(".rataan-indeks-" + uid + "-prov").html(res.data.rataanIndeks.toFixed(2));
+									$(".iku-" + uid + "-prov").html(indeksIku);
+								}else if (year <= 2025) {
+									var indeksIkuIna = (res.data.indeksIkuIna > 100 ? 100 : res.data.indeksIkuIna.toFixed(2));
+									$(".rpp-no2-" + uid + "-prov").html(res.data?.indeksIkuInaDetail?.no2?.rataan_konsentrasi?.toFixed(2));
+									$(".rpp-so2-" + uid + "-prov").html(res.data?.indeksIkuInaDetail?.so2?.rataan_konsentrasi?.toFixed(2));
+									$(".rpp-pm25-" + uid + "-prov").html(res.data?.indeksIkuInaDetail?.pm25?.rataan_konsentrasi?.toFixed(2));
+									$(".idbm-no2-" + uid + "-prov").html(res.data?.indeksIkuInaDetail?.no2?.indeks_konsentrasi?.toFixed(2));
+									$(".idbm-so2-" + uid + "-prov").html(res.data?.indeksIkuInaDetail?.so2?.indeks_konsentrasi?.toFixed(2));
+									$(".idbm-pm25-" + uid + "-prov").html(res.data?.indeksIkuInaDetail?.pm25?.indeks_konsentrasi?.toFixed(2));
+									$(".rataan-indeks-" + uid + "-prov").html(res.data?.rataanIndeksIna.toFixed(2));
+									$(".iku-ina-" + uid + "-prov").html(indeksIkuIna);
+								}
+							}
+						}
+					}
+				});
+			}
+		});
+
+		$(document).on("click", "#btn-hitung-simulasi-nasional", function(event) {
+			var uid = $(this).attr("data-uid");
+			if (uid) {
+				$.ajax({
+					url: baseUrl + "simulasiHitungIKU/hitungNasional/x/" + uid,
+					method: "GET",
+					success: function(request) {
+						var res = JSON.parse(request);
+						if (res.statusCode == 200) {
+							$(".iku-" + uid + "-nasional").html((res.data ? res.data.toFixed(2) : "--"));
+						}
+					}
+				});
+			}
+		});
+
+		$(".select-year-indeks").on("change", function() {
+			var year = $(this).val();
+			if (year != "") {
+				$.ajax({
+					url: baseUrl + "simulasiHitungIKU/getDataIndeks/x/" + year,
+					method: "GET",
+					success: function(req) {
+						var res = JSON.parse(req);
+						if (res.statusCode == 200) {
+							var data = res;
+							if (data) {
+								$(".simulasi-content").html(data.html);
+							}
+						}
+					}
+				});
+			}
+		});
+
+		setTimeout(function() {
+			window.scrollTo(0, scrollTobtn);
+		}, 1500);
+	});
+	reset = () => {
+		$("#uid_pelaporan_iku").val("");
+		$("#tanggal").val("");
+		$('input[name="form[tanggal]_submit"]').attr('value', "");
+		$("#durasi_pemantauan").val("");
+		$("#periode_pemantauan").val("").trigger("change");
+		$("#no2").val("");
+		$("#no2_uid_metode_pemantauan").val("").trigger("change");
+		$("#no2_durasi_pemantauan").val("").trigger("change");
+		$("#no2_faktor_koreksi").val("");
+		$("#no2-dp-manual-aktif").hide();
+		$("#no2-dp-pasif").hide();
+		$("#no2-faktor-koreksi").hide();
+		$("#so2").val("");
+		$("#so2_uid_metode_pemantauan").val("").trigger("change");
+		$("#so2_durasi_pemantauan").val("").trigger("change");
+		$("#so2_faktor_koreksi").val("");
+		$("#so2-dp-manual-aktif").hide();
+		$("#so2-dp-pasif").hide();
+		$("#so2-faktor-koreksi").hide();
+		$("#pm25").val("");
+		$("#pm25_uid_metode_pemantauan").val("").trigger("change");
+		$("#pm25_durasi_pemantauan").val("").trigger("change");
+		$("#pm25_faktor_koreksi").val("");
+		$("#pm25-dp-manual-aktif").hide();
+		$("#pm25-dp-pasif").hide();
+		$("#pm25-faktor-koreksi").hide();
+		$("#alamat").val("");
+		$("#alamat_detail").val("");
+		$("#latitude").val("");
+		$("#longitude").val("");
+		$("#uid_lokasi_pemantauan").val("").trigger("change");
+		$("#uid_rf_peruntukan").val("").trigger("change");
+		$("#uid_metode_pemantauan").val("").trigger("change");
+		$("#uid_provinsi").val("").trigger("change");
+		id_kabkota = "";
+		id_provinsi = "";
+		$("#uid_kabkota").val("").trigger("change");
+		$(".shu-download").hide();
+		$("#uid_lab").val("").trigger("change");
+	}
+
+	$(".tahun-pemantauan").on("change", function() {
+		var toId = $(this).attr("to");
+		var year = $(this).val();
+		const year2 = new Date(year).getFullYear();
+		// let year = year.getFullYear();
+		$.ajax({
+			url: baseUrl + "ajax/pemantauanIkuByYear/x/" + year2,
+			method: "GET",
+			success: function(req) {
+				console.log(req);
+				var htmls = "<option value=''>--PILIH LOKASI PEMANTAUAN--</option>";
+				if (req.total) {
+					jQuery.each(req.data, function(i, val) {
+						htmls += "<option value='" + val.uid_lokasi_pemantauan + "'>" + val.kode_lokasi + " - " + val.alamat + " - " + val.alamat_detail + "</option>";
+					});
+				}
+				$("#" + toId).html(htmls);
+			}
+		});
+	});
+
+	$("#no2_uid_metode_pemantauan").on("change", function() {
+		var id = $(this).val();
+		if (id == 1) {
+			$("#no2-dp-manual-aktif").show();
+			$("#no2-dp-pasif").hide();
+		} else {
+			$("#no2-dp-manual-aktif").hide();
+			$("#no2-dp-pasif").show();
+		}
+	});
+
+	$("#so2_uid_metode_pemantauan").on("change", function() {
+		var id = $(this).val();
+		if (id == 1) {
+			$("#so2-dp-manual-aktif").show();
+			$("#so2-dp-pasif").hide();
+		} else {
+			$("#so2-dp-manual-aktif").hide();
+			$("#so2-dp-pasif").show();
+		}
+	});
+
+	$("#pm25_uid_metode_pemantauan").on("change", function() {
+		var id = $(this).val();
+		if (id == 1) {
+			$("#pm25-dp-manual-aktif").show();
+			$("#pm25-dp-pasif").hide();
+		} else {
+			$("#pm25-dp-manual-aktif").hide();
+			$("#pm25-dp-pasif").show();
+		}
+	});
+
+	function checkAllSelected3() {
+	    const no2  = $("#no2_uid_metode_pemantauan").val();
+	    const so2  = $("#so2_uid_metode_pemantauan").val();
+	    const pm25 = $("#pm25_uid_metode_pemantauan").val();
+
+	    if (no2 == 3 && so2 == 3 && pm25 == 3) {
+	        $("#uid_lab").removeAttr("required");
+	    } else {
+	        $("#uid_lab").attr("required", true);
+	    }
+	}
+
+	$("#no2_uid_metode_pemantauan, #so2_uid_metode_pemantauan, #pm25_uid_metode_pemantauan")
+	    .on("change", function () {
+	        checkAllSelected3();
+	    });
+
+	$('#tambahData').on('show.bs.modal', function(event) {
+		reset();
+		var button = $(event.relatedTarget) // Button that triggered the modal
+		var userBy = button.data('uid');
+		if (userBy) {
+			$.ajax({
+				url: baseUrl + ctrl + "/editData/x/" + userBy,
+				method: "GET",
+				success: function(req) {
+					if (req.uid_pelaporan_iku) {
+						$("#uid_pelaporan_iku").val(req.uid_pelaporan_iku);
+						$("#tanggal").val(req.tanggal);
+						$('input[name="form[tanggal]_submit"]').attr('value', req.tanggal);
+						// $("#durasi_pemantauan").val(req.durasi_pemantauan);
+						$("#periode_pemantauan").val(req.periode_pemantauan).trigger("change");
+						$.ajax({
+							url: baseUrl + "ajax/lokasiById/x/" + req.uid_lokasi_pemantauan,
+							method: "GET",
+							success: function(r) {
+								var htmls = "<option value=''>--PILIH LOKASI PEMANTAUAN--</option>";
+								if (r.total) {
+									jQuery.each(r.data, function(i, val) {
+										htmls += "<option value='" + val.uid_lokasi_pemantauan + "' selected>" + val.kode_lokasi + " - " + val.alamat + " - " + val.alamat_detail + "</option>";
+										$("#alamat").val(val.alamat);
+										$("#alamat_detail").val(val.alamat_detail);
+										$("#latitude").val(val.latitude);
+										$("#longitude").val(val.longitude);
+									});
+								}
+								$("#uid_lokasi_pemantauan").html(htmls);
+							}
+						});
+						// $("#uid_lokasi_pemantauan").val(req.uid_lokasi_pemantauan).trigger("change");
+						$("#no2").val(req.no2);
+						$("#no2_uid_metode_pemantauan").val(req.no2_uid_metode_pemantauan).trigger("change");
+						if (req.no2_uid_metode_pemantauan == 1) {
+							$("#no2-dp-manual-aktif").show();
+							$("#no2_durasi_pemantauan").val(req.no2_durasi_pemantauan).trigger("change");
+						} else {
+							$("#no2-dp-pasif").show();
+							$("#no2_durasi_pemantauan_pasif").val(req.no2_durasi_pemantauan_pasif);
+						}
+						$("#no2_faktor_koreksi").val(req.no2_faktor_koreksi);
+						if (req.no2_faktor_koreksi != 0) {
+							$("#no2-faktor-koreksi").show();
+						}
+
+						$("#so2").val(req.so2);
+						$("#so2_uid_metode_pemantauan").val(req.so2_uid_metode_pemantauan).trigger("change");
+						if (req.so2_uid_metode_pemantauan == 1) {
+							$("#so2-dp-manual-aktif").show();
+							$("#so2_durasi_pemantauan").val(req.so2_durasi_pemantauan).trigger("change");
+						} else {
+							$("#so2-dp-pasif").show();
+							$("#so2_durasi_pemantauan_pasif").val(req.so2_durasi_pemantauan_pasif);
+						}
+						$("#so2_faktor_koreksi").val(req.so2_faktor_koreksi);
+						if (req.so2_faktor_koreksi != 0) {
+							$("#so2-faktor-koreksi").show();
+						}
+
+						$("#pm25").val(req.pm25);
+						$("#pm25_uid_metode_pemantauan").val(req.pm25_uid_metode_pemantauan).trigger("change");
+						if (req.pm25_uid_metode_pemantauan == 1) {
+							$("#pm25-dp-manual-aktif").show();
+							$("#pm25_durasi_pemantauan").val(req.pm25_durasi_pemantauan).trigger("change");
+						} else {
+							$("#pm25-dp-pasif").show();
+							$("#pm25_durasi_pemantauan_pasif").val(req.pm25_durasi_pemantauan_pasif);
+						}
+						$("#pm25_faktor_koreksi").val(req.pm25_faktor_koreksi);
+						if (req.pm25_faktor_koreksi != 0) {
+							$("#pm25-faktor-koreksi").show();
+						}
+						// $("#uid_lokasi_pemantauan").val(req.uid_lokasi_pemantauan).trigger("change");
+						$("#uid_rf_peruntukan").val(req.uid_rf_peruntukan).trigger("change");
+						// $("#uid_metode_pemantauan").val(req.uid_metode_pemantauan).trigger("change");
+						id_kabkota = req.uid_kabkota;
+						setTimeout(() => {
+							$("#uid_provinsi").val(req.uid_provinsi).trigger("change");
+							$("#uid_kabkota").val(req.uid_kabkota).trigger("change");
+						}, 1000);
+						if (req.shu) {
+							var htmlDownload = '<a title="Download File" class="border-secondary badge badge-dark round" href="' + baseUrl + 'uploads/monitoring/' + req.shu + '" target="_blank" >Download</a>'
+							$(".shu-download").html(htmlDownload);
+							$(".shu-download").show();
+						} else {
+							$(".shu-download").hide();
+						}
+						$("#uid_lab").val(req.uid_lab? req.uid_lab.split(',') : '').trigger("change");
+					}
+				}
+			});
+		}
+	});
+
+	$("#tambahDataExcel").on('show.bs.modal', function(event) {
+		reset();
+		var button = $(event.relatedTarget) // Button that triggered the modal
+	});
+
+	var lock = '{/literal}{$listLockYear}{literal}'
+  lock = (lock ? JSON.parse(lock) : []);
+  $("#tanggal").on("change", function(){
+    var val = $(this).val();
+    if(val){
+      var yearSelect = new Date(val).getFullYear();
+      if(lock.includes(yearSelect.toString())){
+          swal("Informasi","Tidak dapat melakukan pelaporan tahun "+yearSelect+", periode dikunci","warning");
+          $("#tanggal").val("");
+      }
+    }
+  });
+
+	// $("#jenis_isian").on("change", function(){
+	//   var val = $(this).val();
+	//   if(val == 1){
+	//     $(".form_isian_params").show("slow");
+	//     $(".form_isian_excel").hide("slow");
+	//   }else if(val == 2){
+	//     $(".form_isian_excel").show("slow");
+	//     $(".form_isian_params").hide("slow");
+	//   }
+	// });
+
+	var maxLenghtText = 700;
+	$(".catatan-verifikator").on('click', function() {
+		$("#id-pelaporan").val("");
+		$("#catatan-verifikator-txt").val("");
+		$("#catatan-verifikator-select").val("").trigger("change");
+		$("#catatan-verifikator-txt-length").html("Sudah terisi 0/"+maxLenghtText+" Karakter")
+		var idPelaporan = $(this).attr("data-uid");
+		$("#id-pelaporan").val(idPelaporan);
+		if (idPelaporan) {
+			$.ajax({
+				url: baseUrl + ctrl + "/getCatatanVerifikasi/x/" + idPelaporan,
+				method: "GET",
+				success: function(request) {
+					var req = JSON.parse(request);
+					if (req.statusCode == 200) {
+						$("#catatan-verifikator-txt").val(req.catatan).trigger("keyup");
+						$("#catatan-verifikator-select").val(req.catatanSelect).trigger("change");
+					}
+				}
+			});
+		}
+	});
+
+	$("#catatan-verifikator-txt").on("keyup", function(){
+		var val = $(this).val();
+		var length_text = val.length;
+		if(length_text > maxLenghtText){
+			$("#catatan-verifikator-txt").val(val.substring(0,maxLenghtText));
+			length_text = maxLenghtText;
+		}
+		$("#catatan-verifikator-txt-length").html("*Sudah digunakan "+length_text+"/"+maxLenghtText+" Karakter")
+	});
+
+	$(".simpan-catatan-verifikator").on("click hide.bs.modal", function(event) {
+		var idPelaporan = $("#id-pelaporan").val();
+		var catatanVerifikatorTxt = $("#catatan-verifikator-txt").val();
+		var catatanVerifikatorSelect = $("#catatan-verifikator-select").val();
+		if (idPelaporan) {
+			$.ajax({
+				url: baseUrl + ctrl + "/catatanVerifikasi",
+				method: "POST",
+				data: JSON.stringify({
+					uid: idPelaporan,
+					catatan: catatanVerifikatorTxt,
+					catatanSelect: catatanVerifikatorSelect,
+				}),
+				success: function(request) {
+					if (request == 1) {
+						console.log(request);
+						$("#catatan-" + idPelaporan + "-short").html(catatanVerifikatorTxt + (catatanVerifikatorSelect ? " " + catatanVerifikatorSelect : ""));
+					}
+				}
+			});
+		}
+	});
+	$(".iku_lokasi").on("click", function() {
+		var val = $(this).attr("id");
+		if (val == "base-tab4") {
+			$(".li-src").hide("slow");
+		} else {
+			$(".li-src").show("slow");
+		}
+	});
+	$("#base-tab1").on("click", function() {
+		freezeHeader('.freeze-table');
+	});
+	$("#base-tab2").on("click", function() {
+		freezeHeader('.freeze-table');
+	});
+
+	function freezeHeader(toFreeze) {
+		$(function() {
+			$(this).find(toFreeze).freezeTable({
+				'freezeColumn': false,
+			});
+			var freezeTable = new FreezeTable(toFreeze, {
+				'namespace': 'first-table'
+			});
+			freezeTable.resize();
+		});
+	}
+</script>
+{/literal}
+
+{literal}
+<script type="text/javascript">
+	function searchData(tableSrc, txtSrc) {
+		if (tableSrc, txtSrc) {
+			var input, filter, table, tr, td, i, txtValue;
+			input = document.getElementById(txtSrc);
+			filter = input.value.toUpperCase();
+			table = document.getElementById(tableSrc);
+			tr = table.getElementsByTagName("tr");
+			for (i = 0; i < tr.length; i++) {
+				td = tr[i].getElementsByTagName("td")[1];
+				td2 = tr[i].getElementsByTagName("td")[2];
+				if (td && td2) {
+					txtValue = td.textContent || td.innerText;
+					txtValue2 = td2.textContent || td2.innerText;
+					if ((txtValue.toUpperCase().indexOf(filter) > -1) || txtValue2.toUpperCase().indexOf(filter) > -1) {
+						tr[i].style.display = "";
+					} else {
+						tr[i].style.display = "none";
+					}
+				}
+			}
+
+		}
+
+	}
+</script>
+{/literal}

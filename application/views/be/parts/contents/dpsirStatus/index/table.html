@@ -1,0 +1,96 @@
+<form class="form form-horizontal" method="post" action="{$baseUrl}{$ctrl}/{$act}">
+  <div class="row mb-1 pl-1 pr-1">
+      <div class="col-md-2">
+        <select class="select2 form-control" id="src_tahun" name="src[tahun]">
+          {for $yi=2023 to $thisYear}
+            <option value="{$yi}" {if $yi == $src.tahun} selected {/if} >{$yi}</option>
+          {/for}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select class="select2 form-control" id="src_kabkota" name="src[daerah]">
+          <option value="">--PILIH REGIONAL/PROVINSI/KABKOTA--</option>
+          {foreach from=$daerahSrc item=vd}
+            <option value="{$vd.id}" {if $vd.id == $src.daerah} selected {/if} >{$vd.text}</option>
+          {/foreach}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select class="select2 form-control" id="src_komponen" name="src[daerah]">
+          <option value="all">TAMPILKAN SEMUA</option>
+          <option value="iku">INDEKS KUALITAS UDARA (IKU)</option>
+          <option value="ika">INDEKS KUALITAS AIR (IKA)</option>
+          <option value="ikl">INDEKS KUALITAS LAHAN (IKL)</option>
+          <option value="ikal">INDEKS KUALITAS AIR LAUT (IKAL)</option>
+          <option value="ikeg">INDEKS KUALITAS EKOSISTEM GAMBUT (IKEG)</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <div class="btn-group btn-block" role="group" aria-label="Basic example">
+          <button type="submit" name="search" value="1" class="btn btn-info" style="padding: 10px;">
+            <small><i class="ft-search"></i> SEARCH</small>
+          </button>
+          <a href="{$baseUrl}{$ctrl}/{$act}" class="btn btn-secondary" style="padding: 10px;">
+            <small><i class="ft-refresh-cw"></i> RESET</small>
+          </a>
+          <button type="submit" name="export" value="export" class="btn btn-primary" style="padding: 10px;">
+            <small><i class="ft-download"></i> EXCEL</small>
+          </button>
+        </div>
+      </div>
+  </div>
+</form>
+
+<div class="row mb-1 pl-1 pr-1">
+  <div class="col-md-12">
+    <div class="table-responsive freeze-table">
+      <table class="table table-bordered">
+        <thead class="bg-info bg-darken-2 white">
+          <tr>
+            <th class="text-center" rowspan="2">NO</th>
+            <th class="text-center" rowspan="2">PROVINSI</th>
+            <th class="text-center" rowspan="2">KABKOTA</th>
+            <th class="text-center td-iku" colspan="{count($komponen)}">INDEKS KUALITAS UDARA (IKU)</th>
+            <th class="text-center td-ika" colspan="{count($komponen)}">INDEKS KUALITAS AIR (IKA)</th>
+            <th class="text-center td-ikl" colspan="{count($komponen)}">INDEKS KUALITAS LAHAN (IKL)</th>
+            <th class="text-center td-ikal" colspan="{count($komponen)}">INDEKS KUALITAS AIR LAUT (IKAL)</th>
+            <th class="text-center td-ikeg" colspan="{count($komponen)}">INDEKS KUALITAS EKOSISTEM GAMBUT (IKEG)</th>
+          </tr>
+          <tr>
+            {foreach from=$aspek item=as}
+              {foreach from=$komponen item=ka}
+                <th class="td-{$as.text}">{$ka['id']}</th>
+              {/foreach}
+            {/foreach}
+          </tr>
+        </thead>
+        <tbody>
+          {foreach from=$data item=v key=k}
+            <tr>
+              <td class="nowrap">{$k+1}</td>
+              {if $v.nama_kabkot}
+                <td class="nowrap">{$v.nama_provinsi}</td>
+              {else}
+                <td class="nowrap"><b>{$v.nama_provinsi}</b></td>
+              {/if}
+              <td class="nowrap">{$v.nama_kabkot}</td>
+
+              {foreach from=$aspek item=as}
+                {foreach from=$komponen item=ka}
+                <td class="text-center td-{$as.text}">
+                  {if $v['dpsir'][$ka['text']][$as['text']] == 1}
+                    <span class="badge badge-success"> <i class="ft ft-check"></i> </span>
+                  {else}
+                    <span class="badge badge-danger"> <i class="ft ft-x"></i> </span>
+                  {/if}
+                </td>
+                {/foreach}
+              {/foreach}
+
+            </tr>
+          {/foreach}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,32 @@
+<form method="post" class="global_src">
+	<div class="row">
+		<div class="col-md-3">
+			<select class="form-control select2 short-global-src" name="form[short]">
+				<option value=""> --SHORT NILAI INDEKS-- </option>
+				<option value="ASC" {if $search.short == 'ASC'}selected{/if}> ASC INDEKS </option>
+				<option value="DESC" {if $search.short == 'DESC'}selected{/if}> DESC INDEKS </option>
+			</select>
+		</div>
+		<div class="col-md-3">
+			<select class="form-control select2 tahun-global-src" name="form[tahun]" required="required">
+				<option value=""> --PILIH TAHUN-- </option>
+				{for $foo=2015 to $thisYear}
+				<option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+				{/for}
+			</select>
+		</div>
+		<div class="col-md-6 pr-1">
+			<div class="btn-group" role="group" aria-label="Basic example" style="width: 100%;">
+				<button type="submit" name="search" value="1" class="btn btn-info">
+					<small><i class="ft-search"></i> CARI</small>
+				</button>
+				<a href="{$baseUrl}{$ctrl}/{$act}" class="btn btn-secondary">
+					<small><i class="ft-refresh-cw"></i> RESET</small>
+				</a>
+				{if $me.role_user == 0 || $me.role_user == 1}
+				<button type="button" class="btn btn-warning" data-toggle="modal" data-target="#primary"><small>SIMULASI</small></button>
+				{/if}
+			</div>
+		</div>
+	</div>
+</form>

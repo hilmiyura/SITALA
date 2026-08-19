@@ -1,0 +1,118 @@
+<style>
+	table thead tr th {
+		border: 1px solid black;
+	}
+
+	td {
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style>
+<table>
+	<thead>
+		<tr>
+			<th rowspan="3" class="v-middle text-center">No</th>
+			<th rowspan="3" class="v-middle text-center">Provinsi</th>
+			<th colspan="7" class="text-center">Perhitungan Indeks</th>
+			{if $search.tahun <= 2024}
+				<th rowspan="3" class="v-middle text-center">IKU</th>
+			{/if}
+			{if $search.tahun >= 2025}
+				<th rowspan="3" class="v-middle text-center">IKU INA</th>
+				<th rowspan="3" class="v-middle text-center">IKU INA MUTU</th>
+			{/if}
+			<!-- <th rowspan="3" class="v-middle text-center">TARGET IKU</th> -->
+		</tr>
+		<tr>
+			<th colspan="3" class="v-middle text-center">Rataan Per Parameter</th>
+			{if $search.tahun <= 2024}
+				<th colspan="3" class="v-middle text-center">Indeks Dibagi Bakumutu</th>
+			{/if}
+			{if $search.tahun >= 2025}
+				<th colspan="3" class="v-middle text-center">Indeks Parameter</th>
+			{/if}
+			<th class="v-middle text-center">Rataan</th>
+		</tr>
+		<tr>
+			<th class="v-middle text-center">
+				NO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+				<sup>(Nitrogen Dioksida)</sup>
+			</th>
+			<th class="v-middle text-center">
+				SO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+				<sup>(Sulfur Dioksida)</sup>
+			</th>
+			<th class="v-middle text-center">
+				PM2.5<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+				<sup>(Partikulat)</sup>
+			</th>
+			<th class="v-middle text-center">
+				NO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+				<sup>(Nitrogen Dioksida)</sup>
+			</th>
+			<th class="v-middle text-center">
+				SO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+				<sup>(Sulfur Dioksida)</sup>
+			</th>
+			<th class="v-middle text-center">
+				PM2.5<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+				<sup>(Partikulat)</sup>
+			</th>
+			<th class="v-middle text-center">INDEKS</th>
+		</tr>
+	</thead>
+	<tbody>
+		{$cnProvinsi = 1}
+		{foreach from=$view item=v}
+		{$v.json_data = $v.json_data|@json_decode:true}
+		{$v.json_data_ina = $v.json_data_ina|@json_decode:true}
+		{if $v.jenis_indeks == 1}
+		<tr>
+			<td>{$cnProvinsi}</td>
+			<td>
+				<b>{$v.nama_provinsi}</b>
+			</td>
+			{if $search.tahun <= 2024}
+				<td class="text-center">{number_format($v.json_data.rpp.no2,2,".","")}</td>
+				<td class="text-center">{number_format($v.json_data.rpp.so2,2,".","")}</td>
+				<td class="text-center">-</td>
+
+				<td class="text-center">{number_format($v.json_data.idbm.no2,2,".","")}</td>
+				<td class="text-center">{number_format($v.json_data.idbm.so2,2,".","")}</td>
+				<td class="text-center">-</td>
+
+				<td class="text-center">{number_format($v.json_data.rataanIndeks,2,".","")}</td>
+			{/if}
+
+			{if $search.tahun >= 2025}
+				<td class="text-center">{number_format($v.json_data_ina.detail.no2.rataan_konsentrasi,2,".","")}</td>
+				<td class="text-center">{number_format($v.json_data_ina.detail.so2.rataan_konsentrasi,2,".","")}</td>
+				<td class="text-center">{number_format($v.json_data_ina.detail.pm25.rataan_konsentrasi,2,".","")}</td>
+				<td class="text-center">{number_format($v.json_data_ina.detail.no2.indeks_konsentrasi,2,".","")}</td>
+				<td class="text-center">{number_format($v.json_data_ina.detail.so2.indeks_konsentrasi,2,".","")}</td>
+				<td class="text-center">{number_format($v.json_data_ina.detail.pm25.indeks_konsentrasi,2,".","")}</td>
+
+				<td class="text-center">{if $v.json_data_ina.detail.indeks_rataan > 100}100{else}{number_format($v.json_data_ina.detail.indeks_rataan,2,".","")}{/if}</td>
+			{/if}
+
+			{if $search.tahun <= 2024}
+				<td class="text-center">
+					{if $v.json_data.rataanIndeks && $v.json_data.idbm.so2 && $v.json_data.idbm.no2 && $v.json_data.rpp.so2 && $v.json_data.rpp.no2}
+						{if $v.nilai_indeks > 100 }100{else}{number_format($v.nilai_indeks,2,".","")}{/if}
+					{else}
+					-
+					{/if}
+				</td>
+			{/if}
+
+			{if $search.tahun >= 2025}
+				<td class="text-center">{if $v.json_data_ina}{number_format($v.nilai_indeks_ina,2,".","")}{else}-{/if}</td>
+				<td class="text-center">{if $v.json_data_ina}{$v.nilai_indeks_ina_mutu}{else}-{/if}</td>
+			{/if}
+			<!-- <td class="text-center">{number_format($v.target,2,".","")}</td> -->
+		</tr>
+		{$cnProvinsi = $cnProvinsi + 1}
+		{/if}
+		{/foreach}
+	</tbody>
+</table>

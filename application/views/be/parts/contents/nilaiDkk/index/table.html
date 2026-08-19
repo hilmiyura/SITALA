@@ -1,0 +1,61 @@
+{if $aksesAdmin == 1}
+<div class="row mb-1">
+  <div class="col-md-6">
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData">
+      <i class="ft-plus-circle"></i> Tambah Data
+    </button>
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahDataExcel">
+      <i class="ft-upload-cloud"></i> Upload Excel
+    </button>
+  </div>
+</div>
+{/if}
+{include file="parts/block/block_search_nilai_dkk.html"}
+<div class="row">
+  <div class="col-md-12">
+    <div class="table-responsive freeze-table" style="border: 1px solid #f4f5fa">
+      <table class="table">
+        <thead class="bg-info bg-darken-2 white">
+          <tr>
+            <th colspan="2" class="text-center" style="width: 70px">#</th>
+            <th rowspan="2" class="v-middle">Provinsi</th>
+            <th rowspan="2" class="v-middle">Kab/Kota</th>
+            <th rowspan="2" class="v-middle">Tahun</th>
+            <th rowspan="2" class="v-middle">Nilai DKK</th>
+          </tr>
+          <tr>
+            <th width="50" class="text-center">Action</th>
+            <th width="10" class="text-center">No</th>
+          </tr>
+        </thead>
+        <tbody>
+          {counter start=$page print=false}
+          {foreach from=$view item=v}
+          <tr>
+            <th class="text-center">
+              {if $aksesAdmin == 1}
+                <button class="btn border-secondary badge badge-danger round delete-dialog" data-uid="{$v.$primaryKey}" data-ajax="{$ctrl}/deletedData">
+                  <a href="javascript:void(0);" title="Delete">
+                    <i class="ft-trash-2"></i>
+                  </a>
+                </button>
+                <button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.$primaryKey}" title="Edit">
+                  <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+                </button>
+              {else}
+                -
+              {/if}
+            </th>
+            <td>{counter}</td>
+            <td>{if $v.nama_kabkota}{$v.nama_propinsi}{else}<b>{$v.nama_propinsi}</b>{/if}</td>
+            <td>{if $v.nama_kabkota}{$v.nama_kabkota}{else}{/if}</td>
+            <td>{$v.tahun}</td>
+            <td>{$v.nilai}</td>
+          </tr>
+          {/foreach}
+        </tbody>
+      </table>
+      {include file="parts/block/block_pagination.html"}
+    </div>
+  </div>
+</div>

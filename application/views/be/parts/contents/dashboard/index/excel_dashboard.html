@@ -1,0 +1,96 @@
+<style>
+  table thead tr th {
+    border: 1px solid black;
+  }
+
+  td {
+    border: 1px solid black;
+    vertical-align: top;
+  }
+</style>
+<table>
+  <thead>
+    <tr>
+      <th class="text-center v-middle" rowspan="2">NO</th>
+      <th class="text-center v-middle" rowspan="2">PROPINSI</th>
+      <th class="text-center v-middle" colspan="4" data-a-h="center">VERIFIKASI/TOTAL</th>
+    </tr>
+    <tr>
+      <th class="text-center v-middle">IKU</th>
+      <th class="text-center v-middle">IKA</th>
+      <th class="text-center v-middle">IKL</th>
+      <th class="text-center v-middle">IKAL</th>
+    </tr>
+  </thead>
+  <tbody>
+    {$tIKu = 0}
+    {$vIKu = 0}
+    {$tIKa = 0}
+    {$vIKa = 0}
+    {$tIKl = 0}
+    {$vIKl = 0}
+    {$tIKal = 0}
+    {$vIKal = 0}
+    {counter start=0 print=false}
+    {foreach from=$propRekap item=v}
+    {$vIKu = $vIKu+$v.iku.verify}
+    {$tIKu = $tIKu+$v.iku.total}
+    {$vIKa = $vIKa+$v.ika.verify}
+    {$tIKa = $tIKa+$v.ika.total}
+    {$vIKl = $vIKl+$v.ikl.verify}
+    {$tIKl = $tIKl+$v.ikl.total}
+    {$vIKal = $vIKal+$v.ikal.verify}
+    {$tIKal = $tIKal+$v.ikal.total}
+    <tr>
+      <td class="text-center">{counter}.</td>
+      <td class="text-uppercase">
+        <b>{$v.nama_text}</b>
+      </td>
+      <td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$v.iku.verify} / {$v.iku.total}</b></td>
+      <td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$v.ika.verify} / {$v.ika.total}</b></td>
+      <td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$v.ikl.verify} / {$v.ikl.total}</b></td>
+      <td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$v.ikal.verify} / {$v.ikal.total}</b></td>
+    </tr>
+    {/foreach}
+    <tr>
+      <td colspan="2" class="text-center" data-a-h="center"><b>TOTAL</b></td>
+      <td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$vIKu} / {$tIKu}</b></td>
+      <td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$vIKa} / {$tIKa}</b></td>
+      <td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$vIKl} / {$tIKl}</b></td>
+      <td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$vIKal} / {$tIKal}</b></td>
+    </tr>
+    <tr>
+
+    </tr>
+  </tbody>
+</table>
+<table class="table">
+  <thead class="bg-info bg-darken-2 white">
+    <tr>
+      <th class="text-center v-middle" rowspan="2">NO</th>
+      <th class="text-center v-middle" rowspan="2">
+        KABUPATEN/KOTA
+      </th>
+      <th class="text-center v-middle" colspan="3">VERIFIKASI/TOTAL</th>
+    </tr>
+    <tr>
+      <th class="text-center v-middle">IKU</th>
+      <th class="text-center v-middle">IKA</th>
+      <th class="text-center v-middle">IKL</th>
+    </tr>
+  </thead>
+  <tbody>
+    {$kk=1}
+    {foreach from=$propRekap.detail item=v key=k}
+    {foreach from=$v item=w}
+    <tr>
+      <td class="text-center">{$kk++}</td>
+      <td class="text-uppercase"><b>{$w.nama_text}</b></td>
+      <td class="text-center"><b>{$w.iku.verify}/{$w.iku.total}</b></td>
+      <td class="text-center"><b>{$w.ika.verify}/{$w.ika.total}</b></td>
+      <td class="text-center"><b>{$w.ikl.verify}/{$w.ikl.total}</b></td>
+    </tr>
+    {/foreach}
+    {/foreach}
+  </tbody>
+</table>

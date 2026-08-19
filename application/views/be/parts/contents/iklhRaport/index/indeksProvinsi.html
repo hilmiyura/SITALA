@@ -1,0 +1,172 @@
+{if $me.role_user != 2}
+<div class="row">
+	<div class="col-sm-12">
+		<input type="text" class="form-control mb-1" id="seachFieldProvinsi" onkeyup="searchData('dataTableProvinsi','seachFieldProvinsi')" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+	</div>
+</div>
+{/if}
+<div class="table-responsive table-border freeze-table">
+	{if $viewp}
+	<table class="table table-bordered table-striped" id="dataTableProvinsi">
+		<thead class="bg-info bg-darken-2 white">
+			<tr>
+				<th rowspan="2" class="">No</th>
+				<th rowspan="2" class="">Provinsi</th>
+				<th colspan="3" class=" text-center">IKA</th>
+				<th colspan="3" class=" text-center">IKU</th>
+				<th colspan="3" class=" text-center">IKL</th>
+				<th colspan="3" class=" text-center">IKAL</th>
+				<th colspan="3" class=" text-center">IKLH</th>
+			</tr>
+			<tr>
+				<th class="text-center">Nilai</th>
+				<th class="text-center">Rating</th>
+				<th class="text-center">Raport</th>
+
+				<th class="text-center">Nilai</th>
+				<th class="text-center">Rating</th>
+				<th class="text-center">Raport</th>
+
+				<th class="text-center">Nilai</th>
+				<th class="text-center">Rating</th>
+				<th class="text-center">Raport</th>
+
+				<th class="text-center">Nilai</th>
+				<th class="text-center">Rating</th>
+				<th class="text-center">Raport</th>
+
+				<th class="text-center">Nilai</th>
+				<th class="text-center">Rating</th>
+				<th class="text-center">Raport</th>
+			</tr>
+		</thead>
+		<tbody>
+			{$cnProvinsi = 1}
+			{foreach from=$viewp item=v}
+			{if $v.iklh > 0}
+			<tr>
+				<td>{$cnProvinsi}</td>
+				<td><b>{$v.nama_provinsi}</b></td>
+
+				<td class="text-center">
+					{if $v.ika > 100}
+						100
+					{else}
+						{number_format($v.ika,2,".","")}
+					{/if}
+				</td>
+				<td class="text-center">
+					{if $v.ika > 0}
+						{$ratingsIKA = $functions->rating($rating,number_format($v.ika,2,".",""))}
+						<label class="badge badge-{$ratingsIKA.color}">{$ratingsIKA.rating}</label>
+					{else}
+					 <b>-</b>
+					{/if}
+				</td>
+				<td class="text-center">
+					{if $v.ika > 0}
+						<a href="{$baseUrl}raport/index/x/ika/k/{$v.uid_kabkota}/p/{$v.uid_provinsi}/t/{$v.tahun}" target="_blank" class="btn btn-outline-info btn-sm"> <i class="ft-book"></i> Lihat</a>
+					{else}
+						-
+					{/if}
+				</td>
+
+				<td class="text-center">
+					{if $v.iku > 100}
+						100
+					{else}
+						{number_format($v.iku,2,".","")}
+					{/if}
+				</td>
+				<td class="text-center">
+					{if $v.iku > 0}
+						{$ratingsIKU = $functions->rating($rating,number_format($v.iku,2,".",""))}
+						<label class="badge badge-{$ratingsIKU.color}">{$ratingsIKU.rating}</label>
+					{else}
+					 <b>-</b>
+					{/if}
+				</td>
+				<td class="text-center">
+					{if $v.iku > 0}
+						<a href="{$baseUrl}raport/index/x/iku/k/{$v.uid_kabkota}/p/{$v.uid_provinsi}/t/{$v.tahun}" target="_blank" class="btn btn-outline-info btn-sm"> <i class="ft-book"></i> Lihat</a>
+					{else}
+						-
+					{/if}
+				</td>
+
+				<td class="text-center">
+					{if $v.ikl > 100}
+						100
+					{else}
+						{number_format($v.ikl,2,".","")}
+					{/if}
+				</td>
+				<td class="text-center">
+					{if $v.ikl > 0}
+						{$ratingsIKL = $functions->rating($rating,number_format($v.ikl,2,".",""))}
+						<label class="badge badge-{$ratingsIKL.color}">{$ratingsIKL.rating}</label>
+					{else}
+					 <b>-</b>
+					{/if}
+				</td>
+				<td class="text-center">
+					{if $v.ikl > 0}
+						<a href="{$baseUrl}raport/index/x/ikl/k/{$v.uid_kabkota}/p/{$v.uid_provinsi}/t/{$v.tahun}" target="_blank" class="btn btn-outline-info btn-sm"> <i class="ft-book"></i> Lihat</a>
+					{else}
+						-
+					{/if}
+				</td>
+
+				<td class="text-center">
+					{if $v.ikal > 100}
+						100
+					{else}
+						{number_format($v.ikal,2,".","")}
+					{/if}
+				</td>
+				<td class="text-center">
+					{if $v.ikal > 0}
+						{$ratingsIKL = $functions->rating($rating,number_format($v.ikal,2,".",""))}
+						<label class="badge badge-{$ratingsIKL.color}">{$ratingsIKL.rating}</label>
+					{else}
+					 <b>-</b>
+					{/if}
+				</td>
+				<td class="text-center">
+					{if $v.ikal > 0}
+						<a href="{$baseUrl}raport/index/x/ikal/k/{$v.uid_kabkota}/p/{$v.uid_provinsi}/t/{$v.tahun}" target="_blank" class="btn btn-outline-info btn-sm"> <i class="ft-book"></i> Lihat</a>
+					{else}
+						-
+					{/if}
+				</td>
+
+				<td class="text-center">
+					{if $v.ika > 0 || $v.iku > 0 || $v.ikl > 0 || $v.ikal > 0}
+						{if $v.iklh > 100} 100 {else} {number_format($v.iklh,2,".","")} {/if}
+					{else}
+						<b>-</b>
+					{/if}
+				</td>
+				<td class="text-center">
+					{if $v.ika > 0 || $v.iku > 0 || $v.ikl > 0 || $v.ikal > 0}
+						{$ratingsIKLH = $functions->rating($rating,number_format($v.iklh,2,".",""))}
+						<label class="badge badge-{$ratingsIKLH.color}">{$ratingsIKLH.rating}</label>
+					{else}
+					 <b>-</b>
+					{/if}
+				</td>
+				<td class="text-center">
+					{if $v.ika > 0 || $v.iku > 0 || $v.ikl > 0 || $v.ikal > 0}
+						<a href="{$baseUrl}raport/index/x/iklhk/k/{$v.uid_kabkota}/p/{$v.uid_provinsi}/t/{$v.tahun}" target="_blank" class="btn btn-outline-info btn-sm"> <i class="ft-book"></i> Lihat</a>
+					{else}
+						<b>-</b>
+					{/if}
+				</td>
+			</tr>
+			<p style="display: none">{$cnProvinsi++}</p>
+			{/if}
+			{/foreach}
+		</tbody>
+	</table>
+	{/if}
+</div>

@@ -1,0 +1,245 @@
+{include file="parts/block/block_search.html"}
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th rowspan="2" class="v-middle text-center" style="width: 70px">No</th>
+        <th colspan="2" class="text-center">Tanggal</th>
+        <th rowspan="2" class="v-middle text-center">Reject</th>
+        <th colspan="2" class="text-center">Verifikasi</th>
+        <th rowspan="2" class="v-middle">Level</th>
+        <th rowspan="2" class="v-middle">Catatan Pelaporan</th>
+        <th rowspan="2" class="v-middle">Pemantauan</th>
+        <th rowspan="2" class="v-middle">Provinsi</th>
+        <!-- <th rowspan="2" class="v-middle">Kab/Kota</th> -->
+        <th rowspan="2" class="v-middle">Peruntukan</th>
+        <th colspan="2" class="text-center">Titik Koordinat</th>
+        <th colspan="5" class="text-center">Nilai Pemantauan</th>
+      </tr>
+      <tr>
+        <th>Input Data</th>
+        <th>Update Data</th>
+        <!-- <th class="text-center">Provinsi</th> -->
+        <th class="text-center">Regional</th>
+        <th class="text-center">Pusat</th>
+        <th class="text-center">Latitude</th>
+        <th class="text-center">Longitude</th>
+        <th class="text-center">
+          TSS <sup>(mg/L)</sup><br>
+          <sup>(Total Susppended Solid)</sup>
+        </th>
+        <th class="text-center">
+          DO <sup>(mg/L)</sup><br>
+          <sup>(Dissolved Oxygen)</sup>
+        </th>
+        <th class="text-center">MINYAK & LEMAK <sup>(mg/L)</sup></th>
+        <th class="text-center">AMONIA TOTAL <sup>(mg/L)</sup></th>
+        <th class="text-center">ORTOFOSFAT (PO4-P) <sup>(mg/L)</sup></th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {$showBtnCatatan = 0}
+      {foreach from=$view item=v}
+      <!-- 0/1 = super
+      2 = Provinsi
+      3 = kab/Kota
+      4 = Regional -->
+      {if $me.role_user <= 1} {$showBtnCatatan=1} {else if $me.role_user==4 && $v.role_user==2} {$showBtnCatatan=1} {else if $me.role_user==2 && $v.role_user==3} {$showBtnCatatan=1} {else} {$showBtnCatatan=0} {/if} <tr>
+        <td class="text-center">{counter}</td>
+        <td class="pr-1">
+          {date('Y-m-d',$v.crdate)}
+        </td>
+        <td class="pr-1">
+          {if $v.chdate}
+          {date('Y-m-d',$v.chdate)}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.v_reject_status}
+          Sudah diperbaiki
+          {else}
+          --
+          {/if}
+        </td>
+        <!-- <th class="text-center v_provinsi_verifikasi{$v.$primaryKey} {if $v.role_user == 3}{if $v.v_provinsi == 1}bg-info{else if  $v.v_provinsi == 2} bg-danger{else}{/if}{/if} bg-accent-1">
+          {if $v.role_user == 3}
+          {if ($me.role_user == 2 || $me.role_user == 0) && $lockAction == 0}
+          <select class="form-control select2 verifikasi" style="width:100%">
+            <option value="">-Pilih-</option>
+            <option value="2" {if $v.v_provinsi==2}selected{/if} data-verify="v_provinsi" data-uid="{$v.$primaryKey}">Rejected</option>
+            <option value="un" {if $v.v_provinsi==0}selected{/if} data-verify="v_provinsi" data-uid="{$v.$primaryKey}">Unverified</option>
+            <option value="1" {if $v.v_provinsi==1}selected{/if} data-verify="v_provinsi" data-uid="{$v.$primaryKey}">Verified</option>
+          </select>
+          {else}
+          {if !$v.v_provinsi}
+          <div class="badge badge-light " title="Invalid">Unverified</div>
+          {else if $v.v_provinsi == 1}
+          <div class="badge badge-info " title="Valid">Verified</div>
+          {else if $v.v_provinsi == 2}
+          <div class="badge badge-danger " title="Rejected">Rejected</div>
+          {/if}
+          {/if}
+          {else}
+          --
+          {/if}
+        </th> -->
+        {if $lockActionYear == 0}
+        <th class="text-center v_regional_verifikasi{$v.$primaryKey} {if $v.role_user == 2}{if $v.v_regional == 1}bg-info{else if  $v.v_regional == 2} bg-danger{else}{/if}  {/if} bg-accent-1">
+          {if $v.role_user == 2}
+          {if ($me.role_user == 4 || $me.role_user == 5 || $me.role_user == 0) && $lockAction == 0}
+          <select class="form-control select2 verifikasi" style="width:100%">
+            <option value="un" {if $v.v_regional==0}selected{/if} data-verify="v_regional" data-uid="{$v.$primaryKey}">Unverified</option>
+            <option value="1" {if $v.v_regional==1}selected{/if} data-verify="v_regional" data-uid="{$v.$primaryKey}">Verified</option>
+            <option value="2" {if $v.v_regional==2}selected{/if} data-verify="v_regional" data-uid="{$v.$primaryKey}">Rejected</option>
+          </select>
+          {else}
+          {if !$v.v_regional}
+          <div class="badge badge-light " title="Invalid">Unverified</div>
+          {else if $v.v_regional == 1}
+          <div class="badge badge-info " title="Valid">Verified</div>
+          {else if $v.v_regional == 2}
+          <div class="badge badge-danger " title="Rejected">Rejected</div>
+          {/if}
+          {/if}
+          {else}
+          --
+          {/if}
+        </th>
+        <th class="text-center v_pusat_verifikasi{$v.$primaryKey} {if $v.v_pusat == 1}bg-info{else if  $v.v_pusat == 2} bg-danger{else}{/if} bg-accent-1">
+          {if ($me.role_user == 1 || $me.role_user == 0) && $lockAction == 0}
+          <select class="form-control select2 verifikasi" style="width:100%">
+            <option value="">-Pilih-</option>
+            <option value="un" {if $v.v_pusat==0}selected{/if} data-verify="v_pusat" data-uid="{$v.$primaryKey}">Unverified</option>
+            <option value="1" {if $v.v_pusat==1}selected{/if} data-verify="v_pusat" data-uid="{$v.$primaryKey}">Verified</option>
+            <option value="2" {if $v.v_pusat==2}selected{/if} data-verify="v_pusat" data-uid="{$v.$primaryKey}">Rejected</option>
+          </select>
+          {else}
+          {if !$v.v_pusat}
+          <div class="badge badge-light " title="Invalid">Unverified</div>
+          {else if $v.v_pusat == 1}
+          <div class="badge badge-info " title="Valid">Verified</div>
+          {else if $v.v_pusat == 2}
+          <div class="badge badge-danger " title="Rejected">Rejected</div>
+          {/if}
+          {/if}
+        </th>
+        {else}
+        <!-- <th colspan="2" class="text-center">
+          <span class="badge badge-dark">pelaporan {$lockActionYear} ditutup</span>
+        </th> -->
+          <th class="text-center">
+            {if $v.role_user == 2}
+              {if !$v.v_regional}
+                <div class="badge badge-light " title="Invalid">Unverified</div>
+              {else if $v.v_regional == 1}
+                <div class="badge badge-info " title="Valid">Verified</div>
+              {else if $v.v_regional == 2}
+                <div class="badge badge-danger " title="Rejected">Rejected</div>
+              {/if}
+            {else}
+              --
+            {/if}
+          </th>
+          <th class="text-center">
+            {if !$v.v_pusat}
+              <div class="badge badge-light " title="Invalid">Unverified</div>
+            {else if $v.v_pusat == 1}
+              <div class="badge badge-info " title="Valid">Verified</div>
+            {else if $v.v_pusat == 2}
+              <div class="badge badge-danger " title="Rejected">Rejected</div>
+            {/if}
+          </th>
+        {/if}
+        <td class="text-center">
+          {$roleUser = $functions->roleUser($v.role_user)}
+          <div class="badge badge-{$roleUser.color}">{$roleUser.name}</div>
+        </td>
+        <td>
+          {if $showBtnCatatan && $lockActionYear == 0}
+          <a href="javascript:();" data-toggle="modal" data-target="#catatanVerifikator" data-uid="{$v.$primaryKey}" class="badge badge-primary catatan-verifikator"> <i class="ft-edit"></i> Tambah catatan</a>
+          <br><br>
+          {/if}
+          <a class="badge badge-primary" data-toggle="collapse" href="#collapse-{$v.$primaryKey}-short" role="button" aria-expanded="false" aria-controls="collapseExample">
+            <i class="ft-eye"></i> Lihat Catatan
+          </a>
+          <div class="collapse" id="collapse-{$v.$primaryKey}-short">
+            <!-- <span id="catatan-{$v.$primaryKey}-long" style="display:none"></span> -->
+            <span id="catatan-{$v.$primaryKey}-short">
+              {if $me.role_user <= 1} <strong>Pusat</strong> : {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}
+                {elseif $me.role_user == 4 && $v.role_user == 2}
+                <strong>Regional</strong> : {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+                {elseif $me.role_user == 2 && $v.role_user == 3}
+                <strong>Provinsi</strong> : {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+                {/if}
+            </span>
+            <!-- 0/1 = super
+          2 = Provinsi
+          3 = kab/Kota
+          4 = Regional -->
+
+            {if $me.role_user == 1 || $me.role_user == 0}
+            <hr>
+            <strong>Regional</strong> : {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+            <hr>
+            <strong>Provinsi</strong> : {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+
+            {elseif $me.role_user == 2}
+            <hr>
+            <strong>Regional</strong> : {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+            <hr>
+            <strong>Pusat</strong> : {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}
+
+            {elseif $me.role_user == 4}
+            <hr>
+            <strong>Provinsi </strong> : {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+            <hr>
+            <strong>Pusat </strong> : {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}
+            {else}
+            <strong>Pusat</strong> : {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}
+            <hr>
+            <strong>Regional</strong> : {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+            <hr>
+            <strong>Provinsi</strong> : {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+            {/if}
+          </div>
+        </td>
+        <td>
+          <b>{$v.kode_lokasi}</b><br>
+          {$v.alamat}<br />
+          {$v.alamat_detail}<br />
+          <div class="badge badge-success">
+            {$format->dateFormat($v.tanggal)}
+          </div><br>
+          {if $v.shu}
+          <a title="Download File" class="border-secondary badge badge-warning" href="{$baseUrl}uploads/monitoring/{$v.shu}" target="_blank">DOWNLOAD SHU</a>
+          {else}
+          <label class="border-secondary badge badge-danger">TIDAK ADA SHU</label>
+          {/if}
+        </td>
+        <td>{$v.nama_provinsi}</td>
+        <td>{$v.peruntukan}</td>
+        <td>{$v.latitude}</td>
+        <td>{$v.longitude}</td>
+        <td>{$v.tss}</td>
+        <td>{$v.do_p}</td>
+        <td>{$v.minyak_dan_lemak}</td>
+        <td>{$v.amonia_total}</td>
+        <td>{$v.orto_fosfat}</td>
+        {foreachelse}
+        </tr>
+
+        <tr>
+          <td colspan="18" class="p-0">
+            <div class="alert alert-danger text-center">
+              <strong>Tidak Ada Data</strong>
+            </div>
+          </td>
+        </tr>
+        {/foreach}
+    </tbody>
+  </table>
+</div>
+{include file="parts/block/block_pagination.html"}

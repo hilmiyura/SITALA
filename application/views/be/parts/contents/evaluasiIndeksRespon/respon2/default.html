@@ -1,0 +1,89 @@
+<div class="row">
+	<div class="col-xl-12 col-lg-12 col-md-12">
+		<div class="row">
+			<div class="col-md-10">
+				<ul class="nav nav-tabs">
+					{if ($me.role_user == 3 || $me.role_user == 2 || $me.role_user == 1 || $me.role_user == 0) && $tipe == 1}
+					<li class="nav-item">
+						<a class="nav-link active" id="base-tab1" data-toggle="tab" aria-controls="tab1" href="#tab1" aria-expanded="true">Langit Biru</a>
+					</li>
+					{/if}
+					{if ($me.role_user == 2 || $me.role_user == 1 || $me.role_user == 0) && $tipe == 1}
+					<li class="nav-item">
+						<a class="nav-link" id="base-tab2" data-toggle="tab" aria-controls="tab2" href="#tab2" aria-expanded="true">Pantai Bersih</a>
+					</li>
+					{/if}
+					{if ($me.role_user == 3 || $me.role_user == 2 || $me.role_user == 1 || $me.role_user == 0) && $tipe == 1}
+					<li class="nav-item">
+						<a class="nav-link" id="base-tab3" data-toggle="tab" aria-controls="tab3" href="#tab3" aria-expanded="true">Program Kali Bersih</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="base-tab4" data-toggle="tab" aria-controls="tab4" href="#tab4" aria-expanded="true">Indonesia Hijau</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="base-tab5" data-toggle="tab" aria-controls="tab5" href="#tab5" aria-expanded="true">Gambut Lestari</a>
+					</li>
+					{/if}
+				</ul>
+			</div>
+			<div class="col-md-2">
+				<ul class="nav justify-content-end">
+					<li class="nav-item">
+						<a class="nav-link btn btn-info" href="{$baseUrl}{$ctrl}"><i class="ft-arrow-left"></i> Back</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="tab-content px-0 pt-1">
+			{if $tipe == 1}
+			<div role="tabpanel" class="tab-pane active" id="tab1" aria-expanded="true" aria-labelledby="base-tab1">
+				<h5 class="my-2 bold">{str_replace("%20"," ",trim($nama_kabkot))} | Provinsi {str_replace("%20"," ",trim($nama_propinsi))}</h5>
+				<h5 class="my-2">Tahun : {$tahun} | Download Excel : <button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-excel1"><i class="ft-download"></i></button></h5>
+				{if $parent != ""}
+				<div class="form-wrapper1">
+					{include file="parts/contents/$ctrl/$act/admin_tab1.html"}
+				</div>
+				{/if}
+			</div>
+			{/if}
+			{if $tipe == 2}
+			<div role="tabpanel" class="tab-pane" id="tab2" aria-expanded="true" aria-labelledby="base-tab2">
+				<h5 class="my-2">Provinsi {str_replace("%20"," ",trim($nama_propinsi))}</h5>
+				<h5 class="my-2">Tahun : {$tahun} | Download Excel : <button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-excel2"><i class="ft-download"></i></button></h5>
+				{if $parent != ""}
+				<div class="form-wrapper2">
+					{include file="parts/contents/$ctrl/$act/admin_tab2.html"}
+				</div>
+				{/if}
+			</div>
+			{/if}
+			<div role="tabpanel" class="tab-pane" id="tab3" aria-expanded="true" aria-labelledby="base-tab3">
+				<h5 class="my-2 bold">{str_replace("%20"," ",trim($nama_kabkot))} | Provinsi {str_replace("%20"," ",trim($nama_propinsi))}</h5>
+				<h5 class="my-2">Tahun : {$tahun} | Download Excel : <button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-excel3"><i class="ft-download"></i></button></h5>
+				{if $parent2 != ""}
+				<div class="form-wrapper3">
+					{include file="parts/contents/$ctrl/$act/admin_tab3.html"}
+				</div>
+				{/if}
+			</div>
+			<div role="tabpanel" class="tab-pane" id="tab4" aria-expanded="true" aria-labelledby="base-tab4">
+				<h5 class="my-2 bold">{str_replace("%20"," ",trim($nama_kabkot))} | Provinsi {str_replace("%20"," ",trim($nama_propinsi))}</h5>
+				<h5 class="my-2">Tahun : {$tahun} | Download Excel : <button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-excel4"><i class="ft-download"></i></button></h5>
+				{if $parent3 != ""}
+				<div class="form-wrapper4">
+					{include file="parts/contents/$ctrl/$act/admin_tab4.html"}
+				</div>
+				{/if}
+			</div>
+			<div role="tabpanel" class="tab-pane" id="tab5" aria-expanded="true" aria-labelledby="base-tab5">
+				<h5 class="my-2 bold">{str_replace("%20"," ",trim($nama_propinsi))} | Provinsi {str_replace("%20"," ",trim($nama_kabkot))}</h5>
+				<h5 class="my-2">Tahun : {$tahun} | Download Excel : <button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-excel5"><i class="ft-download"></i></button></h5>
+				{if $parent4 != ""}
+				<div class="form-wrapper5">
+					{include file="parts/contents/$ctrl/$act/admin_tab5.html"}
+				</div>
+				{/if}
+			</div>
+		</div>
+	</div>
+</div>

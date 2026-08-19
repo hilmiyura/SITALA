@@ -1,0 +1,22 @@
+<ul class="nav nav-tabs">
+  <li class="nav-item">
+    <a class="nav-link {if !$vSungai && !$showProv && !$showN && !$showM}active{/if} ika_mutu" id="base-tab5" data-toggle="tab" aria-controls="tab5" href="#tab5" aria-expanded="true">Kabupaten/Kota</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link ika_sungai {if $showProv}active{/if} ika_mutu" id="base-tab6" data-toggle="tab" aria-controls="tab6" href="#tab6" aria-expanded="false">Provinsi</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {if $showN } active {/if} ika_mutu" id="base-tab7" data-toggle="tab" aria-controls="tab7" href="#tab7" aria-expanded="false">Nasional</a>
+  </li>
+</ul>
+<div class="tab-content px-0 pt-1">
+  <div role="tabpanel" class="tab-pane {if !$vSungai && !$showProv && !$showN && !$showM}active{/if}" id="tab5" aria-expanded="true" aria-labelledby="base-tab5">
+    {include file="parts/contents/ika/indeks/simulasiIndeksKabkota.html"}
+  </div>
+  <div class="tab-pane {if $showProv}active{/if}" id="tab6" aria-labelledby="base-tab6">
+    {include file="parts/contents/ika/indeks/simulasiIndeksProvinsi.html"}
+  </div>
+  <div class="tab-pane {if $showN } active {/if}" id="tab7" aria-labelledby="base-tab7">
+    {include file="parts/contents/ika/indeks/simulasiIndeksNasional.html"}
+  </div>
+</div>

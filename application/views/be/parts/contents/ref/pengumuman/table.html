@@ -1,0 +1,66 @@
+<div class="row mb-1">
+  <div class="col-md-3">
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData">
+      <i class="ft-plus-circle"></i> Tambah Data
+    </button>
+  </div>
+</div>
+{include file="parts/block/block_search_pengumuman.html"}
+<div class="table-responsive" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th colspan="2" class="text-center" style="width: 70px">#</th>
+        <th rowspan="2" class="v-middle">Tanggal</th>
+        <th rowspan="2" class="v-middle">Judul</th>
+        <th rowspan="2" class="v-middle">Lampiran</th>
+        <th rowspan="2" class="v-middle">Publish</th>
+      </tr>
+      <tr>
+        <th width="50" class="text-center">Action</th>
+        <th width="10" class="text-center">No</th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v key=k}
+      <tr>
+        <th class="text-center">
+          {if $me.role_user <= 1} <button class="btn border-secondary badge badge-danger round delete-dialog" data-uid="{$v.$primaryKey}" data-ajax="{$ctrl}/deletedData/tbl/pengumuman/pk/uid_pengumuman">
+            <a href="javascript:void(0);" title="Delete">
+              <i class="ft-trash-2"></i>
+            </a>
+            </button>
+            <button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.$primaryKey}" title="Edit">
+              <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+            </button>
+            {/if}
+        </th>
+
+        <th class="text-center">{counter}</th>
+        <td>{$v.tanggal}</td>
+        <td><a class="text-primary" data-toggle="collapse" data-target="#collapseA{$k}" aria-expanded="true" aria-controls="collapseA{$k}"> {$v.judul} </a></td>
+        <td>
+          {if $v.lampiran}
+          <a href="{$baseUrl}uploads/pengumuman/{$v.lampiran}" class="btn btn-primary btn-sm" target="_blank"><i class="ft ft-download"></i></a>
+          {else}
+          -
+          {/if}
+        </td>
+        <td>
+          {if $v.status == 1}
+          <div class="badge border-success success badge-border">YA</div>
+          {else}
+          <div class="badge border-danger danger badge-border">TIDAK</div>
+          {/if}
+        </td>
+      </tr>
+      <tr id="collapseA{$k}" class="collapse" bgcolor="aliceblue">
+        <td colspan="2"></td>
+        <td colspan="5">{$v.isi}</td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+  {include file="parts/block/block_pagination.html"}
+</div>

@@ -1,0 +1,202 @@
+<style>
+	table thead tr th {
+		border: 1px solid black;
+	}
+
+	table tbody tr td {
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style>
+<table>
+	<thead>
+		<tr style="color: white;">
+			<th rowspan="2" bgcolor="#1E9FC4">NO</th>
+			<th rowspan="2" bgcolor="#1E9FC4">TANGGAL PEMANTAUAN</th>
+			<th rowspan="2" bgcolor="#1E9FC4">LAMPIRAN</th>
+			<th rowspan="2" bgcolor="#1E9FC4">RTH</th>
+			<th rowspan="2" bgcolor="#1E9FC4">KAB/KOTA</th>
+			<th rowspan="2" bgcolor="#1E9FC4">PROVINSI</th>
+			<th colspan="{if $search.tahun >= 2025} 24 {else} 10 {/if}" bgcolor="#1E9FC4">NILAI PEMANTAUAN</th>
+		</tr>
+		<tr style="color: white;">
+			{if $search.tahun < 2025}
+				<th bgcolor="#1E9FC4">
+					Luas Wilayah <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Luas Hutan <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Luas Belukar Dalam Kawasan <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Luas Belukar pada Fungsi Lindung <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Kebun Raya (data LIPI) <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					RTH <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Taman Kehati <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Tutupan Vegetasi Relevan Lainnya <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					RHL (Rehabilitasi Hutan dan Lahan dari APBN) <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Faktor Koreksi Gambut
+				</th>
+			{/if}
+
+			{if $search.tahun >= 2025}
+				<th bgcolor="#1E9FC4">
+					RTH <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					RHL (Rehabilitasi Hutan dan Lahan dari APBN) <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Hutan lahan kering primer <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Hutan lahan kering sekunder / bekas tebangan <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Hutan mangrove primer <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Hutan rawa primer <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Hutan tanaman <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Belukar <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Perkebunan / Kebun <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Permukiman / Lahan terbangun <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Lahan terbuka <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Savanna / Padang rumput <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Tubuh air <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Hutan mangrove sekunder / bekas tebangan <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Hutan rawa sekunder / bekas tebangan <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Belukar rawa <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Pertanian lahan kering <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Pertanian lahan kering  campur semak / kebun campur <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Sawah <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Tambak <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Bandara / Pelabuhan <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Transmigrasi <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Pertambangan <sup>(HA)</sup>
+				</th>
+				<th bgcolor="#1E9FC4">
+					Rawa <sup>(HA)</sup>
+				</th>
+			{/if}
+
+		</tr>
+	</thead>
+	<tbody>
+		{foreach from=$viewExcel.data item=data}
+		<tr>
+			<td>{$offset++}</td>
+			<td>{$data.tanggal}</td>
+			<!-- <td>'{$format->dateFormat($data.tanggal)}</td> -->
+			<td>
+				{if $data.shu || $data.lampiran || $data.lampiran_dtp}
+				ADA LAMPIRAN
+				{else}
+				TIDAK ADA LAMPIRAN
+				{/if}
+			</td>
+			<td>
+				{if $data.kebun_raya_data_lipi == 0 && $data.rth == 0 && $data.taman_kehati == 0}
+				Belum Melengkapi RTH
+				{else}
+				Ada
+				{/if}
+			</td>
+			<td>{$data.nama_kabkota}</td>
+			<td>{$data.nama_provinsi}</td>
+
+			{if $search.tahun < 2025}
+				<td align="center">'{$data.luas_wilayah}</td>
+				<td align="center">'{$data.luas_hutan}</td>
+				<td align="center">'{$data.luas_belukar_dalam_kawasan}</td>
+				<td align="center">'{$data.luas_belukar_pada_fungsi_lindung}</td>
+				<td align="center">'{$data.kebun_raya_data_lipi}</td>
+				<td align="center">'{$data.rth}</td>
+				<td align="center">'{$data.taman_kehati}</td>
+				<td align="center">'{$data.tutupan_vegetasi}</td>
+				<td align="center">'{$data.rhl}</td>
+				<td align="center">'{$data.dkk}</td>
+			{/if}
+
+			{if $search.tahun >= 2025}
+				<td align="center">'{$data.rth}</td>
+				<td align="center">'{$data.rhl}</td>
+				<td align="center">'{$data.hutan_lahan_kering_primer}</td>
+				<td align="center">'{$data.hutan_lahan_kering_sekunder}</td>
+				<td align="center">'{$data.hutan_mangrove_primer}</td>
+				<td align="center">'{$data.hutan_rawa_primer}</td>
+				<td align="center">'{$data.hutan_tanaman}</td>
+				<td align="center">'{$data.belukar}</td>
+				<td align="center">'{$data.perkebunan}</td>
+				<td align="center">'{$data.permukiman}</td>
+				<td align="center">'{$data.lahan_terbuka}</td>
+				<td align="center">'{$data.savanna}</td>
+				<td align="center">'{$data.tubuh_air}</td>
+				<td align="center">'{$data.hutan_mangrove_sekunder}</td>
+				<td align="center">'{$data.hutan_rawa_sekunder}</td>
+				<td align="center">'{$data.belukar_rawa}</td>
+				<td align="center">'{$data.pertanian_lahan_kering}</td>
+				<td align="center">'{$data.pertanian_lahan_kering_campur_semak}</td>
+				<td align="center">'{$data.sawah}</td>
+				<td align="center">'{$data.tambak}</td>
+				<td align="center">'{$data.bandara}</td>
+				<td align="center">'{$data.transmigrasi}</td>
+				<td align="center">'{$data.pertambangan}</td>
+				<td align="center">'{$data.rawa}</td>
+			{/if}
+		</tr>
+		{foreachelse}
+		<tr style="color: white;">
+			<td colspan="16" align="center" bgcolor="#FA535D">BELUM ADA DATA</td>
+		</tr>
+		{/foreach}
+	</tbody>
+</table>

@@ -1,0 +1,623 @@
+<div class="row">
+  <div class="col-xl-12 col-lg-12 col-md-12">
+    <form class="form form-horizontal" method="post" action="{$baseUrl}{$ctrl}/{$act}">
+      <div class="form-group row mb-0">
+        <!-- {var_dump($provinsi)} -->
+        <div class="col-md-12">
+          {if ($ctrl == "iku" || $ctrl == "ika" || $ctrl == "ikal") && ($me.role_user == 0 || $me.role_user == 1 ||
+          $me.role_user == 2 || $me.role_user == 4 || $me.role_user == 5)}
+          <div class="form-group mb-0">
+            <div class="row mb-2">
+              {if $ctrl == "lokasiPemantauan"}
+              <div class="col-md-12">
+                {else}
+                {if ($ctrl == "iku" || $ctrl == "ika" || $ctrl == "iktl") && ($me.role_user <= 2 || $me.role_user==4 || $me.role_user==5)} <div class="col-md-12">
+                  {elseif ($ctrl == "ikal") && ($me.role_user < 2 || $me.role_user==4 || $me.role_user==5 || $me.role_user==2)} <div class="col-md-12">
+                    {else}
+                    <div class="col-md-12">
+                      {/if}
+                      {/if}
+                      <input type="text" class="form-control" id="kataKunci" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+                    </div>
+              </div>
+              <div class="row mb-0">
+                {if $ctrl == "ikal"}
+                <div class="col-md-3 mb-1">
+                  <select class="form-control select2" name="form[src_level]">
+                    <option value=""> --LEVEL ENTRI-- </option>
+                    {if $me.role_user == 0 || $me.role_user == 1}
+                    <option value="1" {if 1==$search.src_level}selected{/if}>PUSAT</option>
+                    <option value="2" {if 2==$search.src_level}selected{/if}>PROVINSI</option>
+                    <option value="3" {if 3==$search.src_level}selected{/if}>KABUPATEN/KOTA</option>
+                    <option value="4" {if 4==$search.src_level}selected{/if}>REGIONAL</option>
+                    {elseif $me.role_user == 2}
+                    <option value="1" {if 1==$search.src_level}selected{/if}>PUSAT</option>
+                    <option value="2" {if 2==$search.src_level}selected{/if}>PROVINSI</option>
+                    <option value="3" {if 3==$search.src_level}selected{/if}>KABUPATEN/KOTA</option>
+                    <option value="4" {if 4==$search.src_level}selected{/if}>REGIONAL</option>
+                    {elseif $me.role_user == 4 || $me.role_user == 5}
+                    <option value="1" {if 1==$search.src_level}selected{/if}>PUSAT</option>
+                    <option value="2" {if 2==$search.src_level}selected{/if}>PROVINSI</option>
+                    <option value="3" {if 3==$search.src_level}selected{/if}>KABUPATEN/KOTA</option>
+                    <option value="4" {if 4==$search.src_level}selected{/if}>REGIONAL</option>
+                    {/if}
+                  </select>
+                </div>
+                {/if}
+                {if $ctrl == "iku" || $ctrl == "ika"}
+                <div class="col-md-3 mb-1">
+                  <select class="form-control select2" name="form[src_level]">
+                    <option value=""> --LEVEL ENTRI-- </option>
+                    <option value="1" {if 1==$search.src_level}selected{/if}>PUSAT</option>
+                    <option value="2" {if 2==$search.src_level}selected{/if}>PROVINSI</option>
+                    <option value="3" {if 3==$search.src_level}selected{/if}>KABUPATEN/KOTA</option>
+                    <option value="4" {if 4==$search.src_level}selected{/if}>REGIONAL</option>
+                  </select>
+                </div>
+                {/if}
+                {if $ctrl != "users" && $ctrl != "lokasiPemantauan" && $ctrl != "ref"}
+                <div class="col-md-3">
+                  <select class="form-control select2 select-tahun" name="form[tahun]" required="required">
+                    <option value=""> --PILIH TAHUN-- </option>
+                    {for $foo=2015 to ($thisYear+5)}
+                    <option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+                    {/for}
+                  </select>
+                </div>
+                {/if}
+                {if ($ctrl == "iku" || $ctrl == "ika" || $ctrl == "iktl" || $ctrl == "ikal") && ($me.role_user < 2)} <div class="col-md-3">
+                  <select class="form-control select2 regional_select2" to="src-provinsi2" name="form[src_reg]">
+                    <option value=""> --SEMUA REGIONAL-- </option>
+                    {foreach from=$regSelect item=i}
+                    <option value="{$i.kd_regional}" {if $i.kd_regional==$search.src_reg}selected{/if}>
+                      {$i.ur_regional} </option>
+                    {/foreach}
+                  </select>
+              </div>
+              <div class="col-md-3">
+                <select class="form-control select2 provinsi_select2" id="src-provinsi2" to="src-kabkota2" name="form[src_prop]">
+                  <option value=""> --PILIH PROVINSI-- </option>
+                  {if $search.src_prop}
+                  {foreach from=$propSelect item=i}
+                  <option value="{$i.kd_propinsi}" {if $i.kd_propinsi==$search.src_prop}selected{/if}>
+                    {$i.nama_propinsi} </option>
+                  {/foreach}
+                  {/if}
+                </select>
+              </div>
+              {elseif ($ctrl == "iku" || $ctrl == "ika" || $ctrl == "iktl" || $ctrl == "ikal") && ($me.role_user==4 || $me.role_user==5)}
+              <div class="col-md-3">
+                <select class="form-control select2 regional_select2" to="src-provinsi2" disabled name="form[src_reg]">
+                  <option value=""> --SEMUA REGIONAL-- </option>
+                  {foreach from=$regSelect item=i}
+                  <option value="{$i.kd_regional}" {if $i.kd_regional==$me.uid_regional}selected{/if}>{$i.ur_regional}</option>
+                  {/foreach}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <select class="form-control select2 provinsi_select2" id="src-provinsi2" to="src-kabkota2" name="form[src_prop]">
+                  <option value=""> --PILIH PROVINSI-- </option>
+                  {foreach from=$propSelect item=i}
+                  <option value="{$i.kd_propinsi}" {if $i.kd_propinsi==$search.src_prop}selected{/if}>
+                    {$i.nama_propinsi} </option>
+                  {/foreach}
+                </select>
+              </div>
+              {/if}
+              {if ($ctrl == "iku" || $ctrl == "ika" || $ctrl == "iktl" || $ctrl == "ikal") && ($me.role_user == 2)}
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2" disabled name="form[src_reg]">
+                  {foreach from=$regional item=i}
+                  <option value="{$i.kd_regional}" selected> {$i.ur_regional} </option>
+                  {/foreach}
+                </select>
+              </div>
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2 provinsi_select2 sfsef" to="src-kabkota2" disabled name="form[src_prop]">
+                  <option value="{$me.uid_provinsi}" selected> {$me.name} </option>
+                </select>
+              </div>
+              {/if}
+              {if ($ctrl == "iku" || $ctrl == "ika" || $ctrl == "iktl") && ($me.role_user == 2)}
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2" id="src-kabkota2" name="form[src_kabkota]">
+                  <option value=""> --SEMUA KAB/KOTA-- </option>
+                  {foreach from=$kabkotaSelect item=i}
+                  <option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota}selected{/if}> {$i.nama_kabkot}
+                  </option>
+                  {/foreach}
+                </select>
+              </div>
+              {/if}
+              {if ($ctrl == "iku" || $ctrl == "ika" || $ctrl == "iktl") && ($me.role_user != 2)}
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2" id="src-kabkota2" name="form[src_kabkota2]">
+                  <option value="">--PILIH KAB/KOTA--</option>
+                  {if $search.src_kabkota2}
+                  {foreach from=$kabkotaSelect2 item=i}
+                  <option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota2}selected{/if}> {$i.nama_kabkot}
+                  </option>
+                  {/foreach}
+                  {/if}
+                </select>
+              </div>
+              {/if}
+              {if ($ctrl == "iku")}
+              <div class="col-md-3">
+                <select class="form-control select2" name="form[src_periode]">
+                  <option value=""> --PERIODE PEMANTAUAN-- </option>
+                  <option value="1" {if 1==$search.src_periode}selected{/if}>Periode 1</option>
+                  <option value="2" {if 2==$search.src_periode}selected{/if}>Periode 2</option>
+                  <option value="3" {if 3==$search.src_periode}selected{/if}>Periode 3</option>
+                  <option value="4" {if 4==$search.src_periode}selected{/if}>Periode 4</option>
+                </select>
+              </div>
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2" name="form[src_metode]">
+                  <option value=""> --METODE PEMANTAUAN-- </option>
+                  {foreach from=$metode item=i}
+                  <option value="{$i.uid_metode_pemantauan}" {if $i.uid_metode_pemantauan==$search.src_metode}selected{/if}> {$i.metode} </option>
+                  {/foreach}
+                </select>
+              </div>
+              {/if}
+              {if ($ctrl == "ika")}
+              <div class="col-md-3">
+                <select class="form-control select2" name="form[src_periode]">
+                  <option value=""> --PERIODE PEMANTAUAN-- </option>
+                  <option value="1" {if 1==$search.src_periode}selected{/if}>Periode 1</option>
+                  <option value="2" {if 2==$search.src_periode}selected{/if}>Periode 2</option>
+                  <option value="3" {if 3==$search.src_periode}selected{/if}>Periode 3</option>
+                  <option value="4" {if 4==$search.src_periode}selected{/if}>Periode 4</option>
+                </select>
+              </div>
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2" name="form[src_kategori]">
+                  <option value=""> --KATEGORI-- </option>
+                  <option value="1" {if $search.src_kategori==1}selected{/if}> AIR SUNGAI </option>
+                  <option value="2" {if $search.src_kategori==2}selected{/if}> BADAN AIR GAMBUT </option>
+                  <option value="3" {if $search.src_kategori==3}selected{/if}> DANAU/SITU </option>
+                </select>
+              </div>
+              {/if}
+              {if $ctrl == "ikal"}
+              <div class="col-md-3">
+                <select class="form-control select2" name="form[src_periode]">
+                  <option value=""> --PERIODE PEMANTAUAN-- </option>
+                  <option value="1" {if 1==$search.src_periode}selected{/if}>Periode 1</option>
+                  <option value="2" {if 2==$search.src_periode}selected{/if}>Periode 2</option>
+                  <option value="3" {if 3==$search.src_periode}selected{/if}>Periode 3</option>
+                  <option value="4" {if 4==$search.src_periode}selected{/if}>Periode 4</option>
+                </select>
+              </div>
+              {/if}
+              {if ($ctrl == "iku" || $ctrl == "ikal")}
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2" name="form[src_peruntukan]">
+                  <option value=""> --PERUNTUKAN-- </option>
+                  {foreach from=$peruntukan item=i}
+                  <option value="{$i.uid_rf_peruntukan}" {if $i.uid_rf_peruntukan==$search.src_peruntukan}selected{/if}>
+                    {$i.nama} </option>
+                  {/foreach}
+                </select>
+              </div>
+              {/if}
+              {if ($ctrl == "iku" || $ctrl == "ika")}
+              <div class="col-md-3">
+                <select class="form-control select2" name="form[src_shu]">
+                  <option value=""> --ADA SHU ATAU TIDAK-- </option>
+                  <option value="NULL" {if $search.src_shu=="NULL" }selected{/if}> TIDAK ADA </option>
+                  <option value="NOT NULL" {if $search.src_shu=="NOT NULL" }selected{/if}> ADA </option>
+                </select>
+              </div>
+              {/if}
+              {if $ctrl == "lokasiPemantauan"}
+              <div class="col-md-3">
+                <select class="form-control select2" name="form[uid_rf_component]">
+                  <option value=""> --PILIH KOMPONEN PELAPORAN-- </option>
+                  {foreach from=$komponen item=i}
+                  <option value="{$i.uid_rf_component}" {if $i.uid_rf_component==$search.uid_rf_component}selected{/if}>
+                    {$i.name} </option>
+                  {/foreach}
+                </select>
+              </div>
+              {/if}
+              {if (($ctrl == "iku" || $ctrl == "ika" || $ctrl == "ikal") && $act == "verifikasi") && ($me.role_user != 3)}
+              <div class="col-md-3">
+                <select class="form-control select2" name="form[verifikasi]">
+                  <option value=""> --PILIH VERIFIKASI-- </option>
+                  <option value="un" {if $search.verifikasi=='un' }selected{/if}>Unverifed</option>
+                  <option value="1" {if $search.verifikasi==1}selected{/if}>Verified</option>
+                  <option value="2" {if $search.verifikasi==2}selected{/if}>Rejected</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <div class="input-group">
+                  <input type="date" class="form-control pl-1 pr-1" value="{$search.crdate_start}" name="form[crdate_start]">
+                  <div class="input-group-append">
+                    <span class="input-group-text pl-1 pr-1">s/d</span>
+                  </div>
+                  <input type="date" class="form-control pl-1 pr-1" value="{$search.crdate_end}" name="form[crdate_end]">
+                </div>
+                <small class="text-info">*tanggal input/update data</small>
+              </div>
+              {/if}
+              <div class="{if $ctrl != 'users'}col-md-3{else}col-md-5{/if}">
+                <div class="btn-group btn-block" role="group" aria-label="Basic example">
+                  <button type="submit" name="search" value="1" class="btn btn-info" style="padding: 10px;">
+                    <small><i class="ft-search"></i> SEARCH</small>
+                  </button>
+                  <a href="{$baseUrl}{$ctrl}/{$act}" class="btn btn-secondary" style="padding: 10px;">
+                    <small><i class="ft-refresh-cw"></i> RESET</small>
+                  </a>
+                  {if $ctrl != "lokasiPemantauan" && $ctrl != "nilaiDkk" && $ctrl != "targetiklh" && $ctrl != "users" &&
+                  $ctrl != "ref"}
+                  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#unduhDataExcel" style="padding: 10px;">
+                    <small><i class="ft-download"></i> EXCEL</small>
+                  </button>
+                  {/if}
+                </div>
+              </div>
+            </div>
+          </div>
+          {else}
+          <div class="form-group row mb-0">
+            {if $ctrl == "lokasiPemantauan"}
+            <div class="col-md-6">
+              {else}
+              {if ($ctrl == "iku" || $ctrl == "ika") && ($me.role_user <= 2 || $me.role_user==4 || $me.role_user==5)} <div class="col-md-12">
+                {elseif ($ctrl == "ikal") && ($me.role_user < 2 || $me.role_user==4 || $me.role_user==5)} <div class="col-md-3">
+                  {elseif ($ctrl == "nilaiDkk" || $ctrl == "users")} <div class="col-md-7">
+                    {elseif ($ctrl == "targetiklh")} <div class="col-md-6">
+                      {elseif ($ctrl == "iktl")} <div class="col-md-12">
+                        {else}
+                        <div class="col-md-12">
+                          {/if}
+                          {/if}
+                          <input type="text" class="form-control mb-1" id="kataKunci" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+                        </div>
+                        {if ($ctrl == "iku" || $ctrl == "ika" || $ctrl == "iktl" || $ctrl == "ikal") && ($me.role_user < 2)} <div class="col-md-3">
+                          <select class="form-control select2 regional_select2" to="src-provinsi2" name="form[src_reg]">
+                            <option value=""> --SEMUA REGIONAL-- </option>
+                            {foreach from=$regSelect item=i}
+                            <option value="{$i.kd_regional}" {if $i.kd_regional==$search.src_reg}selected{/if}>
+                              {$i.ur_regional} </option>
+                            {/foreach}
+                          </select>
+                      </div>
+                      <div class="col-md-3">
+                        <select class="form-control select2 provinsi_select2" id="src-provinsi2" to="src-kabkota2" name="form[src_prop]">
+                          <option value=""> --PILIH PROVINSI-- </option>
+                          {if $search.src_prop}
+                          {foreach from=$propSelect item=i}
+                          <option value="{$i.kd_propinsi}" {if $i.kd_propinsi==$search.src_prop}selected{/if}>
+                            {$i.nama_propinsi} </option>
+                          {/foreach}
+                          {/if}
+                        </select>
+                      </div>
+                      {elseif ($ctrl == "iku" || $ctrl == "ika" || $ctrl == "iktl" || $ctrl == "ikal") && ($me.role_user==4 || $me.role_user==5)}
+                      <div class="col-md-3">
+                        <select class="form-control select2 regional_select2" to="src-provinsi2" disabled name="form[src_reg]">
+                          <option value=""> --SEMUA REGIONAL-- </option>
+                          {foreach from=$regSelect item=i}
+                          <option value="{$i.kd_regional}" {if $i.kd_regional==$me.uid_regional}selected{/if}>
+                            {$i.ur_regional} </option>
+                          {/foreach}
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <select class="form-control select2 provinsi_select2" id="src-provinsi2" to="src-kabkota2" name="form[src_prop]">
+                          <option value=""> --PILIH PROVINSI-- </option>
+                          {foreach from=$propSelect item=i}
+                          <option value="{$i.kd_propinsi}" {if $i.kd_propinsi==$search.src_prop}selected{/if}>
+                            {$i.nama_propinsi} </option>
+                          {/foreach}
+                        </select>
+                      </div>
+                      {/if}
+                      {if $ctrl == "iku" || $ctrl == "ika" || $ctrl == "ikal"}
+                      <div class="col-md-3 mb-1">
+                        <select class="form-control select2" name="form[src_level]">
+                          <option value=""> --LEVEL ENTRI-- </option>
+                          <option value="1" {if 1==$search.src_level}selected{/if}>PUSAT</option>
+                          <option value="2" {if 2==$search.src_level}selected{/if}>PROVINSI</option>
+                          <option value="3" {if 3==$search.src_level}selected{/if}>KABUPATEN/KOTA</option>
+                          <option value="4" {if 4==$search.src_level}selected{/if}>REGIONAL</option>
+                        </select>
+                      </div>
+                      {/if}
+                      {if $ctrl != "users" && $ctrl != "lokasiPemantauan" && $ctrl != "ref" && $ctrl != "nilaiDkk" &&
+                      $ctrl != "iktl" && $me.role_user == 3 && $ctrl != "targetiklh"}
+                      <div class="col-md-3 mb-1">
+                        <select class="form-control select2" disabled name="form[src_reg]">
+                          {foreach from=$regional item=i}
+                          <option value="{$i.kd_regional}" selected> {$i.ur_regional} </option>
+                          {/foreach}
+                        </select>
+                      </div>
+                      <div class="col-md-3 mb-1">
+                        <select class="form-control select2" disabled name="form[src_prop]">
+                          {foreach from=$provinsi item=i}
+                          <option value="{$i.kd_propinsi}" selected> {$i.nama_propinsi} </option>
+                          {/foreach}
+                        </select>
+                      </div>
+                      {/if}
+                      {if $ctrl == "iktl" && $me.role_user == 3}
+                      <div class="col-md-3 mb-1">
+                        <select class="form-control select2" disabled name="form[src_reg]">
+                          {foreach from=$regional item=i}
+                          <option value="{$i.kd_regional}" selected> {$i.ur_regional} </option>
+                          {/foreach}
+                        </select>
+                      </div>
+                      <div class="col-md-3 mb-1">
+                        <select class="form-control select2" disabled name="form[src_prop]">
+                          {foreach from=$provinsi item=i}
+                          <option value="{$i.kd_propinsi}" selected> {$i.nama_propinsi} </option>
+                          {/foreach}
+                        </select>
+                      </div>
+                      {/if}
+                      {if $ctrl == "iktl" && $me.role_user == 2}
+                      <div class="col-md-3 mb-1">
+                        <select class="form-control select2" disabled name="form[src_reg]">
+                          {foreach from=$regional item=i}
+                          <option value="{$i.kd_regional}" selected> {$i.ur_regional} </option>
+                          {/foreach}
+                        </select>
+                      </div>
+                      <div class="col-md-3 mb-1">
+                        <select class="form-control select2" disabled name="form[src_prop]">
+                          {foreach from=$provinsi item=i}
+                          <option value="{$i.kd_propinsi}" selected> {$i.nama_propinsi} </option>
+                          {/foreach}
+                        </select>
+                      </div>
+                      {/if}
+                      {if ($ctrl == "iku" || $ctrl == "ika" || $ctrl == "iktl") && ($me.role_user != 2 && $me.role_user
+                      != 3)}
+                      <div class="col-md-3 mb-1">
+                        <select class="form-control select2" id="src-kabkota2" name="form[src_kabkota2]">
+                          <option value="">--PILIH KAB/KOTA--</option>
+                          {if $search.src_kabkota2}
+                          {foreach from=$kabkotaSelect2 item=i}
+                          <option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota2}selected{/if}>
+                            {$i.nama_kabkot} </option>
+                          {/foreach}
+                          {/if}
+                        </select>
+                      </div>
+                      {/if}
+                      {if $ctrl != "users" && $ctrl != "lokasiPemantauan" && $ctrl != "ref" && $ctrl != "nilaiDkk" &&
+                      $ctrl != "iktl" && $me.role_user == 3 && $ctrl != "targetiklh"}
+                      <div class="col-md-3">
+                        <select class="form-control select2" disabled name="form[src_kabkota]">
+                          <option value=""> {$me.name} </option>
+                          <!-- {foreach from=$kabkotaSelect item=i}
+                <option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota}selected{/if}> {$i.nama_kabkot} </option>
+                {/foreach} -->
+                        </select>
+                      </div>
+                      {/if}
+                      {if $ctrl == "iktl" && $me.role_user == 3}
+                      <div class="col-md-3">
+                        <select class="form-control select2" disabled name="form[src_kabkota]">
+                          <option value=""> {$me.name} </option>
+                          <!-- {foreach from=$kabkotaSelect item=i}
+                <option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota}selected{/if}> {$i.nama_kabkot} </option>
+                {/foreach} -->
+                        </select>
+                      </div>
+                      {/if}
+                      {if $ctrl == "iktl" && $me.role_user == 2}
+                      <div class="col-md-3">
+                        <select class="form-control select2" id="src-kabkota2" name="form[src_kabkota]">
+                          <option value="">--PILIH KAB/KOTA--</option>
+                          {foreach from=$kabkotaSelect item=i}
+                          <option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota}selected{/if}>
+                            {$i.nama_kabkot} </option>
+                          {/foreach}
+                        </select>
+                      </div>
+                      {/if}
+                      {if ($ctrl == "iku")}
+                      <div class="col-md-3">
+                        <select class="form-control select2" name="form[src_metode]">
+                          <option value=""> --METODE PEMANTAUAN-- </option>
+                          {foreach from=$metode item=i}
+                          <option value="{$i.uid_metode_pemantauan}" {if $i.uid_metode_pemantauan==$search.src_metode}selected{/if}> {$i.metode} </option>
+                          {/foreach}
+                        </select>
+                      </div>
+                      {/if}
+                      {if ($ctrl == "ika")}
+                      <div class="col-md-3">
+                        <select class="form-control select2" name="form[src_kategori]">
+                          <option value=""> --KATEGORI-- </option>
+                          <option value="1" {if $search.src_kategori==1}selected{/if}> AIR SUNGAI </option>
+                          <option value="2" {if $search.src_kategori==2}selected{/if}> BADAN AIR GAMBUT </option>
+                          <option value="3" {if $search.src_kategori==3}selected{/if}> DANAU/SITU </option>
+                        </select>
+                      </div>
+                      {/if}
+                      {if ($ctrl == "iku" || $ctrl == "ikal")}
+                      <div class="col-md-3">
+                        <select class="form-control select2" name="form[src_peruntukan]">
+                          <option value=""> --PERUNTUKAN-- </option>
+                          {foreach from=$peruntukan item=i}
+                          <option value="{$i.uid_rf_peruntukan}" {if $i.uid_rf_peruntukan==$search.src_peruntukan}selected{/if}> {$i.nama} </option>
+                          {/foreach}
+                        </select>
+                      </div>
+                      {/if}
+                      {if ($ctrl == "iku" || $ctrl == "ika")}
+                      <div class="col-md-3">
+                        <select class="form-control select2" name="form[src_shu]">
+                          <option value=""> --ADA SHU ATAU TIDAK-- </option>
+                          <option value="NULL" {if $search.src_shu=="NULL" }selected{/if}> TIDAK ADA </option>
+                          <option value="NOT NULL" {if $search.src_shu=="NOT NULL" }selected{/if}> ADA </option>
+                        </select>
+                      </div>
+                      {/if}
+                      {if ($ctrl == "iku" || $ctrl == "ika" || $ctrl == "iktl") && ($me.role_user < 2 || $me.role_user==4 || $me.role_user==5)} <div class="col-md-3">
+                        <select class="form-control select2" name="form[src_lampiran]">
+                          <option value=""> --ADA LAMPIRAN ATAU TIDAK-- </option>
+                          <option value="NULL" {if $search.src_lampiran=="NULL" }selected{/if}> TIDAK ADA </option>
+                          <option value="NOT NULL" {if $search.src_lampiran=="NOT NULL" }selected{/if}> ADA </option>
+                        </select>
+                    </div>
+                    {/if}
+                    {if ($ctrl == "iktl")}
+                    <div class="col-md-3">
+                      <select class="form-control select2" name="form[src_rth]">
+                        <option value=""> --ADA RTH ATAU TIDAK-- </option>
+                        <option value="NULL" {if $search.src_rth=="NULL" }selected{/if}> TIDAK ADA </option>
+                        <option value="NOT NULL" {if $search.src_rth=="NOT NULL" }selected{/if}> ADA </option>
+                      </select>
+                    </div>
+                    {/if}
+                    {if ($ctrl == "iktl")}
+                    {if $search.tahun < 2025}
+                    <div class="col-md-3">
+                      <select class="form-control select2" name="form[src_tutupan]">
+                        <option value=""> --ADA TUTUPAN VEGETASI ATAU TIDAK-- </option>
+                        <option value="NULL" {if $search.src_tutupan=="NULL" }selected{/if}> TIDAK ADA </option>
+                        <option value="NOT NULL" {if $search.src_tutupan=="NOT NULL" }selected{/if}> ADA </option>
+                      </select>
+                    </div>
+                    {else}
+                    <div class="col-md-3">
+                      <select class="form-control select2" name="form[src_tutupan]">
+                        <option value=""> --ADA RHL ATAU TIDAK-- </option>
+                        <option value="NULL" {if $search.src_tutupan=="NULL" }selected{/if}> TIDAK ADA </option>
+                        <option value="NOT NULL" {if $search.src_tutupan=="NOT NULL" }selected{/if}> ADA </option>
+                      </select>
+                    </div>
+                    {/if}
+                    {/if}
+                    {if ($ctrl == "iktl") && ($me.role_user == 3)}
+                    <div class="col-md-3">
+                      <select class="form-control select2" name="form[src_lampiran]">
+                        <option value=""> --ADA LAMPIRAN ATAU TIDAK-- </option>
+                        <option value="NULL" {if $search.src_lampiran=="NULL" }selected{/if}> TIDAK ADA </option>
+                        <option value="NOT NULL" {if $search.src_lampiran=="NOT NULL" }selected{/if}> ADA </option>
+                      </select>
+                    </div>
+                    {/if}
+                    {if ($ctrl == "iktl") && ($me.role_user == 2)}
+                    <div class="col-md-3">
+                      <select class="form-control select2" name="form[src_lampiran]">
+                        <option value=""> --ADA LAMPIRAN ATAU TIDAK-- </option>
+                        <option value="NULL" {if $search.src_lampiran=="NULL" }selected{/if}> TIDAK ADA </option>
+                        <option value="NOT NULL" {if $search.src_lampiran=="NOT NULL" }selected{/if}> ADA </option>
+                      </select>
+                    </div>
+                    {/if}
+                    {if ($ctrl == "iktl" && $act == "verifikasi") && $me.role_user != 3}
+                    <div class="col-md-3">
+                      <select class="form-control select2" name="form[verifikasi]">
+                        <option value=""> --PILIH VERIFIKASI-- </option>
+                        <option value="un" {if $search.verifikasi=='un' }selected{/if}>Unverifed</option>
+                        <option value="1" {if $search.verifikasi==1}selected{/if}>Verified</option>
+                        <option value="2" {if $search.verifikasi==2}selected{/if}>Rejected</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="input-group">
+                        <input type="date" class="form-control pl-1 pr-1" value="{$search.crdate_start}" name="form[crdate_start]">
+                        <div class="input-group-append">
+                          <span class="input-group-text pl-1 pr-1">s/d</span>
+                        </div>
+                        <input type="date" class="form-control pl-1 pr-1" value="{$search.crdate_end}" name="form[crdate_end]">
+                      </div>
+                      <small class="text-info">*tanggal input/update data</small>
+                    </div>
+                    {/if}
+                    {if $ctrl != "users" && $ctrl != "ref" && $ctrl != "lokasiPemantauan" && $ctrl != "targetiklh" && $me.role_user == 3 && $ctrl != "nilaiDkk"}
+                    <div class="col-md-3 mb-1">
+                      <select class="form-control select2 select-tahun" name="form[tahun]" required="required">
+                        <option value=""> --PILIH TAHUN-- </option>
+                        {for $foo=2015 to ($thisYear+5)}
+                        <option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+                        {/for}
+                      </select>
+                    </div>
+                    {/if}
+                    {if $ctrl == "targetiklh" && $me.role_user == 3}
+                    <div class="col-md-3">
+                      <select class="form-control select2 select-tahun" name="form[tahun]" required="required">
+                        <option value=""> --PILIH TAHUN-- </option>
+                        {for $foo=2015 to ($thisYear+5)}
+                        <option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+                        {/for}
+                      </select>
+                    </div>
+                    {/if}
+                    {if $ctrl == "iktl" && ($me.role_user == 2 || $me.role_user == 4 || $me.role_user == 5)}
+                    <div class="col-md-3 mb-1">
+                      <select class="form-control select2 select-tahun" name="form[tahun]" required="required">
+                        <option value=""> --PILIH TAHUN-- </option>
+                        {for $foo=2015 to ($thisYear+5)}
+                        <option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+                        {/for}
+                      </select>
+                    </div>
+                    {/if}
+                    {if $ctrl == "iktl" && $me.role_user == 1 || $me.role_user == 0 && $ctrl != "lokasiPemantauan" &&
+                    $ctrl != "nilaiDkk" && $ctrl != "targetiklh" && $ctrl != "users" && $ctrl != "ref"}
+                    <div class="col-md-3 mb-1">
+                      <select class="form-control select2 select-tahun" name="form[tahun]" required="required">
+                        <option value=""> --PILIH TAHUN-- </option>
+                        {for $foo=2015 to ($thisYear+5)}
+                        <option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+                        {/for}
+                      </select>
+                    </div>
+                    {/if}
+                    {if $ctrl != "users" && $ctrl != "lokasiPemantauan" && $ctrl != "ref" && $ctrl != "iktl" &&
+                    ($me.role_user != 3)}
+                    <div class="col-md-2 mb-1">
+                      <select class="form-control select2 select-tahun" name="form[tahun]" required="required">
+                        <option value=""> --PILIH TAHUN-- </option>
+                        {for $foo=2015 to ($thisYear+5)}
+                        <option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+                        {/for}
+                      </select>
+                    </div>
+                    {/if}
+                    {if $ctrl == "lokasiPemantauan"}
+                    <div class="col-md-3">
+                      <select class="form-control select2" name="form[uid_rf_component]">
+                        <option value=""> --PILIH KOMPONEN PELAPORAN-- </option>
+                        {foreach from=$komponen item=i}
+                        <option value="{$i.uid_rf_component}" {if $i.uid_rf_component==$search.uid_rf_component}selected{/if}> {$i.name} </option>
+                        {/foreach}
+                      </select>
+                    </div>
+                    {/if}
+                    <div class="{if $ctrl != 'users' && $ctrl != 'ref' }col-md-3{else}col-md-5{/if}">
+                      <div class="btn-group btn-block" role="group" aria-label="Basic example">
+                        <button type="submit" name="search" value="1" class="btn btn-info" style="padding: 10px;">
+                          <small><i class="ft-search"></i> SEARCH</small>
+                        </button>
+                        <a href="{$baseUrl}{$ctrl}/{$act}" class="btn btn-secondary" style="padding: 10px;">
+                          <small><i class="ft-refresh-cw"></i> RESET</small>
+                        </a>
+                        {if $ctrl != "lokasiPemantauan" && $ctrl != "nilaiDkk" && $ctrl != "targetiklh" && $ctrl !=
+                        "users" && $ctrl != "ref"}
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#unduhDataExcel" style="padding: 10px;">
+                          <small><i class="ft-download"></i> EXCEL</small>
+                        </button>
+                        {/if}
+                      </div>
+                    </div>
+                  </div>
+                  {/if}
+            </div>
+          </div>
+          <hr />
+    </form>
+  </div>
+</div>

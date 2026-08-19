@@ -1,0 +1,32 @@
+{if isset($totalRow) && isset($limit)}
+	{if $totalRow > $limit}
+		<div class="border-top-blue-grey border-top-lighten-5 row">
+			<div class="col-sm-4">
+				<div class="pt-1">
+					<strong>Number Of Rows : {$totalRow} Rows</strong>
+				</div>
+			</div>
+			<div class="col-sm-8">
+				<div class="pull-right">
+					<ul class="pagination">
+						<li class="page-item">
+							{paginate_first}
+						</li>
+						<li class="page-item">
+							{paginate_prev}
+						</li>
+						<!-- <li class="page-item"> -->
+							{paginate_middle format="page" prefix=" " suffix=" " page_limit="5"}
+						<!-- </li> -->
+						<li class="page-item">
+							{paginate_next}
+						</li>
+						<li class="page-item">
+							{paginate_last}
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	{/if}
+{/if}

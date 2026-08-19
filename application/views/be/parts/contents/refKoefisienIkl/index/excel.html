@@ -1,0 +1,68 @@
+<table>
+  <thead>
+    <tr style="color: white;">
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">NO</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Tahun</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Hutan lahan kering primer</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Hutan lahan kering sekunder / bekas tebangan</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Hutan mangrove primer</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Hutan rawa primer</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Hutan tanaman</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Belukar</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Perkebunan / Kebun</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Permukiman / Lahan terbangun</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Lahan terbuka</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Savanna / Padang rumput</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Tubuh air</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Hutan mangrove sekunder / bekas tebangan</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Hutan rawa sekunder / bekas tebangan</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Belukar rawa</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Pertanian lahan kering</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Pertanian lahan kering  campur semak / kebun campur</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Sawah</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Tambak</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Bandara / Pelabuhan</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Transmigrasi</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Pertambangan</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Rawa</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">RTH</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">RTL</th>
+    </tr>
+  </thead>
+  <tbody>
+    {foreach from=$viewExcel.data item=v}
+    <tr>
+      <td style="border: 1px solid black;vertical-align:top;">{counter}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.tahun}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.hutan_lahan_kering_primer}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.hutan_lahan_kering_sekunder}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.hutan_mangrove_primer}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.hutan_rawa_primer}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.hutan_tanaman}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.belukar}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.perkebunan}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.permukiman}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.lahan_terbuka}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.savanna}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.tubuh_air}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.hutan_mangrove_sekunder}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.hutan_rawa_sekunder}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.belukar_rawa}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.pertanian_lahan_kering}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.pertanian_lahan_kering_campur_semak}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.sawah}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.tambak}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.bandara}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.transmigrasi}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.pertambangan}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.rawa}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.rth}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.rtl}</td>
+    </tr>
+    {foreachelse}
+    <tr style="color: white;">
+      <td colspan="3" align="center" bgcolor="#FA535D" style="border: 1px solid black;vertical-align:top;">BELUM ADA DATA</td>
+    </tr>
+    {/foreach}
+  </tbody>
+</table>

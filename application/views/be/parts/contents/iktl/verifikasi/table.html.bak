@@ -1,0 +1,225 @@
+{include file="parts/block/block_search.html"}
+<div class="table-responsive table-border freeze-table">
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th rowspan="2" class="v-middle text-center" style="width: 70px">No</th>
+        <th colspan="2" class="text-center">Tanggal</th>
+        <th colspan="3" class="text-center">Verifikasi</th>
+        <th rowspan="3" class="v-middle">Catatan Pelaporan</th>
+        <th rowspan="3" class="v-middle">Pemantauan</th>
+        <th rowspan="3" class="v-middle">Kab/Kota</th>
+        <th rowspan="3" class="v-middle">Provinsi</th>
+        <th colspan="10" class="text-center">Nilai Pemantauan</th>
+      </tr>
+      <tr>
+        <th>Input Data</th>
+        <th>Update Data</th>
+        <th width="10" class="v-middle text-center">Provinsi</th>
+        <th width="10" class="v-middle text-center">Regional</th>
+        <th width="50" class="v-middle text-center">Pusat</th>
+        <th class="v-middle text-center">
+          Luas Wilayah <sup>(HA)</sup>
+        </th>
+        <th class="v-middle text-center">
+          Luas Hutan <sup>(HA)</sup>
+        </th>
+        <th class="v-middle text-center">
+          Luas Belukar Dalam Kawasan <sup>(HA)</sup>
+        </th>
+        <th class="v-middle text-center">
+          Luas Belukar pada Fungsi Lindung <sup>(HA)</sup>
+        </th>
+        <th class="v-middle text-center">
+          Kebun Raya (data LIPI) <sup>(HA)</sup>
+        </th>
+        <th class="v-middle text-center">
+          RTH <sup>(HA)</sup>
+        </th>
+        <th class="v-middle text-center">
+          Taman Kehati <sup>(HA)</sup>
+        </th>
+        <th class="v-middle text-center">
+          Tutupan Vegetasi Relevan Lainnya <sup>(HA)</sup>
+        </th>
+        <th class="v-middle text-center">
+          RHL (Rehabilitasi Hutan dan Lahan) <sup>(HA)</sup>
+        </th>
+        <th class="v-middle text-center">
+          DKK
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {$showBtnCatatan = 0}
+      {foreach from=$view item=v}
+
+      {if $me.role_user == 4 && $v.role_user == 2}
+      {$showBtnCatatan = 1}
+      {elseif $me.role_user == 2 && $v.role_user == 3}
+      {$showBtnCatatan = 1}
+      {elseif $me.role_user == 0 || $me.role_user == 1}
+      {$showBtnCatatan = 1}
+      {/if}
+      <tr>
+        <td class="text-center">{counter}</td>
+        <td class="pr-1">
+          {date('Y-m-d',$v.crdate)}
+        </td>
+        <td class="pr-1">
+          {if $v.chdate}
+          {date('Y-m-d',$v.chdate)}
+          {else}
+          -
+          {/if}
+        </td>
+        {if $lockActionYear == 0}
+        <th class="text-center">
+          {if ($me.role_user == 2 || $me.role_user == 0) && $lockAction == 0}
+          <button {if !$v.v_provinsi} style="display:none;" {/if}
+            class="badge badge-info v_provinsi_verify{$v.$primaryKey}  unverify" data-verify="v_provinsi"
+            data-uid="{$v.$primaryKey}" title="Verifikasi"><a href="javascript:void(0);">verified</a></button>
+          <button {if $v.v_provinsi} style="display:none;" {/if}
+            class="badge badge-danger v_provinsi_unverify{$v.$primaryKey}  verify" data-verify="v_provinsi"
+            data-uid="{$v.$primaryKey}" title="Verifikasi"><a href="javascript:void(0);">unverified</a></button>
+          {else}
+          <div {if !$v.v_provinsi} style="display:none;" {/if} class="badge badge-info " title="Valid">verified</div>
+          <div {if $v.v_provinsi} style="display:none;" {/if} class="badge badge-danger " title="Invalid">unverified
+          </div>
+          {/if}
+        </th>
+        <th class="text-center">
+          --
+          <!-- {if ($me.role_user == 4 || $me.role_user == 0) && $lockAction == 0}
+              <button {if !$v.v_regional} style="display:none;"{/if} class="badge badge-info v_regional_verify{$v.$primaryKey}  unverify" data-verify="v_regional"  data-uid="{$v.$primaryKey}" title="Verifikasi"><a href="javascript:void(0);">verified</a></button>
+              <button {if $v.v_regional} style="display:none;"{/if} class="badge badge-danger v_regional_unverify{$v.$primaryKey}  verify" data-verify="v_regional"  data-uid="{$v.$primaryKey}" title="Verifikasi"><a href="javascript:void(0);">unverified</a></button>
+            {else}
+              <div {if !$v.v_regional} style="display:none;"{/if} class="badge badge-info" title="Valid">verified</div>
+              <div {if $v.v_regional} style="display:none;"{/if} class="badge badge-danger" title="Invalid">unverified</div>
+            {/if} -->
+        </th>
+        <th class="text-center">
+          {if ($me.role_user == 1 || $me.role_user == 0) && $lockAction == 0}
+          <button {if !$v.v_pusat} style="display:none;" {/if}
+            class="badge badge-info v_pusat_verify{$v.$primaryKey}  unverify" data-verify="v_pusat"
+            data-uid="{$v.$primaryKey}" title="Verifikasi"><a href="javascript:void(0);">verified</a></button>
+          <button {if $v.v_pusat} style="display:none;" {/if}
+            class="badge badge-danger v_pusat_unverify{$v.$primaryKey}  verify" data-verify="v_pusat"
+            data-uid="{$v.$primaryKey}" title="Verifikasi"><a href="javascript:void(0);">unverified</a></button>
+          {else}
+          <div {if !$v.v_pusat} style="display:none;" {/if} class="badge badge-info" title="Valid">verified</div>
+          <div {if $v.v_pusat} style="display:none;" {/if} class="badge badge-danger" title="Invalid">unverified</div>
+          {/if}
+        </th>
+        {else}
+        <th colspan="3" class="text-center">
+          <span class="badge badge-dark">pelaporan {$lockActionYear} ditutup</span>
+        </th>
+        {/if}
+        <td>
+          {if $showBtnCatatan && $lockActionYear == 0}
+          <a href="javascript:();" data-toggle="modal" data-target="#catatanVerifikator" data-uid="{$v.$primaryKey}"
+            class="badge badge-primary catatan-verifikator"> <i class="ft-edit"></i> Tambah catatan</a>
+          <br><br>
+          {/if}
+          <span id="catatan-{$v.$primaryKey}-short">{if
+            $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}</span>
+          <!-- <span id="catatan-{$v.$primaryKey}-long" style="display:none"></span> -->
+        </td>
+        <td>
+          <div class="badge badge-success">
+            {$format->dateFormat($v.tanggal)}
+          </div><br>
+          {if $v.shu || $v.lampiran_kml || $v.lampiran || $v.lampiran_dtp || $v.lampiran_rth || $v.lampiran_tutupan}
+          <div class="dropdown" style="margin-top: 5px;">
+            <a class="btn btn-info btn-sm dropdown-toggle tx-12" href="#" role="button" id="dropdownMenuLink"
+              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              LAMPIRAN
+            </a>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+              {if $v.shu}
+              <a title="Download File" class="dropdown-item" href="{$baseUrl}uploads/monitoring/{$v.shu}"
+                target="_blank">LAMPIRAN SHU</a>
+              {/if}
+              {if $v.lampiran_kml}
+              <a title="Download File" class="dropdown-item" href="{$baseUrl}uploads/kml/{$v.lampiran_kml}"
+                target="_blank">LAMPIRAN KML</a>
+              {/if}
+              {if $v.lampiran}
+              <a title="Download File" class="dropdown-item" href="{$baseUrl}uploads/monitoring/{$v.lampiran}"
+                target="_blank">LAMPIRAN PETA</a>
+              {/if}
+              {if $v.lampiran_dtp}
+              <a title="Download File" class="dropdown-item" href="{$baseUrl}uploads/dtp/{$v.lampiran_dtp}"
+                target="_blank">LAMPIRAN TABEL RTH</a>
+              {/if}
+              {if $v.lampiran_rth}
+              <a title="Download File" class="dropdown-item" href="{$baseUrl}uploads/rth/{$v.lampiran_rth}"
+                target="_blank">LAMPIRAN RTH</a>
+              {/if}
+              {if $v.lampiran_tutupan}
+              <a title="Download File" class="dropdown-item" href="{$baseUrl}uploads/tutupan/{$v.lampiran_tutupan}"
+                target="_blank">LAMPIRAN TUTUPAN VEGETASI</a>
+              {/if}
+            </div>
+          </div>
+          {else}
+          <label class="badge badge-danger">TIDAK ADA LAMPIRAN</label><br>
+          {/if}
+          {if $v.kebun_raya_data_lipi == 0 && $v.rth == 0 && $v.taman_kehati == 0}
+          <label class="badge badge-warning">Belum Melengkapi Rincian RTH</label><br>
+          {else}
+            {if $dev == 1}
+              <a class="btn btn-primary btn-sm tx-12 tambah-rth-detail" data-toggle="modal" role="button" data-target="#modal-rincian"
+                data-uid="{$v.$primaryKey}" data-verifikasi="{$v.$primaryKey}" title="Detail" style="margin-top:2px;color:white;">
+                Detail RTH
+              </a>
+            {else}
+              <a class="btn btn-primary btn-sm tx-12" data-toggle="modal" role="button" data-target="#detailRth"
+                data-uid="{$v.$primaryKey}" title="Detail RTH" style="margin-top:2px;color:white;">
+                Detail RTH
+              </a>
+            {/if}
+          {/if}
+          {if $v.tutupan_vegetasi == 0}
+          <label class="badge badge-warning">Belum Melengkapi Rincian Tutupan Vegetasi</label><br>
+          {else}
+          <a class="btn btn-primary btn-sm tx-12" data-toggle="modal" role="button" data-target="#detailTutupan"
+            data-uid="{$v.$primaryKey}" title="Detail Tutupan" style="margin-top:2px;color:white;">
+            Detail Tutupan
+          </a>
+          {/if}
+        </td>
+        <td>{$v.nama_kabkota}</td>
+        <td>{$v.nama_provinsi}</td>
+        <td class="text-center">{$v.luas_wilayah}</td>
+        <td class="text-center">{$v.luas_hutan}</td>
+        <td class="text-center">{$v.luas_belukar_dalam_kawasan}</td>
+        <td class="text-center">{$v.luas_belukar_pada_fungsi_lindung}</td>
+        <td class="text-center" id="verifikasi-kebun-{$v.$primaryKey}">{if
+          $v.kebun_raya_data_lipi}{$v.kebun_raya_data_lipi}{else}--{/if}</td>
+        <td class="text-center" id="verifikasi-rth-{$v.$primaryKey}">{if $v.rth}{$v.rth}{else}--{/if}</td>
+        <td class="text-center" id="verifikasi-taman-{$v.$primaryKey}">{if
+          $v.taman_kehati}{$v.taman_kehati}{else}--{/if}</td>
+        <td class="text-center" id="verifikasi-tutupan-{$v.$primaryKey}">{if
+          $v.tutupan_vegetasi}{$v.tutupan_vegetasi}{else}--{/if}</td>
+        <td class="text-center">{$v.rhl}</td>
+        <td class="text-center">{$v.dkk}</td>
+        <!-- <td>{$v.luas_khg}</td>
+	                <td>{$v.luas_non_khg}</td> -->
+        {foreachelse}
+      </tr>
+
+      <tr>
+        <td colspan="15" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+</div>
+{include file="parts/block/block_pagination.html"}

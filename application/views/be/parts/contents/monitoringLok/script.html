@@ -1,0 +1,151 @@
+{literal}
+<script type="text/javascript">
+  var objMap = {
+    /literal}{if $viewMap}{$viewMap}{else}0{/if
+  } {
+    literal
+  };
+  reset = () => {
+    $("#uid_lokasi_pemantauan").val("");
+    $("#kode_lokasi").val("");
+    $("#alamat").val("");
+    $("#alamat_detail").val("");
+    $("#uid_provinsi").val("").trigger("change");
+    id_kabkota = 0;
+    $("#uid_kabkota").val("").trigger("change");
+    $("#latitude").val("");
+    $("#longitude").val("");
+    $("#tahun").val("").trigger("change");
+    $("#uid_rf_component").val("").trigger("change");
+    $("#uid_rf_pelaksana").val("").trigger("change");
+  }
+
+  $(document).ready(function() {
+    initMap = function() {
+      var latitude = -2;
+      var longitude = 120;
+      var zoomLevel = 5;
+      var centerMap = [latitude, longitude];
+      var mymap = L.map('map').setView(centerMap, zoomLevel);
+      var greenIcon = L.icon({
+        iconUrl: 'http://labs.google.com/ridefinder/images/mm_20_green.png',
+        iconSize: [15, 20]
+      });
+      var redIcon = L.icon({
+        iconUrl: 'http://labs.google.com/ridefinder/images/mm_20_red.png',
+        iconSize: [15, 20]
+      });
+      var orangeIcon = L.icon({
+        iconUrl: 'http://labs.google.com/ridefinder/images/mm_20_orange.png',
+        iconSize: [15, 20]
+      });
+      var blueIcon = L.icon({
+        iconUrl: 'http://labs.google.com/ridefinder/images/mm_20_blue.png',
+        iconSize: [15, 20]
+      });
+
+      L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYWRlb2ZpayIsImEiOiJja2F4eGVtY2IwY21xMnZvYWJ5azE0eWRnIn0.buGOeenzITnPaWe1pnQTWw', {
+        maxZoom: 18,
+        minZoom: 4,
+        id: 'mapbox/streets-v11',
+        tileSize: 512,
+        zoomOffset: -1,
+        zoomControl: false
+      }).addTo(mymap);
+      mymap.zoomControl.remove();
+      L.control.zoom({
+        position: 'topright'
+      }).addTo(mymap);
+      console.log(objMap);
+      if (objMap) {
+        var data = JSON.parse(JSON.stringify(objMap));
+        jQuery.each(data, function(key, val) {
+          var lapor = false;
+          var color = '';
+          var title = '';
+          var content = '';
+          var lat = 0;
+          var lng = 0;
+          if (val) {
+            title = val.kode_lokasi + ', ' + val.alamat;
+            lat = val.latitude;
+            lng = val.longitude;
+
+            content += '<table id="table-sm" class="table table-bordered table-sm">';
+            content += '<thead>';
+            content += '<tr>';
+            content += '<th colspan="2">';
+            content += '<small>';
+            content += 'LOKASI PEMANTAUAN';
+            content += '</small>'
+            content += '</th>';
+            content += '</tr>';
+            content += '</thead>';
+            content += '<tbody>';
+            content += '<tr style="padding:5px; font-size:10px;">';
+            content += '<td style="text-transform:uppercase;">' + val.kode_lokasi + '</td>';
+            content += '<td>' + val.alamat + ',<br/> ' + val.alamat_detail + '</td>';
+            content += '</tr>';
+            content += '</tbody>';
+            content += '</table>';
+
+            if (val.uid_rf_pelaksana == 1) {
+              iconResult = redIcon;
+            } else if (val.uid_rf_pelaksana == 2) {
+              iconResult = greenIcon;
+            } else if (val.uid_rf_pelaksana == 3) {
+              iconResult = blueIcon;
+            } else if (val.uid_rf_pelaksana == 4) {
+              iconResult = orangeIcon;
+            }
+            if (lat && lng) {
+              var latLng = [lat, lng];
+              L.marker(latLng, {
+                icon: iconResult
+              }).bindTooltip(title).bindPopup(content).addTo(mymap);
+            }
+          }
+        });
+      }
+    }
+    $('#maps').on('show.bs.modal', function() {
+      setTimeout(function() {
+        initMap();
+      }, 10);
+    });
+  });
+
+  $('#tambahData').on('show.bs.modal', function(event) {
+    reset();
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    var userBy = button.data('uid');
+    if (userBy) {
+      $.ajax({
+        url: baseUrl + ctrl + "/editData/x/" + userBy,
+        method: "GET",
+        success: function(req) {
+          if (req.uid_lokasi_pemantauan) {
+            $("#uid_lokasi_pemantauan").val(req.uid_lokasi_pemantauan);
+            $("#kode_lokasi").val(req.kode_lokasi);
+            $("#alamat").val(req.alamat);
+            $("#alamat_detail").val(req.alamat_detail);
+            $("#uid_provinsi").val(req.uid_provinsi).trigger("change");
+            id_kabkota = req.uid_kabkota;
+            $("#uid_kabkota").val(req.uid_kabkota).trigger("change");
+            $("#latitude").val(req.latitude);
+            $("#longitude").val(req.longitude);
+            $("#tahun").val(req.tahun).trigger("change");
+            $("#uid_rf_component").val(req.uid_rf_component).trigger("change");
+            $("#uid_rf_pelaksana").val(req.uid_rf_pelaksana).trigger("change");
+          }
+        }
+      })
+    }
+
+  });
+  $("#tambahDataExcel").on('show.bs.modal', function(event) {
+    reset();
+    var button = $(event.relatedTarget) // Button that triggered the modal
+  });
+</script>
+{/literal}

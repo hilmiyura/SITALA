@@ -1,0 +1,33 @@
+<!-- Modal -->
+<div class="modal text-left" id="tambahData3" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data FAQ
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+        <input type="hidden" name="form[uid_topik]" id="uid_topik" />
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="col-md-12 mb-1">
+              <label for="name">Nama Topik</label>
+              <input type="text" class="form-control position-relative" name="form[nama_topik]" id="nama_topik" placeholder="Nama Topik" value="" required="" />
+              <!-- <div class="valid-tooltip"></div> -->
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="submit" name="topik" class="btn btn-danger">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

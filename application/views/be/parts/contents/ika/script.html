@@ -1,0 +1,610 @@
+{literal}
+<script type="text/javascript">
+  var scrollTobtn = '{/literal}{$scrollTobtn}{literal}';
+  $(document).ready(function() {
+    $('#exportTitik').on("click", function(){
+      TableToExcel.convert(document.getElementById("titik"), {
+        name: "Titik.xlsx",
+        sheet: {
+          name: "Sheet 1"
+        }
+      });
+    });
+
+    $('.show-titik').on("click", function() {
+      var name = $(this).attr('data-nama');
+      var uid = $(this).attr('data-uid');
+      // alert(name);
+      $('#body-data').html('<tr><td colspan="6" class="text-center">...wait a moment...</td></tr>');
+      $('#data-nama').text('Titik Lokasi - '+name);
+      $('#data-nama-daerah').text(name);
+
+      $.ajax({
+        url: baseUrl + ctrl + "/titikLokasi/uid/" + uid,
+        method: "GET",
+        success: function(req) {
+          $('#body-data').html(req);
+        }
+      });
+    });
+
+    $('#primary').on('show.bs.modal', function(event) {
+      $(".select-year-indeks").val("").trigger("change");
+      $(".simulasi-content").html("");
+    });
+
+    var idOpen = 0;
+    $(".open-detail").on("click", function(){
+      var id = $(this).attr("id");
+      var shu = $(this).attr("shu");
+      var embeded = "";
+      if(shu == 0){
+        embeded = '<div class="alert alert-danger text-center">TIDAK ADA SHU</div>';
+      }else if (shu == 1) {
+        embeded = '<div class="alert alert-warning text-center">FORMAT SHU BUKAN PDF | SILAHKAN DOWNLOAD SHU</div>';
+      }else{
+        embeded = '<iframe src="'+shu+'" style="width:100%; height:700px"></iframe>';
+      }
+
+      $(".tr_detail").hide();
+      if(id != idOpen){
+        idOpen = id;
+        $("#tr-detail-"+id).show("slow");
+
+        $("#shu-detail-"+id).html(embeded);
+      }else{
+        idOpen = 0;
+      }
+    });
+
+    $(document).on("click", "#btn-hitung-simulasi-kabkota", function(event) {
+      var uid = $(this).attr("data-uid");
+      if (uid) {
+        $.ajax({
+          url: baseUrl + "simulasiHitungIKA/hitung/x/" + uid + "/y/1",
+          method: "GET",
+          success: function(request) {
+            var res = JSON.parse(request);
+            if (res.statusCode == 200) {
+              if (res.data) {
+                $(".jumlah-titik-memenuhi-" + uid + "-kabkota").html(res.data.jumlah_titik_memenuhi);
+                $(".jumlah-titik-ringan-" + uid + "-kabkota").html(res.data.jumlah_titik_ringan);
+                $(".jumlah-titik-sedang-" + uid + "-kabkota").html(res.data.jumlah_titik_sedang);
+                $(".jumlah-titik-berat-" + uid + "-kabkota").html(res.data.jumlah_titik_berat);
+                $(".nilai-mutu-memenuhi-" + uid + "-kabkota").html((res.data.nilai_mutu_memenuhi ? res.data.nilai_mutu_memenuhi.toFixed(2) : res.data.nilai_mutu_memenuhi));
+                $(".nilai-mutu-ringan-" + uid + "-kabkota").html((res.data.nilai_mutu_ringan ? res.data.nilai_mutu_ringan.toFixed(2) : res.data.nilai_mutu_ringan));
+                $(".nilai-mutu-sedang-" + uid + "-kabkota").html((res.data.nilai_mutu_sedang ? res.data.nilai_mutu_sedang.toFixed(2) : res.data.nilai_mutu_sedang));
+                $(".nilai-mutu-berat-" + uid + "-kabkota").html((res.data.nilai_mutu_berat ? res.data.nilai_mutu_berat.toFixed(2) : res.data.nilai_mutu_berat));
+                $(".nilai-indeks-" + uid + "-kabkota").html((res.data.nilai_indeks ? res.data.nilai_indeks.toFixed(2) : res.data.nilai_indeks));
+
+                $(".nilai-indeks-ina-" + uid + "-kabkota").html((res.data.nilai_indeks_ina ? res.data.nilai_indeks_ina.toFixed(2) : res.data.nilai_indeks_ina));
+                $(".nilai-indeks-ina-mutu-" + uid + "-kabkota").html(res.data.nilai_indeks_ina_mutu);
+              }
+            }
+          }
+        });
+      }
+    });
+
+    $(document).on("click", "#btn-hitung-simulasi-prov", function(event) {
+      var uid = $(this).attr("data-uid");
+      if (uid) {
+        $.ajax({
+          url: baseUrl + "simulasiHitungIKA/hitung/x/" + uid + "/y/2",
+          method: "GET",
+          success: function(request) {
+            var res = JSON.parse(request);
+            if (res.statusCode == 200) {
+              if (res.data) {
+                $(".jumlah-titik-memenuhi-" + uid + "-prov").html(res.data.jumlah_titik_memenuhi);
+                $(".jumlah-titik-ringan-" + uid + "-prov").html(res.data.jumlah_titik_ringan);
+                $(".jumlah-titik-sedang-" + uid + "-prov").html(res.data.jumlah_titik_sedang);
+                $(".jumlah-titik-berat-" + uid + "-prov").html(res.data.jumlah_titik_berat);
+                $(".nilai-mutu-memenuhi-" + uid + "-prov").html((res.data.nilai_mutu_memenuhi ? res.data.nilai_mutu_memenuhi.toFixed(2) : res.data.nilai_mutu_memenuhi));
+                $(".nilai-mutu-ringan-" + uid + "-prov").html((res.data.nilai_mutu_ringan ? res.data.nilai_mutu_ringan.toFixed(2) : res.data.nilai_mutu_ringan));
+                $(".nilai-mutu-sedang-" + uid + "-prov").html((res.data.nilai_mutu_sedang ? res.data.nilai_mutu_sedang.toFixed(2) : res.data.nilai_mutu_sedang));
+                $(".nilai-mutu-berat-" + uid + "-prov").html((res.data.nilai_mutu_berat ? res.data.nilai_mutu_berat.toFixed(2) : res.data.nilai_mutu_berat));
+                $(".nilai-indeks-" + uid + "-prov").html((res.data.nilai_indeks ? res.data.nilai_indeks.toFixed(2) : res.data.nilai_indeks));
+
+                $(".nilai-indeks-ina-" + uid + "-prov").html((res.data.nilai_indeks_ina ? res.data.nilai_indeks_ina.toFixed(2) : res.data.nilai_indeks_ina));
+                $(".nilai-indeks-ina-mutu-" + uid + "-prov").html(res.data.nilai_indeks_ina_mutu);
+              }
+            }
+          }
+        });
+      }
+    });
+
+    $(document).on("click", "#btn-hitung-simulasi-nasional", function(event) {
+      var uid = $(this).attr("data-uid");
+      if (uid) {
+        $.ajax({
+          url: baseUrl + "simulasiHitungIKA/hitungNasional/x/" + uid,
+          method: "GET",
+          success: function(request) {
+            var res = JSON.parse(request);
+            if (res.statusCode == 200) {
+              if (res.data) {
+                console.log(res.data);
+                $(".ika-" + uid + "-nasional").html(res.data.toFixed(2));
+                $(".ika-" + uid + "-nasional-no-bobot").html(res.data_no_bobot.toFixed(2));
+              }
+            }
+          }
+        });
+      }
+    });
+
+    $(".select-year-indeks").on("change", function() {
+      var year = $(this).val();
+      if (year != "") {
+        $.ajax({
+          url: baseUrl + "simulasiHitungIKA/getDataIndeks/x/" + year,
+          method: "GET",
+          success: function(req) {
+            var res = JSON.parse(req);
+            if (res.statusCode == 200) {
+              var data = res;
+              if (data) {
+                $(".simulasi-content").html(data.html);
+              }
+            }
+          }
+        });
+      }
+    });
+    setTimeout(function() {
+      window.scrollTo(0, scrollTobtn);
+    }, 1500);
+  });
+  reset = () => {
+    $("#uid_pelaporan_ika").val("");
+    $("#tanggal").val("");
+    $('input[name="form[tanggal]_submit"]').attr('value', "");
+    // $("#uid_rf_bma").val("").trigger("change");
+    $("#debit").val("");
+    $("#ph").val("");
+    $("#bod").val("");
+    $("#cod").val("");
+    $("#tss").val("");
+    $("#do_p").val("");
+    $("#do_max_p").val("");
+    $("#no3_n").val("");
+    $("#total_phosphat").val("");
+    $("#fecal_coliform").val("");
+    $("#kecerahan").val("");
+    $("#klorofil_a").val("");
+    $("#total_coliform").val("");
+    $("#temperatur_air").val("");
+    $("#temperatur_udara").val("");
+    $("#minyak_lemak").val("");
+    $("#detergen_total").val("");
+    $("#fenol").val("");
+    $("#tds").val("");
+    $("#sulfat").val("");
+    $("#klorida").val("");
+    $("#nitrit").val("");
+    $("#amoniak").val("");
+    $("#total_nitrogen").val("");
+    $("#florida").val("");
+    $("#belerang_sbg_h2s").val("");
+    $("#sianida").val("");
+    $("#klorin_bebas").val("");
+    $("#warna").val("");
+    $("#sampah").val("");
+    $("#ba").val("");
+    $("#bo").val("");
+    $("#hg").val("");
+    $("#as_").val("");
+    $("#se").val("");
+    $("#fe").val("");
+    $("#cd").val("");
+    $("#co").val("");
+    $("#mn").val("");
+    $("#ni").val("");
+    $("#zn").val("");
+    $("#cu").val("");
+    $("#pb").val("");
+    $("#cr_6").val("");
+    $("#aldrin").val("");
+    $("#bhc").val("");
+    $("#chlordane").val("");
+    $("#ddt").val("");
+    $("#endrin").val("");
+    $("#heptachlor").val("");
+    $("#lindane").val("");
+    $("#methoxychlor").val("");
+    $("#toxapan").val("");
+    $("#radioaktivitas_gross_a").val("");
+    $("#radioaktivitas_gross_b").val("");
+    $("#e_coli").val("");
+    $("#kategori").val("").trigger("change");
+    $("#alamat").val("");
+    $("#alamat_detail").val("");
+    $("#latitude").val("");
+    $("#longitude").val("");
+    $("#uid_lokasi_pemantauan").val("").trigger("change");
+    $("#periode_pemantauan").val("").trigger("change");
+    $("#uid_provinsi").val("").trigger("change");
+    id_kabkota = "";
+    $("#uid_kabkota").val("").trigger("change");
+    $(".shu-download").hide();
+    $("#uid_lab").val("").trigger("change");
+  };
+
+  $(".tahun-pemantauan").on("change", function() {
+    var toId = $(this).attr("to");
+    var year = $(this).val();
+    const year2 = new Date(year).getFullYear();
+    // let year = year.getFullYear();
+    $.ajax({
+      url: baseUrl + "ajax/pemantauanIkaByYear/x/" + year2,
+      method: "GET",
+      success: function(req) {
+        var htmls = "<option value=''>--PILIH LOKASI PEMANTAUAN--</option>";
+        if (req.total) {
+          jQuery.each(req.data, function(i, val) {
+            htmls += "<option value='" + val.uid_lokasi_pemantauan + "' kategori='"+val.kategori_pelaporan_ika+"'>" + val.kode_lokasi + " - " + val.alamat + " - " + val.alamat_detail + "</option>";
+          });
+        }
+        $("#" + toId).html(htmls);
+      }
+    })
+  });
+
+  $("#tambahData").on("show.bs.modal", function(event) {
+    reset();
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var userBy = button.data("uid");
+    if (userBy) {
+      $.ajax({
+        url: baseUrl + ctrl + "/editData/x/" + userBy,
+        method: "GET",
+        success: function(req) {
+          if (req.uid_pelaporan_ika) {
+            $("#uid_pelaporan_ika").val(req.uid_pelaporan_ika);
+            $("#tanggal").val(req.tanggal);
+            $('input[name="form[tanggal]_submit"]').attr('value', req.tanggal);
+            // $("#uid_rf_bma").val(req.uid_rf_bma).trigger("change");
+            $("#debit").val(req.debit);
+            $("#ph").val(req.ph);
+            $("#bod").val(req.bod);
+            $("#cod").val(req.cod);
+            $("#tss").val(req.tss);
+            $("#do_p").val(req.do_p);
+            $("#do_max_p").val(req.do_max_p);
+            $("#no3_n").val(req.no3_n);
+            $("#total_phosphat").val(req.total_phosphat);
+            $("#fecal_coliform").val(req.fecal_coliform);
+            $("#kecerahan").val(req.kecerahan);
+            $("#klorofil_a").val(req.klorofil_a);
+            $("#total_coliform").val(req.total_coliform);
+            $("#temperatur_air").val(req.temperatur_air);
+            $("#temperatur_udara").val(req.temperatur_udara);
+            $("#minyak_lemak").val(req.minyak_lemak);
+            $("#detergen_total").val(req.detergen_total);
+            $("#fenol").val(req.fenol);
+            $("#tds").val(req.tds);
+            $("#sulfat").val(req.sulfat);
+            $("#klorida").val(req.klorida);
+            $("#nitrit").val(req.nitrit);
+            $("#amoniak").val(req.amoniak);
+            $("#total_nitrogen").val(req.total_nitrogen);
+            $("#florida").val(req.florida);
+            $("#belerang_sbg_h2s").val(req.belerang_sbg_h2s);
+            $("#sianida").val(req.sianida);
+            $("#klorin_bebas").val(req.klorin_bebas);
+            $("#warna").val(req.warna);
+            $("#sampah").val(req.sampah);
+            $("#ba").val(req.ba);
+            $("#bo").val(req.bo);
+            $("#hg").val(req.hg);
+            $("#as_").val(req.as_);
+            $("#se").val(req.se);
+            $("#fe").val(req.fe);
+            $("#cd").val(req.cd);
+            $("#co").val(req.co);
+            $("#mn").val(req.mn);
+            $("#ni").val(req.ni);
+            $("#zn").val(req.zn);
+            $("#cu").val(req.cu);
+            $("#pb").val(req.pb);
+            $("#cr_6").val(req.cr_6);
+            $("#aldrin").val(req.aldrin);
+            $("#bhc").val(req.bhc);
+            $("#chlordane").val(req.chlordane);
+            $("#ddt").val(req.ddt);
+            $("#endrin").val(req.endrin);
+            $("#heptachlor").val(req.heptachlor);
+            $("#lindane").val(req.lindane);
+            $("#methoxychlor").val(req.methoxychlor);
+            $("#toxapan").val(req.toxapan);
+            $("#radioaktivitas_gross_a").val(req.radioaktivitas_gross_a);
+            $("#radioaktivitas_gross_b").val(req.radioaktivitas_gross_b);
+            $("#e_coli").val(req.e_coli);
+            $("#periode_pemantauan").val(req.periode_pemantauan).trigger("change");
+            $.ajax({
+              url: baseUrl + "ajax/lokasiById/x/" + req.uid_lokasi_pemantauan,
+              method: "GET",
+              success: function(req) {
+                var htmls = "<option value=''>--PILIH LOKASI PEMANTAUAN--</option>";
+                if (req.total) {
+                  jQuery.each(req.data, function(i, val) {
+                    htmls += "<option value='" + val.uid_lokasi_pemantauan + "' selected>" + val.kode_lokasi + " - " + val.alamat + " - " + val.alamat_detail + "</option>";
+                    $("#alamat").val(val.alamat);
+                    $("#alamat_detail").val(val.alamat_detail);
+                    $("#latitude").val(val.latitude);
+                    $("#longitude").val(val.longitude);
+                  });
+                }
+                $("#uid_lokasi_pemantauan").html(htmls);
+              }
+            });
+            // $("#uid_lokasi_pemantauan").val(req.uid_lokasi_pemantauan).trigger("change");
+            $("#kategori").val(req.kategori).trigger("change");
+
+            id_kabkota = req.uid_kabkota;
+            setTimeout(() => {
+              $("#uid_provinsi").val(req.uid_provinsi).trigger("change");
+              $("#uid_kabkota").val(req.uid_kabkota).trigger("change");
+            }, 1000)
+            if (req.shu) {
+              var htmlDownload = '<a title="Download File" class="border-secondary badge badge-dark round" href="' + baseUrl + 'uploads/monitoring/' + req.shu + '" target="_blank" >Download</a>'
+              $(".shu-download").html(htmlDownload);
+              $(".shu-download").show();
+            } else {
+              $(".shu-download").hide();
+            }
+            $("#uid_lab").val(req.uid_lab? req.uid_lab.split(',') : '').trigger("change");
+          }
+        },
+      });
+    }
+  });
+  $("#tambahDataExcel").on("show.bs.modal", function(event) {
+    reset();
+    var button = $(event.relatedTarget); // Button that triggered the modal
+  });
+  var lock = '{/literal}{$listLockYear}{literal}'
+  lock = (lock ? JSON.parse(lock) : []);
+  $("#tanggal").on("change", function(){
+    var val = $(this).val();
+    if(val){
+      var yearSelect = new Date(val).getFullYear();
+      if(lock.includes(yearSelect.toString())){
+          swal("Informasi","Tidak dapat melakukan pelaporan tahun "+yearSelect+", periode dikunci","warning");
+          $("#tanggal").val("");
+      }
+    }
+  });
+  $(".ika_sungai").on("click", function() {
+    var val = $(this).attr("id");
+    if (val == "base-tab3") {
+      $(".global_src").hide("slow");
+    } else {
+      $(".global_src").show("slow");
+    }
+  });
+  $(".ika_mutu").on("click", function() {
+    var val = $(this).attr("id");
+    if (val == "base-tab4") {
+      $(".li-src").hide("slow");
+    } else {
+      $(".li-src").show("slow");
+    }
+  });
+  $("#uid_lokasi_pemantauan").on("change", function(){
+    var kategori = $('option:selected', this).attr('kategori');
+    var uid_pelaporan_ika = $("#uid_pelaporan_ika").val();
+    if(!uid_pelaporan_ika){
+      if(kategori){
+        $("#kategori").val(kategori).trigger("change");
+      }else{
+        $("#kategori").val("").trigger("change");
+      }
+    }
+  });
+  $("#kategori").on("change", function() {
+    var val = $(this).val();
+    if (val == 3) {
+      $(".danau_parameter").fadeIn();
+      // $(".danau_parameter_2").addClass('border-wajib');
+      // $(".danau_parameter_3").removeClass('border-wajib');
+    } else {
+      $(".danau_parameter").fadeOut();
+      // $(".danau_parameter_2").removeClass('border-wajib');
+      // $(".danau_parameter_3").addClass('border-wajib');
+    }
+  });
+  $("#modalRekap").on("show.bs.modal", function(event) {
+    $("#push-rekap").html("<tr><td colspan='5' style='padding: 0px;'><div class='alert alert-danger text-center'>Menghitung data..</div></td></tr>");
+    var tahun = $(".tahun-global-src-2").val();
+    var tampil_data = $(".tampil_data").val();
+    $.ajax({
+      url: baseUrl + ctrl + "/rekapStatusMutu/t/" + tahun + "/td/" + tampil_data,
+      method: "GET",
+      success: function(req) {
+        var data = JSON.parse(req);
+        var htmls = "";
+        $("#title-tahun").html("Tahun " + data.tahun + " " + data.tampil_data);
+        if (data.code == 1) {
+          // console.log(data);
+          data.data.forEach((item, i) => {
+            htmls += "<tr>" +
+              "<td class='text-center' >" + item.kelas + "</td>" +
+              "<td class='text-center' >" + item.memenuhi + "</td>" +
+              "<td class='text-center' >" + item.ringan + "</td>" +
+              "<td class='text-center' >" + item.sedang + "</td>" +
+              "<td class='text-center' >" + item.berat + "</td>" +
+              "</tr>";
+          });
+        } else {
+          htmls += "<tr><td colspan='5' style='padding: 0px;'><div class='alert alert-danger text-center'>Tidak Ada Data</div></td></tr>";
+        }
+        $("#push-rekap").html(htmls);
+      }
+    })
+  });
+
+  var maxLenghtText = 700;
+  $(".catatan-verifikator").on('click', function() {
+    $("#id-pelaporan").val("");
+    $("#catatan-verifikator-txt").val("");
+    $("#catatan-verifikator-select").val("").trigger("change");
+    $("#catatan-verifikator-txt-length").html("Sudah terisi 0/"+maxLenghtText+" Karakter")
+    var idPelaporan = $(this).attr("data-uid");
+    $("#id-pelaporan").val(idPelaporan);
+    $('#load-catatan').show();
+    if (idPelaporan) {
+      $.ajax({
+        url: baseUrl + ctrl + "/getCatatanVerifikasi/x/" + idPelaporan,
+        method: "GET",
+        success: function(request) {
+          var req = JSON.parse(request);
+          // console.log(req);
+          if (req.statusCode == 200) {
+            $('#load-catatan').hide();
+            $("#catatan-verifikator-txt").val(req.catatan).trigger("keyup");
+            $("#catatan-verifikator-select").val(req.catatanSelect).trigger("change");
+          }
+        }
+      });
+    }
+  });
+
+  $("#catatan-verifikator-txt").on("keyup", function(){
+		var val = $(this).val();
+		var length_text = val.length;
+		if(length_text > maxLenghtText){
+			$("#catatan-verifikator-txt").val(val.substring(0,maxLenghtText));
+      length_text = maxLenghtText;
+		}
+		$("#catatan-verifikator-txt-length").html("*Sudah terisi "+length_text+"/"+maxLenghtText+" Karakter")
+	});
+
+  $(".simpan-catatan-verifikator").on("click hide.bs.modal", function(event) {
+    var idPelaporan = $("#id-pelaporan").val();
+    var catatanVerifikatorTxt = $("#catatan-verifikator-txt").val();
+    var catatanVerifikatorSelect = $("#catatan-verifikator-select").val();
+    if (idPelaporan) {
+      $.ajax({
+        url: baseUrl + ctrl + "/catatanVerifikasi",
+        method: "POST",
+        data: JSON.stringify({
+          uid: idPelaporan,
+          catatan: catatanVerifikatorTxt,
+          catatanSelect: catatanVerifikatorSelect,
+        }),
+        success: function(request) {
+          if (request == 1) {
+            $("#catatan-" + idPelaporan + "-short").html(catatanVerifikatorTxt + (catatanVerifikatorSelect ? " " + catatanVerifikatorSelect : ""));
+          }
+        }
+      });
+    }
+  });
+  $("#base-tab1").on("click", function() {
+    freezeHeader('.freeze-table');
+  });
+  $("#base-tab2").on("click", function() {
+    freezeHeader('.freeze-table');
+  });
+  $("#base-tab4").on("click", function() {
+    freezeHeader('.freeze-table-2');
+  });
+
+  function freezeHeader(toFreeze) {
+    $(function() {
+      $(this).find(toFreeze).freezeTable({
+        'freezeColumn': false,
+      });
+      var freezeTable = new FreezeTable(toFreeze, {
+        'namespace': 'first-table'
+      });
+      freezeTable.resize();
+    });
+  }
+</script>
+{/literal}
+
+{literal}
+<script type="text/javascript">
+  function searchData(tableSrc, txtSrc) {
+    if (tableSrc, txtSrc) {
+      var input, filter, table, tr, td, i, txtValue;
+      input = document.getElementById(txtSrc);
+      filter = input.value.toUpperCase();
+      table = document.getElementById(tableSrc);
+      tr = table.getElementsByTagName("tr");
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[1];
+        td2 = tr[i].getElementsByTagName("td")[2];
+        if (td && td2) {
+          txtValue = td.textContent || td.innerText;
+          txtValue2 = td2.textContent || td2.innerText;
+          if ((txtValue.toUpperCase().indexOf(filter) > -1) || txtValue2.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+
+    }
+
+  }
+</script>
+{/literal}
+
+
+{literal}
+  <script type="text/javascript">
+  	$(".checked-status-prioritas").on("click", function(){
+  		let prioritas = ["prioritas","kurang","tidak"];
+  		let sx = $(this).attr("sx");
+  		let sp = $(this).attr("sp");
+  		$.ajax({
+  			url: baseUrl + ctrl + "/indeksSetPrioritas/x/" + sx + "/p/" +sp,
+  			method: "POST",
+  			success: function(request) {
+  				var req = JSON.parse(request);
+  				if (req.statusCode == 200) {
+  					prioritas.forEach((item, i) => {
+  						$(".checked-"+item+"-"+sx).removeClass("bg-success");
+  						$(".checked-"+item+"-"+sx).html("");
+  					});
+
+            if(req.prioritas){
+              setTimeout(()=>{
+                let lsp = sp.toLowerCase();
+                $(".checked-"+lsp+"-"+sx).html("<h2><i class='ft-check'></i></h2>");
+                $(".checked-"+lsp+"-"+sx).addClass("bg-success");
+              },300);
+            }
+
+  				}
+  			}
+  		});
+  	});
+    $(".parameter_kritis").on("change", function(){
+      let sx = $(this).attr("sx");
+      let val = $(this).val();
+      let parameter = "";
+      if(val.length){
+        parameter = val.join(",");
+      }
+      $.ajax({
+  			url: baseUrl + ctrl + "/indeksSetParameter/x/" + sx + "/p/" + btoa(parameter),
+  			method: "POST",
+  			success: function(request) {
+  				var req = JSON.parse(request);
+  				if (req.statusCode == 200) {
+
+  				}else{
+            swal("Informasi","Gagal menyimpan data","warning");
+          }
+  			}
+  		});
+    })
+  </script>
+{/literal}

@@ -1,0 +1,99 @@
+<table class="table">
+  <thead class="bg-info bg-darken-2 white">
+    <tr>
+      <th colspan="2" class="text-center" style="width: 70px">#</th>
+      <th rowspan="2" class="v-middle text-center">Tahun</th>
+      <th rowspan="2" class="v-middle text-center">Kabupaten/Kota</th>
+      <th rowspan="2" class="v-middle text-center">Provinsi</th>
+      <th colspan="5" class="v-middle text-center">(%) Pengisian</th>
+    </tr>
+    <tr>
+      <th width="50" class="text-center">Action</th>
+      <th width="10" class="text-center">No</th>
+      <th class="text-center">Langit Biru</th>
+      <th class="text-center">Pantai Lestari</th>
+      <th class="text-center">Kali Bersih</th>
+      <th class="text-center">Indonesia Hijau</th>
+      <th class="text-center">Gambut Lestari</th>
+    </tr>
+  </thead>
+  <tbody>
+    {counter start=$page print=false}
+    {foreach from=$view item=v}
+    <tr>
+      {if $me.uid_users == $v.users_uid}
+      <th class="text-center">
+        {if $lockActionYear == 0}
+        {if $v.v_provinsi == 0 && $v.v_regional == 0 && $v.v_pusat == 0 && $lockAction == 0}
+        <button class="badge badge-danger round delete-dialog" data-uid="{$v.min_index}" data-ajax="{$ctrl}/deletedData">
+          <a href="javascript:void(0);" title="Delete">
+            <i class="ft-trash-2"></i>
+          </a>
+        </button>
+        <button class="badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.min_index}" title="Edit">
+          <a href="{$baseUrl}{$ctrl}/respon/tahun/{$v.tahun}"><i class="ft-edit"></i></a>
+        </button>
+        <button class="badge badge-success round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.min_index}" title="Lihat">
+          <a href="{$baseUrl}{$ctrl}/respon/tahun/{$v.tahun}/view/printout">
+            <i class="ft-eye"></i>
+          </a>
+        </button>
+        {else}
+        {if $v.v_provinsi == 0 && $v.v_regional == 0 && $v.v_pusat == 0 && $lockAction == 1 && ( $me.role_user == 0 || $me.role_user == 1)}
+        <button class="badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.min_index}" title="Edit">
+          <a href="{$baseUrl}{$ctrl}/respon/tahun/{$v.tahun}"><i class="ft-edit"></i></a>
+        </button>
+        {else}
+        <button class="badge badge-success round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.min_index}" title="Lihat">
+          <a href="{$baseUrl}{$ctrl}/respon/tahun/{$v.tahun}/view/printout">
+            <i class="ft-eye"></i>
+          </a>
+        </button>
+        {/if}
+        {/if}
+        {else}
+        <button class="badge badge-success round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.min_index}" title="Lihat">
+          <a href="{$baseUrl}{$ctrl}/respon/tahun/{$v.tahun}/view/printout">
+            <i class="ft-eye"></i>
+          </a>
+        </button>
+        <!-- <br>
+        <span class="badge badge-dark">indeks respon {$lockActionYear} ditutup</span> -->
+        {/if}
+      </th>
+      {else}
+      <th class="text-center">
+        <button class="badge badge-success round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.min_index}" title="Lihat">
+          <a href="{$baseUrl}{$ctrl}/respon/tahun/{$v.tahun}/user/{$v.users_uid}/view/printout">
+            <i class="ft-eye"></i>
+          </a>
+        </button>
+      </th>
+      {/if}
+
+      <th class="text-center">{counter}</th>
+      <td class="text-center">{$v.tahun}</td>
+      <td class="text-center">{if $v.nama_kabkot!=''}{$v.nama_kabkot}{else}--{/if}</td>
+      <td class="text-center">{$v.nama_propinsi}</td>
+      <!-- 1. LANGIT BIRU -->
+      <td class="text-center">{if $v.isian[1].persen_mengisi}{$v.isian[1].persen_mengisi}%{else}-{/if}</td>
+      <!-- 2. PANTAI BERSIH -->
+      <td class="text-center">{if $v.isian[2].persen_mengisi}{$v.isian[2].persen_mengisi}%{else}-{/if}</td>
+      <!-- 3. PROGRAM KALI BERSIH -->
+      <td class="text-center">{if $v.isian[3].persen_mengisi}{$v.isian[3].persen_mengisi}%{else}-{/if}</td>
+      <!-- 4. INDONESIA HIJAU -->
+      <td class="text-center">{if $v.isian[4].persen_mengisi}{$v.isian[4].persen_mengisi}%{else}-{/if}</td>
+      <!-- 5. GAMBUT LESTARI -->
+      <td class="text-center">{if $v.isian[5].persen_mengisi}{$v.isian[5].persen_mengisi}%{else}-{/if}</td>
+    </tr>
+    {foreachelse}
+    <tr>
+      <td colspan="10" class="p-0">
+        <div class="alert alert-danger text-center">
+          <strong>Tidak Ada Data</strong>
+        </div>
+      </td>
+    </tr>
+    {/foreach}
+  </tbody>
+</table>

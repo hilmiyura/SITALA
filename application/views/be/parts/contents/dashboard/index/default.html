@@ -1,0 +1,16 @@
+{if $dashboard == 1}
+	{include file="parts/contents/{$ctrl}/{$act}/index-2.html"}
+{elseif $dashboard == 2}
+	{include file="parts/contents/{$ctrl}/{$act}/pengumuman.html"}
+	<div class="push-content-dashboard">
+		<div class="row">
+			<div class="col-md-12 text-center">
+				<img class="mb-0" width="150" src="assets/app-assets/images/logo/clock.gif">
+				<h3>Hi, {$me.name}</h3>
+				<h4>Data sedang disiapkan...</h4>
+			</div>
+		</div>
+	</div>
+{else}
+	{include file="parts/contents/{$ctrl}/{$act}/index-1.html"}
+{/if}

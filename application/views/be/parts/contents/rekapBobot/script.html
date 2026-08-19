@@ -1,0 +1,132 @@
+{literal}
+<script type="text/javascript">
+  $(document).ready(function () {
+
+    // LANGIT BIRU EXCEL
+    $("#export-data-excel1").click(function () {
+      let dates = new Date($.now());
+      let files = dates.getTime() + '-rekap-evaluasi-indeks-respon-langit-biru.xlsx';
+      let table = $('#table-lb');
+      TableToExcel.convert(table[0], {
+        name: files,
+        sheet: {
+          name: 'Rekap Indeks Respon Langit Biru'
+        }
+      });
+    });
+    $("#export-data-csv1").click(function () {
+      let dates = new Date($.now());
+      let files = dates.getTime() + '-rekap-evaluasi-indeks-respon-langit-biru.csv';
+      let table = $('#table-lb');
+      TableToExcel.convert(table[0], {
+        name: files,
+        sheet: {
+          name: 'Rekap Indeks Respon Langit Biru'
+        }
+      });
+    });
+    // END LANGIT BIRU EXCEL
+
+    // PANTAI BERSIH
+    $("#export-data-excel2").click(function () {
+      let dates = new Date($.now());
+      let files = dates.getTime() + '-rekap-evaluasi-indeks-respon-pantai-lestari.xlsx';
+      let table = $('#table-pb');
+      TableToExcel.convert(table[0], {
+        name: files,
+        sheet: {
+          name: 'Rekap Indeks Respon Pantai Bersih'
+        }
+      });
+    });
+    $("#export-data-csv2").click(function () {
+      let dates = new Date($.now());
+      let files = dates.getTime() + '-rekap-evaluasi-indeks-respon-pantai-lestari.csv';
+      let table = $('#table-pb');
+      TableToExcel.convert(table[0], {
+        name: files,
+        sheet: {
+          name: 'Rekap Indeks Respon Pantai Bersih'
+        }
+      });
+    });
+    // END PANTAI BERSIH EXCEL
+
+    // PROGRAM KALI BERSIH
+    $("#export-data-excel3").click(function () {
+      let dates = new Date($.now());
+      let files = dates.getTime() + '-rekap-evaluasi-indeks-respon-kali-bersih.xlsx';
+      let table = $('#table-pkb');
+      TableToExcel.convert(table[0], {
+        name: files,
+        sheet: {
+          name: 'Rekap Indeks Respon Program Kali Bersih'
+        }
+      });
+    });
+    $("#export-data-csv3").click(function () {
+      let dates = new Date($.now());
+      let files = dates.getTime() + '-rekap-evaluasi-indeks-respon-kali-bersih.csv';
+      let table = $('#table-pkb');
+      TableToExcel.convert(table[0], {
+        name: files,
+        sheet: {
+          name: 'Rekap Indeks Respon Program Kali Bersih'
+        }
+      });
+    });
+    // END PROGRAM KALI BERSIH EXCEL
+
+    // INDONESIA HIJAU
+    $("#export-data-excel4").click(function () {
+      let dates = new Date($.now());
+      let files = dates.getTime() + '-rekap-evaluasi-indeks-respon-indonesia-hijau.xlsx';
+      let table = $('#table-ih');
+      TableToExcel.convert(table[0], {
+        name: files,
+        sheet: {
+          name: 'Rekap Indeks Respon Indonesia Hijau'
+        }
+      });
+    });
+    $("#export-data-csv4").click(function () {
+      let dates = new Date($.now());
+      let files = dates.getTime() + '-rekap-evaluasi-indeks-respon-indonesia-hijau.csv';
+      let table = $('#table-ih');
+      TableToExcel.convert(table[0], {
+        name: files,
+        sheet: {
+          name: 'Rekap Indeks Respon Program Kali Bersih'
+        }
+      });
+    });
+    // END INDONESIA HIJAU EXCEL
+
+    // GAMBUT LESTARI
+    $("#export-data-excel5").click(function () {
+      let dates = new Date($.now());
+      let files = dates.getTime() + '-rekap-evaluasi-indeks-respon-gambut-lestari.xlsx';
+      let table = $('#table-gl');
+      TableToExcel.convert(table[0], {
+        name: files,
+        sheet: {
+          name: 'Rekap Indeks Respon Gambut Lestari'
+        }
+      });
+    });
+    $("#export-data-csv5").click(function () {
+      let dates = new Date($.now());
+      let files = dates.getTime() + '-rekap-evaluasi-indeks-respon-gambut-lestari.csv';
+      let table = $('#table-gl');
+      TableToExcel.convert(table[0], {
+        name: files,
+        sheet: {
+          name: 'Rekap Indeks Respon Gambut Lestari'
+        }
+      });
+    });
+    // END GAMBUT LESTARI EXCEL
+
+  });
+</script>
+{/literal}

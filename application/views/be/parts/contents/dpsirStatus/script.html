@@ -1,0 +1,21 @@
+<script type="text/javascript">
+  $("#src_komponen").on("change", function(){
+    var val = $(this).val();
+
+    $(".td-iku").hide();
+    $(".td-ika").hide();
+    $(".td-ikal").hide();
+    $(".td-ikl").hide();
+    $(".td-ikeg").hide();
+
+    if(val == "all"){
+      $(".td-iku").show();
+      $(".td-ika").show();
+      $(".td-ikal").show();
+      $(".td-ikl").show();
+      $(".td-ikeg").show();
+    }else{
+      $(".td-"+val).show();
+    }
+  })
+</script>

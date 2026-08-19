@@ -1,0 +1,54 @@
+<style>
+	table thead tr th {
+		border: 1px solid black;
+	}
+
+	table tbody tr td {
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style>
+<table>
+	<thead>
+		<tr>
+      <th bgcolor="#1E9FC4" rowspan="2">NO</th>
+      <th bgcolor="#1E9FC4" rowspan="2">PROVINSI</th>
+      <th bgcolor="#1E9FC4" rowspan="2">KABKOTA</th>
+      <th bgcolor="#1E9FC4" colspan="{count($komponen)}">INDEKS KUALITAS UDARA (IKU)</th>
+      <th bgcolor="#1E9FC4" colspan="{count($komponen)}">INDEKS KUALITAS AIR (IKA)</th>
+      <th bgcolor="#1E9FC4" colspan="{count($komponen)}">INDEKS KUALITAS LAHAN (IKL)</th>
+      <th bgcolor="#1E9FC4" colspan="{count($komponen)}">INDEKS KUALITAS AIR LAUT (IKAL)</th>
+      <th bgcolor="#1E9FC4" colspan="{count($komponen)}">INDEKS KUALITAS EKOSISTEM GAMBUT (IKEG)</th>
+		</tr>
+    <tr>
+      {foreach from=$aspek item=as}
+        {foreach from=$komponen item=ka}
+          <th bgcolor="#1E9FC4">{$ka['id']}</th>
+        {/foreach}
+      {/foreach}
+    </tr>
+  </thead>
+  <tbody>
+    {foreach from=$data item=v key=k}
+      <tr>
+        <td>{$k+1}</td>
+        {if $v.nama_kabkot}
+          <td>{$v.nama_provinsi}</td>
+        {else}
+          <td><b>{$v.nama_provinsi}</b></td>
+        {/if}
+        <td>{$v.nama_kabkot}</td>
+
+        {foreach from=$aspek item=as}
+          {foreach from=$komponen item=ka}
+            {if $v['dpsir'][$ka['text']][$as['text']] == 1}
+              <td>SUDAH ISI</td>
+            {else}
+              <td>BELUM ISI</td>
+            {/if}
+          {/foreach}
+        {/foreach}
+      </tr>
+    {/foreach}
+  </tbody>
+</table>

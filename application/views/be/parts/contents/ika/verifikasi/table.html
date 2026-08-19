@@ -1,0 +1,1062 @@
+{include file="parts/block/block_search.html"}
+<div class="table-responsive table-border freeze-table">
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th rowspan="2" class="v-middle text-center" style="width: 70px">No</th>
+        <th colspan="2" class="text-center">Tanggal</th>
+        <th rowspan="2" class="v-middle text-center">Reject</th>
+        <th colspan="3" class="text-center">Verifikasi</th>
+        <th rowspan="2" class="v-middle">Level</th>
+        <th rowspan="2" class="v-middle">Catatan Pelaporan</th>
+        <th rowspan="2" class="v-middle">Pemantauan</th>
+        <th rowspan="2" class="v-middle">Frekuensi Pemantauan</th>
+        <th rowspan="2" class="v-middle">Kategori</th>
+        <th rowspan="2" class="v-middle">Nama Das</th>
+        <th rowspan="2" class="v-middle">Nama Sungai</th>
+        <th rowspan="2" class="v-middle">Kab/Kota</th>
+        <th rowspan="2" class="v-middle">Provinsi</th>
+        <th colspan="2" class="text-center">Titik Koordinat</th>
+        <th colspan="55" class="text-center">Nilai Pemantauan</th>
+      </tr>
+      <tr>
+        <th>Input Data</th>
+        <th>Update Data</th>
+        <th class="text-center">Provinsi</th>
+        <th class="text-center">Regional</th>
+        <th class="text-center">Pusat</th>
+        <!-- <th class="v-middle">PH</th>
+        <th class="v-middle">BOD <sup>(mg/L)</sup></th>
+        <th class="v-middle">COD <sup>(mg/L)</sup></th>
+        <th class="v-middle">TSS <sup>(mg/L)</sup></th>
+        <th class="v-middle">DO <sup>(mg/L)</sup></th>
+        <th class="v-middle">DO-MAX<sup>(mg/L)</sup></th>
+        <th class="v-middle">
+          NO<sub class="white">3</sub>-N <sup>(mg/L)</sup>
+        </th>
+        <th class="v-middle">TOTAL PHOSPHAT <sup>(mg/L)</sup></th>
+        <th class="v-middle">FECAL COLIFORM <sup>(MPN/100 mL)</sup></th>
+        <th class="v-middle">KECERAHAN (TRANSPARANSI) <sup>(m)</sup></th>
+        <th class="v-middle">KLOROFIL a <sup>(mg/m<sup>3</sup>)</sup></th>
+        <th class="v-middle">TOTAL NITROGEN <sup>(mg/L)</sup></th> -->
+        <th class="v-middle text-center">Latitude</th>
+        <th class="v-middle text-center">Longitude</th>
+        <th class="v-middle text-center">Debit Air <sup>(m3/s)</sup> </th>
+        <th class="v-middle text-center">
+          PH <sup></sup><br>
+          <sup>(Potential Hydrogen)</sup>
+        </th>
+        <th class="v-middle text-center">
+          BOD <sup>(mg/L)</sup><br>
+          <sup>(Biological Oxygen Demand)</sup>
+        </th>
+        <th class="v-middle text-center">
+          COD <sup>(mg/L)</sup><br>
+          <sup>(Chemical Oxygen Demand)</sup>
+        </th>
+        <th class="v-middle text-center">
+          TSS <sup>(mg/L)</sup><br>
+          <sup>(Total Susppended Solid)</sup>
+        </th>
+        <th class="v-middle text-center">
+          DO <sup>(mg/L)</sup><br>
+          <sup>(Dissolved Oxygen)</sup>
+        </th>
+        <!-- <th class="v-middle">DO-MAX <sup>mg/L</sup> </th> -->
+        <th class="v-middle text-center">
+          NO <sup>(mg/L)</sup><br>
+          <sup>(Nitrat)</sup>
+        </th>
+        <th class="v-middle text-center">TOTAL PHOSPHAT<sup>mg/L</sup> </th>
+        <th class="v-middle text-center">FECAL COLIFORM<sup>MPN/100 mL</sup> </th>
+        <th class="v-middle text-center">KECERAHAN <sup>m</sup> </th>
+        <th class="v-middle text-center">KLOROFIL <sup>mg/m<sup>3</sup></sup> </th>
+        <th class="v-middle text-center">TOTAL COLIFORM<sup>MPN/100 mL</sup> </th>
+        <th class="v-middle text-center">TEMPERATUR AIR <sup><sup>0</sup>C</sup> </th>
+        <th class="v-middle text-center">TEMPERATUR UDARA <sup><sup>0</sup>C</sup> </th>
+        <th class="v-middle text-center">MINYAK LEMAK<sup>mg/L</sup> </th>
+        <th class="v-middle text-center">DETERGEN <sup>mg/L</sup> </th>
+        <th class="v-middle text-center">FENOL <sup>mg/L</sup> </th>
+        <th class="v-middle text-center">
+          TDS <sup>(mg/L)</sup><br>
+          <sup>(Total Dissolved Solid)</sup>
+        </th>
+        <th class="v-middle text-center">SULFAT <sup>mg/L</sup> </th>
+        <th class="v-middle text-center">KLORIDA <sup>mg/L</sup> </th>
+        <th class="v-middle text-center">NITRIT <sup>mg/L</sup> </th>
+        <th class="v-middle text-center">AMONIAK <sup>mg/L</sup> </th>
+        <th class="v-middle text-center">
+          TOTAL N<sup>(mg/L)</sup><br>
+          <sup>(Total Nitrogen)</sup>
+        </th>
+        <th class="v-middle text-center">FLOURIDA <sup>mg/L</sup> </th>
+        <th class="v-middle text-center">BELERANG <sup>mg/L</sup> </th>
+        <th class="v-middle text-center">SIANIDA <sup>mg/L</sup> </th>
+        <th class="v-middle text-center">KLORIN <sup>mg/L</sup> </th>
+        <th class="v-middle text-center">WARNA <sup>Pt-Co Unit</sup> </th>
+        <th class="v-middle text-center">SAMPAH <sup>-</sup> </th>
+        <th class="v-middle text-center">
+          BA <sup>(mg/L)</sup><br>
+          <sup>(Barium)</sup>
+        </th>
+        <th class="v-middle text-center">
+          BO <sup>(mg/L)</sup><br>
+          <sup>(Boron)</sup>
+        </th>
+        <th class="v-middle text-center">
+          HG <sup>(mg/L)</sup><br>
+          <sup>(Hydrargyrum)</sup>
+        </th>
+        <th class="v-middle text-center">
+          AS <sup>(mg/L)</sup><br>
+          <sup>(Arsenik)</sup>
+        </th>
+        <th class="v-middle text-center">
+          SE <sup>(mg/L)</sup><br>
+          <sup>(Selenium)</sup>
+        </th>
+        <th class="v-middle text-center">
+          FE <sup>(mg/L)</sup><br>
+          <sup>(Ferrum)</sup>
+        </th>
+        <th class="v-middle text-center">
+          CD <sup>(mg/L)</sup><br>
+          <sup>(Kadmium)</sup>
+        </th>
+        <th class="v-middle text-center">
+          CO <sup>(mg/L)</sup><br>
+          <sup>(Kobalt)</sup>
+        </th>
+        <th class="v-middle text-center">
+          MN <sup>(mg/L)</sup><br>
+          <sup>(Mangan)</sup>
+        </th>
+        <th class="v-middle text-center">
+          NI <sup>(mg/L)</sup><br>
+          <sup>(Nikel)</sup>
+        </th>
+        <th class="v-middle text-center">
+          ZN <sup>(mg/L)</sup><br>
+          <sup>(Zinc)</sup>
+        </th>
+        <th class="v-middle text-center">
+          CU <sup>(mg/L)</sup><br>
+          <sup>(Cuprum)</sup>
+        </th>
+        <th class="v-middle text-center">
+          PB <sup>(mg/L)</sup><br>
+          <sup>(Plumbum)</sup>
+        </th>
+        <th class="v-middle text-center">
+          CR <sup>(mg/L)</sup><br>
+          <sup>(Kromium)</sup>
+        </th>
+        <th class="v-middle text-center">ALDRIN <sup>(µg/L)</sup> </th>
+        <th class="v-middle text-center">
+          BHC <sup>(µg/L)</sup><br>
+          <sup>(Benzene Hexachloride)</sup>
+        </th>
+        <th class="v-middle text-center">CHLORDANE <sup>(µg/L)</sup> </th>
+        <th class="v-middle text-center">
+          DDT <sup>(µg/L)</sup><br>
+          <sup>(Dichoro Diphenyl Trichlorethane)</sup>
+        </th>
+        <th class="v-middle text-center">ENDRIN <sup>(µg/L)</sup> </th>
+        <th class="v-middle text-center">HEPTACHLOR <sup>(µg/L)</sup> </th>
+        <th class="v-middle text-center">LINDANE <sup>(µg/L)</sup> </th>
+        <th class="v-middle text-center">METHOXYCHLOR <sup>(µg/L)</sup> </th>
+        <th class="v-middle text-center">TOXAPAN <sup>(µg/L)</sup> </th>
+        <th class="v-middle text-center">RADIOAKTIVITAS <sup>(Bq/L)</sup> </th>
+        <th class="v-middle text-center">RADIOAKTIVITAS <sup>(Bq/L)</sup> </th>
+        <th class="v-middle text-center">E-COLI <sup>(MPN/100ML)</sup> </th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {$showBtnCatatan = 0}
+      {foreach from=$view item=v}
+      <!-- 0/1 = super
+        2 = Provinsi
+        3 = kab/Kota
+        4 = Regional -->
+      {if $me.role_user <= 1} {$showBtnCatatan=1} {else if $me.role_user==4 && $v.role_user==2} {$showBtnCatatan=1} {else if $me.role_user==2 && $v.role_user==3} {$showBtnCatatan=1} {else} {$showBtnCatatan=0} {/if} <tr>
+        <td class="text-center">{counter}</td>
+        <td class="pr-1">
+          {date('Y-m-d',$v.crdate)}
+        </td>
+        <td class="pr-1">
+          {if $v.chdate}
+          {date('Y-m-d',$v.chdate)}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.v_reject_status}
+          Sudah diperbaiki
+          {else}
+          --
+          {/if}
+        </td>
+        {if $lockActionYear == 0}
+        <th class="text-center v_provinsi_verifikasi{$v.$primaryKey} {if $v.role_user == 3}{if $v.v_provinsi == 1}bg-info{else if  $v.v_provinsi == 2} bg-danger{else}{/if}{/if} bg-accent-1">
+          {if $v.role_user == 3}
+          {if ($me.role_user == 2 || $me.role_user == 0) && $lockAction == 0}
+          <!-- <button {if !$v.v_provinsi} style="display:none;" {/if} class="badge badge-info v_provinsi_verify{$v.$primaryKey}  unverify" data-verify="v_provinsi" data-uid="{$v.$primaryKey}" title="Verifikasi"><a
+                href="javascript:void(0);">verified</a></button>
+            <button {if $v.v_provinsi} style="display:none;" {/if} class="badge badge-danger v_provinsi_unverify{$v.$primaryKey}  verify" data-verify="v_provinsi" data-uid="{$v.$primaryKey}" title="Verifikasi"><a
+                href="javascript:void(0);">unverified</a></button> -->
+          <select class="form-control select2 verifikasi" style="width:100%">
+            <option value="un" {if $v.v_provinsi==0}selected{/if} data-verify="v_provinsi" data-uid="{$v.$primaryKey}">Unverified</option>
+            <option value="1" {if $v.v_provinsi==1}selected{/if} data-verify="v_provinsi" data-uid="{$v.$primaryKey}">Verified</option>
+            <option value="2" {if $v.v_provinsi==2}selected{/if} data-verify="v_provinsi" data-uid="{$v.$primaryKey}">Rejected</option>
+          </select>
+          {else}
+          {if !$v.v_provinsi}
+          <div class="badge badge-light " title="Invalid">Unverified</div>
+          {else if $v.v_provinsi == 1}
+          <div class="badge badge-info " title="Valid">Verified</div>
+          {else if $v.v_provinsi == 2}
+          <div class="badge badge-danger " title="Rejected">Rejected</div>
+          {/if}
+          {/if}
+          {else}
+          --
+          {/if}
+        </th>
+        <th class="text-center v_regional_verifikasi{$v.$primaryKey} {if $v.role_user == 2}{if $v.v_regional == 1}bg-info{else if  $v.v_regional == 2} bg-danger{else}{/if}  {/if} bg-accent-1">
+          {if $v.role_user == 2}
+          {if ($me.role_user == 4 || $me.role_user == 5 || $me.role_user == 0) && $lockAction == 0}
+          <!-- <button {if !$v.v_regional} style="display:none;" {/if} class="badge badge-info v_regional_verify{$v.$primaryKey}  unverify" data-verify="v_regional" data-uid="{$v.$primaryKey}" title="Verifikasi"><a
+                href="javascript:void(0);">verified</a></button>
+            <button {if $v.v_regional} style="display:none;" {/if} class="badge badge-danger v_regional_unverify{$v.$primaryKey}  verify" data-verify="v_regional" data-uid="{$v.$primaryKey}" title="Verifikasi"><a
+                href="javascript:void(0);">unverified</a></button> -->
+          <select class="form-control select2 verifikasi" style="width:100%">
+            <option value="un" {if $v.v_regional==0}selected{/if} data-verify="v_regional" data-uid="{$v.$primaryKey}">Unverified</option>
+            <option value="1" {if $v.v_regional==1}selected{/if} data-verify="v_regional" data-uid="{$v.$primaryKey}">Verified</option>
+            <option value="2" {if $v.v_regional==2}selected{/if} data-verify="v_regional" data-uid="{$v.$primaryKey}">Rejected</option>
+          </select>
+          {else}
+          <!-- <div {if !$v.v_regional} style="display:none;" {/if} class="badge badge-info" title="Valid">verified</div>
+            <div {if $v.v_regional} style="display:none;" {/if} class="badge badge-danger" title="Invalid">unverified</div> -->
+          {if !$v.v_regional}
+          <div class="badge badge-light " title="Invalid">Unverified</div>
+          {else if $v.v_regional == 1}
+          <div class="badge badge-info " title="Valid">Verified</div>
+          {else if $v.v_regional == 2}
+          <div class="badge badge-danger " title="Rejected">Rejected</div>
+          {/if}
+          {/if}
+          {else}
+          --
+          {/if}
+        </th>
+        <th class="text-center v_pusat_verifikasi{$v.$primaryKey} {if $v.v_pusat == 1}bg-info{else if  $v.v_pusat == 2} bg-danger{else}{/if} bg-accent-1">
+          {if ($me.role_user == 1 || $me.role_user == 0)  && $lockAction == 0}
+          <!-- <button {if !$v.v_pusat} style="display:none;" {/if} class="badge badge-info v_pusat_verify{$v.$primaryKey}  unverify" data-verify="v_pusat" data-uid="{$v.$primaryKey}" title="Verifikasi"><a href="javascript:void(0);">verified</a></button>
+            <button {if $v.v_pusat} style="display:none;" {/if} class="badge badge-danger v_pusat_unverify{$v.$primaryKey}  verify" data-verify="v_pusat" data-uid="{$v.$primaryKey}" title="Verifikasi"><a
+                href="javascript:void(0);">unverified</a></button> -->
+          <select class="form-control select2 verifikasi" style="width:100%">
+            <option value="un" {if $v.v_pusat==0}selected{/if} data-verify="v_pusat" data-uid="{$v.$primaryKey}">Unverified</option>
+            <option value="1" {if $v.v_pusat==1}selected{/if} data-verify="v_pusat" data-uid="{$v.$primaryKey}">Verified</option>
+            <option value="2" {if $v.v_pusat==2}selected{/if} data-verify="v_pusat" data-uid="{$v.$primaryKey}">Rejected</option>
+          </select>
+          {else}
+          <!-- <div {if !$v.v_pusat} style="display:none;" {/if} class="badge badge-info" title="Valid">verified</div>
+            <div {if $v.v_pusat} style="display:none;" {/if} class="badge badge-danger" title="Invalid">unverified</div> -->
+          {if !$v.v_pusat}
+          <div class="badge badge-light " title="Invalid">Unverified</div>
+          {else if $v.v_pusat == 1}
+          <div class="badge badge-info " title="Valid">Verified</div>
+          {else if $v.v_pusat == 2}
+          <div class="badge badge-danger " title="Rejected">Rejected</div>
+          {/if}
+          {/if}
+        </th>
+        {else}
+        <!-- <th colspan="3" class="text-center">
+            <span class="badge badge-dark">pelaporan {$lockActionYear} ditutup</span>
+          </th> -->
+        <th class="text-center">
+          {if $v.role_user == 3}
+          {if !$v.v_provinsi}
+          <div class="badge badge-light " title="Invalid">Unverified</div>
+          {else if $v.v_provinsi == 1}
+          <div class="badge badge-info " title="Valid">Verified</div>
+          {else if $v.v_provinsi == 2}
+          <div class="badge badge-danger " title="Rejected">Rejected</div>
+          {/if}
+          {else}
+          --
+          {/if}
+        </th>
+        <th class="text-center">
+          {if $v.role_user == 2}
+          {if !$v.v_regional}
+          <div class="badge badge-light " title="Invalid">Unverified</div>
+          {else if $v.v_regional == 1}
+          <div class="badge badge-info " title="Valid">Verified</div>
+          {else if $v.v_regional == 2}
+          <div class="badge badge-danger " title="Rejected">Rejected</div>
+          {/if}
+          {else}
+          --
+          {/if}
+        </th>
+        <th class="text-center">
+          {if !$v.v_pusat}
+          <div class="badge badge-light " title="Invalid">Unverified</div>
+          {else if $v.v_pusat == 1}
+          <div class="badge badge-info " title="Valid">Verified</div>
+          {else if $v.v_pusat == 2}
+          <div class="badge badge-danger " title="Rejected">Rejected</div>
+          {/if}
+        </th>
+        {/if}
+        <td>
+          {$roleUser = $functions->roleUser($v.role_user)}
+          <div class="badge badge-{$roleUser.color}">{$roleUser.name}</div>
+        </td>
+        <td>
+          {if $showBtnCatatan && $lockActionYear == 0}
+          <a href="javascript:();" data-toggle="modal" data-target="#catatanVerifikator" data-uid="{$v.$primaryKey}" class="badge badge-primary catatan-verifikator"> <i class="ft-edit"></i> Tambah catatan</a>
+          <br>
+          {/if}
+          <a class="mt-1 badge badge-primary" data-toggle="collapse" href="#collapse-{$v.$primaryKey}-short" role="button" aria-expanded="false" aria-controls="collapseExample">
+            <i class="ft-eye"></i> Lihat Catatan
+          </a>
+          <div class="collapse" id="collapse-{$v.$primaryKey}-short">
+            <!-- <span id="catatan-{$v.$primaryKey}-long" style="display:none"></span> -->
+            <span id="catatan-{$v.$primaryKey}-short">
+              {if $me.role_user <= 1} <strong>Pusat</strong> : {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}
+                {elseif $me.role_user == 4 && $v.role_user == 2}
+                <strong>Regional</strong> : {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+                {elseif $me.role_user == 2 && $v.role_user == 3}
+                <strong>Provinsi</strong> : {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+                {/if}
+            </span>
+            <!-- 0/1 = super
+            2 = Provinsi
+            3 = kab/Kota
+            4 = Regional -->
+
+            {if $me.role_user == 1 || $me.role_user == 0}
+            <hr>
+            <strong>Regional</strong> : {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+            <hr>
+            <strong>Provinsi</strong> : {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+
+            {elseif $me.role_user == 2}
+            <hr>
+            <strong>Regional</strong> : {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+            <hr>
+            <strong>Pusat</strong> : {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}
+
+            {elseif $me.role_user == 4}
+            <hr>
+            <strong>Provinsi </strong> : {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+            <hr>
+            <strong>Pusat </strong> : {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}
+            {else}
+            <strong>Pusat</strong> : {if $v.catatan_verifikator}{$v.catatan_verifikator}{else}--{/if}
+            <hr>
+            <strong>Regional</strong> : {if $v.catatan_regional}{$v.catatan_regional}{else}--{/if}
+            <hr>
+            <strong>Provinsi</strong> : {if $v.catatan_provinsi}{$v.catatan_provinsi}{else}--{/if}
+            {/if}
+          </div>
+          <!-- <span id="catatan-{$v.$primaryKey}-long" style="display:none"></span> -->
+          <br>
+          <a class="mt-1 badge badge-info pointer text-white open-detail" id="{$v.uid_pelaporan_ika}" shu="{if $v.shu}{if strpos($v.shu, '.pdf')}{$baseUrl}uploads/monitoring/{$v.shu}{else}1{/if}{else}0{/if}"><i class="ft-eye"></i> Lihat Parameter &
+            SHU</a>
+        </td>
+        <td>
+          <b>{$v.kode_lokasi}</b><br>
+          {$v.alamat}<br />
+          {$v.alamat_detail}<br />
+          <div class="badge badge-success">
+            {$format->dateFormat($v.tanggal)}
+          </div><br>
+          {if $v.shu}
+          <a title="Download File" class="border-secondary badge badge-warning" href="{$baseUrl}uploads/monitoring/{$v.shu}" target="_blank">DOWNLOAD SHU</a>
+          {else}
+          <label class="border-secondary badge badge-danger">TIDAK ADA SHU</label>
+          {/if}
+        </td>
+        <td>{$v.periode_pemantauan}</td>
+        <td>
+          {if $v.kategori == 1}
+          AIR SUNGAI
+          {elseif $v.kategori == 2}
+          BADAN AIR GAMBUT
+          {elseif $v.kategori == 3}
+          DANAU/SITU
+          {/if}
+        </td>
+        <td>{$v.titik_kode_das} - {$v.titik_nama_das}</td>
+        <td>{$v.titik_nama_sungai}</td>
+        <td>{$v.nama_kabkota}</td>
+        <td>{$v.nama_provinsi}</td>
+        <td class="text-center">{$v.latitude}</td>
+        <td class="text-center">{$v.longitude}</td>
+        <td class="text-center">
+          {if $v.debit > 0}
+          {$v.debit}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.ph >= 0}
+          <!-- {if $v.ph > 9}
+          <span style="color: red;">{$v.ph}</span>
+          {else}
+          {$v.ph}
+          {/if} -->
+          {if $v.ph == 0 || $v.ph >= 14 }
+          <span style="color: red;">{$v.ph}</span>
+          {else}
+          {$v.ph}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.bod >= 0}
+          <!-- {if $v.bod > 3}
+          <span style="color: red;">{$v.bod}</span>
+          {else}
+          {$v.bod}
+          {/if} -->
+          {if $v.bod > $v.cod}
+          <span style="color: red;">{$v.bod}</span>
+          {else}
+          {$v.bod}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.cod > 0}
+          {if $v.cod > 25}
+          <span style="color: red;">{$v.cod}</span>
+          {else}
+          {$v.cod}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.tss > 0}
+          <!-- {if $v.tss > 50}
+          <span style="color: red;">{$v.tss}</span>
+          {else}
+          {$v.tss}
+          {/if} -->
+          {if $v.tss < 2.5} <span style="color: red;">{$v.tss}</span>
+            {else}
+            {$v.tss}
+            {/if}
+            {else}
+            -
+            {/if}
+        </td>
+        <td class="text-center">
+          {if $v.do_p >= 0}
+          {if $v.do_p < 0.1 || $v.do_p>= 10}
+            <span style="color: red;">{$v.do_p}</span>
+            {else}
+            {$v.do_p}
+            {/if}
+            {else}
+            --
+            {/if}
+            <!-- {if $v.do_p > 0}
+              {if $v.do_p < 4}
+                <span style="color: red;">{$v.do_p}</span>
+              {else}
+                {$v.do_p}
+              {/if}
+            {else}
+              -
+            {/if} -->
+        </td>
+        <!-- <td class="text-center do-max-{$v.$primaryKey}">{if $v.do_max_p > 0}{$v.do_max_p}{else}-{/if}</td> -->
+        <td class="text-center">
+          {if $v.no3_n > 0}
+          {if $v.no3_n > 10}
+          <span style="color: red;">{$v.no3_n}</span>
+          {else}
+          {$v.no3_n}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.total_phosphat > 0}
+          <!-- {if $v.total_phosphat > 0.2}
+          <span style="color: red;">{$v.total_phosphat}</span>
+          {else}
+          {$v.total_phosphat}
+          {/if} -->
+          {if $v.total_phosphat < 0.01} <span style="color: red;">{$v.total_phosphat}</span>
+            {else}
+            {$v.total_phosphat}
+            {/if}
+            {else}
+            -
+            {/if}
+        </td>
+        <td class="text-center">
+          {if $v.fecal_coliform > 0}
+          <!-- {if $v.fecal_coliform > 1000}
+          <span style="color: red;">{$v.fecal_coliform}</span>
+          {else}
+          {$v.fecal_coliform}
+          {/if} -->
+          {if $v.fecal_coliform < 1.8} <span style="color: red;">{$v.fecal_coliform}</span>
+            {else}
+            {$v.fecal_coliform}
+            {/if}
+            {else}
+            -
+            {/if}
+        </td>
+        <td class="text-center">
+          {if $v.kecerahan > 0}
+          {if $v.kecerahan > 4}
+          <span style="color: red;">{$v.kecerahan}</span>
+          {else}
+          {$v.kecerahan}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.klorofil_a > 0}
+          <!-- {if $v.klorofil_a > 50}
+          <span style="color: red;">{$v.klorofil_a}</span>
+          {else}
+          {$v.klorofil_a}
+          {/if} -->
+          {if $v.klorofil_a < 1} <span style="color: red;">{$v.klorofil_a}</span>
+            {else}
+            {$v.klorofil_a}
+            {/if}
+            {else}
+            -
+            {/if}
+        </td>
+        <td class="text-center">
+          {if $v.total_coliform > 0}
+          {if $v.total_coliform > 5000}
+          <span style="color: red;">{$v.total_coliform}</span>
+          {else}
+          {$v.total_coliform}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.temperatur_air > 0}
+          {if $v.temperatur_air > -0}
+          <span style="color: red;">{$v.temperatur_air}</span>
+          {else}
+          {$v.temperatur_air}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.temperatur_udara > 0}
+          {if $v.temperatur_udara > -0}
+          <span style="color: red;">{$v.temperatur_udara}</span>
+          {else}
+          {$v.temperatur_udara}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.minyak_lemak > 0}
+          {if $v.minyak_lemak > 1}
+          <span style="color: red;">{$v.minyak_lemak}</span>
+          {else}
+          {$v.minyak_lemak}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.detergen_total > 0}
+          {if $v.detergen_total > 0.2}
+          <span style="color: red;">{$v.detergen_total}</span>
+          {else}
+          {$v.detergen_total}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.fenol > 0}
+          {if $v.fenol > 000.5}
+          <span style="color: red;">{$v.fenol}</span>
+          {else}
+          {$v.fenol}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.tds > 0}
+          {if $v.tds > 1000}
+          <span style="color: red;">{$v.tds}</span>
+          {else}
+          {$v.tds}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.sulfat > 0}
+          {if $v.sulfat > 300}
+          <span style="color: red;">{$v.sulfat}</span>
+          {else}
+          {$v.sulfat}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.klorida > 0}
+          {if $v.klorida > 300}
+          <span style="color: red;">{$v.klorida}</span>
+          {else}
+          {$v.klorida}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.nitrit > 0}
+          {if $v.nitrit > 0.06}
+          <span style="color: red;">{$v.nitrit}</span>
+          {else}
+          {$v.nitrit}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.amoniak > 0}
+          {if $v.amoniak > 0.2}
+          <span style="color: red;">{$v.amoniak}</span>
+          {else}
+          {$v.amoniak}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.total_nitrogen > 0}
+          {if $v.kategori == 3}
+          {if $v.total_nitrogen > 0.75}
+          <span style="color: red;">{$v.total_nitrogen}</span>
+          {else}
+          {$v.total_nitrogen}
+          {/if}
+          {else}
+          {if $v.total_nitrogen > 15}
+          <span style="color: red;">{$v.total_nitrogen}</span>
+          {else}
+          {$v.total_nitrogen}
+          {/if}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.florida > 0}
+          {if $v.florida > 1.5}
+          <span style="color: red;">{$v.florida}</span>
+          {else}
+          {$v.florida}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.belerang_sbg_h2s > 0}
+          {if $v.belerang_sbg_h2s > 0.002}
+          <span style="color: red;">{$v.belerang_sbg_h2s}</span>
+          {else}
+          {$v.belerang_sbg_h2s}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.sianida > 0}
+          {if $v.sianida > 0.02}
+          <span style="color: red;">{$v.sianida}</span>
+          {else}
+          {$v.sianida}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.klorin_bebas > 0}
+          {if $v.klorin_bebas > 0.03}
+          <span style="color: red;">{$v.klorin_bebas}</span>
+          {else}
+          {$v.klorin_bebas}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.warna > 0}
+          {if $v.warna > 50}
+          <span style="color: red;">{$v.warna}</span>
+          {else}
+          {$v.warna}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.sampah > 0}
+          {if $v.sampah > -0}
+          <span style="color: red;">{$v.sampah}</span>
+          {else}
+          {$v.sampah}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.ba > 0}
+          {if $v.ba > -0}
+          <span style="color: red;">{$v.ba}</span>
+          {else}
+          {$v.ba}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.bo > 0}
+          {if $v.bo > 1}
+          <span style="color: red;">{$v.bo}</span>
+          {else}
+          {$v.bo}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.hg > 0}
+          {if $v.hg > 0.002}
+          <span style="color: red;">{$v.hg}</span>
+          {else}
+          {$v.hg}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.as_ > 0}
+          {if $v.as_ > 0.05}
+          <span style="color: red;">{$v.as_}</span>
+          {else}
+          {$v.as_}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.se > 0}
+          {if $v.se > 0.05}
+          <span style="color: red;">{$v.se}</span>
+          {else}
+          {$v.se}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.fe > 0}
+          {if $v.fe > -0}
+          <span style="color: red;">{$v.fe}</span>
+          {else}
+          {$v.fe}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.cd > 0}
+          {if $v.cd > 0.01}
+          <span style="color: red;">{$v.cd}</span>
+          {else}
+          {$v.cd}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.co > 0}
+          {if $v.co > 0.2}
+          <span style="color: red;">{$v.co}</span>
+          {else}
+          {$v.co}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.mn > 0}
+          {if $v.mn > -0}
+          <span style="color: red;">{$v.mn}</span>
+          {else}
+          {$v.mn}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.ni > 0}
+          {if $v.ni > 0.05}
+          <span style="color: red;">{$v.ni}</span>
+          {else}
+          {$v.ni}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.zn > 0}
+          {if $v.zn > 0.05}
+          <span style="color: red;">{$v.zn}</span>
+          {else}
+          {$v.zn}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.cu > 0}
+          {if $v.cu > 0.02}
+          <span style="color: red;">{$v.cu}</span>
+          {else}
+          {$v.cu}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.pb > 0}
+          {if $v.pb > 0.03}
+          <span style="color: red;">{$v.pb}</span>
+          {else}
+          {$v.pb}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.cr_6 > 0}
+          {if $v.cr_6 > 0.05}
+          <span style="color: red;">{$v.cr_6}</span>
+          {else}
+          {$v.cr_6}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.aldrin > 0}
+          {if $v.aldrin > -0}
+          <span style="color: red;">{$v.aldrin}</span>
+          {else}
+          {$v.aldrin}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.bhc > 0}
+          {if $v.bhc > 210}
+          <span style="color: red;">{$v.bhc}</span>
+          {else}
+          {$v.bhc}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.chlordane > 0}
+          {if $v.chlordane > -0}
+          <span style="color: red;">{$v.chlordane}</span>
+          {else}
+          {$v.chlordane}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.ddt > 0}
+          {if $v.ddt > 2}
+          <span style="color: red;">{$v.ddt}</span>
+          {else}
+          {$v.ddt}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.endrin > 0}
+          {if $v.endrin > 4}
+          <span style="color: red;">{$v.endrin}</span>
+          {else}
+          {$v.endrin}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.heptachlor > 0}
+          {if $v.heptachlor > -0}
+          <span style="color: red;">{$v.heptachlor}</span>
+          {else}
+          {$v.heptachlor}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.lindane > 0}
+          {if $v.lindane > -0}
+          <span style="color: red;">{$v.lindane}</span>
+          {else}
+          {$v.lindane}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.methoxychlor > 0}
+          {if $v.methoxychlor > -0}
+          <span style="color: red;">{$v.methoxychlor}</span>
+          {else}
+          {$v.methoxychlor}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.toxapan > 0}
+          {if $v.toxapan > -0}
+          <span style="color: red;">{$v.toxapan}</span>
+          {else}
+          {$v.toxapan}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.radioaktivitas_gross_a > 0}
+          {if $v.radioaktivitas_gross_a > 0.1}
+          <span style="color: red;">{$v.radioaktivitas_gross_a}</span>
+          {else}
+          {$v.radioaktivitas_gross_a}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.radioaktivitas_gross_b > 0}
+          {if $v.radioaktivitas_gross_b > 1}
+          <span style="color: red;">{$v.radioaktivitas_gross_b}</span>
+          {else}
+          {$v.radioaktivitas_gross_b}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        <td class="text-center">
+          {if $v.e_coli > 0}
+          {if $v.e_coli > 1}
+          <span style="color: red;">{$v.e_coli}</span>
+          {else}
+          {$v.e_coli}
+          {/if}
+          {else}
+          -
+          {/if}
+        </td>
+        </tr>
+        {include file="parts/contents/$ctrl/$act/tr_verifikasi.html"}
+        {foreachelse}
+
+        <tr>
+          <td colspan="71" class="p-0">
+            <div class="alert alert-danger text-center">
+              <strong>Tidak Ada Data</strong>
+            </div>
+          </td>
+        </tr>
+        {/foreach}
+    </tbody>
+  </table>
+</div>
+{include file="parts/block/block_pagination.html"}

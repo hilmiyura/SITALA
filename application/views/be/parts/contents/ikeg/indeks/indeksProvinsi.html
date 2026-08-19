@@ -1,0 +1,205 @@
+<div class="table-responsive table-border">
+  {if $view}
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th rowspan="2" class="text-center" style="width: 70px">No</th>
+        <th rowspan="2" class="v-middle">PROVINSI</th>
+        <th rowspan="2" class="v-middle">IKEG</th>
+        <th rowspan="2" class="v-middle">KRITERIA</th>
+        <th colspan="2" class="text-center">LUAS (HA)</th>
+        <th colspan="2" class="text-center">PERSENTASE</th>
+        <th colspan="2" class="text-center">BOBOT</th>
+        <th rowspan="2" class="text-center">ACTION</th>
+      </tr>
+      <tr>
+        <th class="text-center">
+          FLEG<br /><sub>FUNGSI LINDUNG EKOSISTEM GAMBUT</sub>
+        </th>
+        <th class="text-center">
+          FBEG<br /><sub>FUNGSI BUDIDAYA EKOSISTEM GAMBUT</sub>
+        </th>
+        <th class="text-center">
+          FLEG<br /><sub>FUNGSI LINDUNG EKOSISTEM GAMBUT</sub>
+        </th>
+        <th class="text-center">
+          FBEG<br /><sub>FUNGSI BUDIDAYA EKOSISTEM GAMBUT</sub>
+        </th>
+        <th class="text-center">
+          FLEG<br /><sub>FUNGSI LINDUNG EKOSISTEM GAMBUT</sub>
+        </th>
+        <th class="text-center">
+          FBEG<br /><sub>FUNGSI BUDIDAYA EKOSISTEM GAMBUT</sub>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {$cnProvinsi = 1} {foreach from=$view item=v} {$v.json_data =
+      $v.json_data|@json_decode:true} {if $v.jenis_indeks == 1}
+      <tr>
+        <td rowspan="8">{$cnProvinsi}</td>
+        <td rowspan="8">{$v.nama_provinsi}</td>
+        <th rowspan="8" class="text-center amber darken-3">
+          {number_format($v.nilai_indeks,2,",",".")}
+        </th>
+        <th class="border-bottom-none">AREAL TERBAKAR</th>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.luas.areal_terbakar_fleg,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.luas.areal_terbakar_fbeg,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.persentase.burn.fleg.areal_terbakar,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.persentase.burn.fbeg.areal_terbakar,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.bobot.burn.fleg.areal_terbakar,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.bobot.burn.fbeg.areal_terbakar,2,",",".")}
+        </td>
+
+        <td rowspan="8" class="text-center">
+          <form
+            class="form_with_load"
+            method="POST"
+            action=""
+            enctype="multipart/form-data"
+          >
+            <input
+              type="hidden"
+              name="form[uid_indeks_ikeg]"
+              value="{$v.uid_indeks_ikeg}"
+            />
+            <button type="submit" name="submit" class="btn btn-sm btn-warning">
+              <small class="white">Hitung Ulang</small>
+            </button>
+          </form>
+        </td>
+      </tr>
+      <tr>
+        <th class="border-bottom-none">NON TERBAKAR</th>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.luas.non_terbakar_fleg,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.luas.non_terbakar_fbeg,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.persentase.burn.fleg.non_terbakar,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.persentase.burn.fbeg.non_terbakar,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.bobot.burn.fleg.non_terbakar,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.bobot.burn.fbeg.non_terbakar,2,",",".")}
+        </td>
+      </tr>
+      <tr class="amber darken-3">
+        <th>JUMLAH BURN</th>
+        <th class="text-center">
+          {number_format($v.json_data.luas.jumlah_burn_fleg,2,",",".")}
+        </th>
+        <th class="text-center">
+          {number_format($v.json_data.luas.jumlah_burn_fbeg,2,",",".")}
+        </th>
+        <th class="text-center">
+          {number_format($v.json_data.persentase.burn.fleg.jumlah_burn,2,",",".")}
+        </th>
+        <th class="text-center">
+          {number_format($v.json_data.persentase.burn.fbeg.jumlah_burn,2,",",".")}
+        </th>
+        <th class="text-center">
+          {number_format($v.json_data.bobot.burn.fleg.jumlah_burn,2,",",".")}
+        </th>
+        <th class="text-center">
+          {number_format($v.json_data.bobot.burn.fbeg.jumlah_burn,2,",",".")}
+        </th>
+      </tr>
+      <tr>
+        <th class="border-bottom-none">KANAL</th>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.luas.kanal_fleg,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.luas.kanal_fbeg,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.persentase.kanal.fleg.kanal,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.persentase.kanal.fbeg.kanal,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.bobot.kanal.fleg.kanal,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.bobot.kanal.fbeg.kanal,2,",",".")}
+        </td>
+      </tr>
+      <tr>
+        <th class="border-bottom-none">NON KANAL</th>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.luas.non_kanal_fleg,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.luas.non_kanal_fbeg,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.persentase.kanal.fleg.non_kanal,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.persentase.kanal.fbeg.non_kanal,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.bobot.kanal.fleg.non_kanal,2,",",".")}
+        </td>
+        <td class="text-center border-bottom-none">
+          {number_format($v.json_data.bobot.kanal.fbeg.non_kanal,2,",",".")}
+        </td>
+      </tr>
+      <tr class="amber darken-3">
+        <th>JUMLAH KANAL</th>
+        <th class="text-center">
+          {number_format($v.json_data.luas.jumlah_kanal_fleg,2,",",".")}
+        </th>
+        <th class="text-center">
+          {number_format($v.json_data.luas.jumlah_kanal_fbeg,2,",",".")}
+        </th>
+        <th class="text-center">
+          {number_format($v.json_data.persentase.kanal.fleg.jumlah_kanal,2,",",".")}
+        </th>
+        <th class="text-center">
+          {number_format($v.json_data.persentase.kanal.fbeg.jumlah_kanal,2,",",".")}
+        </th>
+        <th class="text-center">
+          {number_format($v.json_data.bobot.kanal.fleg.jumlah_kanal,2,",",".")}
+        </th>
+        <th class="text-center">
+          {number_format($v.json_data.bobot.kanal.fbeg.jumlah_kanal,2,",",".")}
+        </th>
+      </tr>
+      <tr class="amber darken-3">
+        <th colspan="5"></th>
+        <th class="text-center">{number_format($v.persen_fleg,2,",",".")}</th>
+        <th class="text-center">{number_format($v.persen_fbeg,2,",",".")}</th>
+      </tr>
+      <tr class="amber darken-3">
+        <th colspan="6" class="text-center">IKEG</th>
+        <th class="text-center">{number_format($v.nilai_indeks,2,",",".")}</th>
+      </tr>
+      <tr>
+        <td colspan="11"></td>
+      </tr>
+      <p style="display: none">{$cnProvinsi++}</p>
+      {/if} {/foreach}
+    </tbody>
+  </table>
+  {/if}
+</div>

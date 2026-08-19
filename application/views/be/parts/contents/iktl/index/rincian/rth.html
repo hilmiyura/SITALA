@@ -1,0 +1,94 @@
+<div class="modal-header bg-info bg-darken-2 white">
+  <h4 class="modal-title white" id="myModalLabel6">
+    <i class="ft-plus-circle"></i> Detail RTH
+  </h4>
+  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
+  <div class="modal-body">
+    {if !$viewDataList}
+    <div class="form-row mb-1">
+      <div class="col-md-6 mb-1">
+        <label for="name">Metode Penginputan *</label>
+        <div class="input-group">
+          <select class="form-control input-sm select2" id="rth_metode_penginputan">
+            <option value="">--Pilih--</option>
+            <option value="1">Upload Excel</option>
+            <option value="2">Copy Data</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <div class="col-md-12 rthMetodeUpload" style="display:none;">
+        <div class="form-row">
+          <div class="col-md-6">
+            <label for="name">Upload file excel *</label>
+            <div class="input-group">
+              <input type="file" id="file-rth" name="" value="">
+            </div>
+            <small>
+              <p class="text-danger mb-0">*Upload file max 10 Mb.</p>
+              <p><a href="{$baseUrl}temp/format_excel/template_rth_upload.xls?v{$time}" target="_blank">Download template upload</a></p>
+            </small>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-md-6">
+            <label for="name">Jenis Upload *</label>
+            <div class="input-group">
+              <select class="form-control input-sm select2" id="jenis_upload_rth" name="">
+                <option value="">--Pilih--</option>
+                <option value="1">Data Baru (data yang sudah diupload akan diganti dengan baru)</option>
+                <option value="2">Tambah Data (menambahkan data ke data yang sudah diupload sebelumnya)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12 rthMetodeCopy" style="display:none;">
+        <div class="form-row mb-1">
+          <div class="col-md-6 mb-1">
+            <label for="name">Copy Dari Pelaporan *</label>
+            <div class="input-group">
+              <select class="form-control input-sm select2" id="copy_tanggal_pelaporan" name="">
+                <option value="">--Pilih--</option>
+              </select>
+            </div>
+            <span class="text-danger"><small>*pastikan provinsi dan kabupaten kota sudah dipilih!</small></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {/if}
+    <div class="form-row mb-1">
+      <input type="hidden" id="viewOnly" value="{$viewDataList}">
+      <div class="col-md-12 push-list">
+        {$listRth}
+      </div>
+    </div>
+    {if $viewDataList}
+    <div class="form-row">
+      <div class="col-md-12 text-center">
+        <nav class="mb-3" aria-label="Page navigation">
+          <ul class="pagination">
+            {foreach from=$paginationList item=vp key=kp}
+            <li class="page-item {if $paginationStart == $vp.offset_start}active{/if}"><a href="javascript:();" class="page-link page-rth-detail" data-uid="{$viewDataList}" page-start="{$vp.offset_start}" page-end="{$vp.offset_end}"
+                data-verifikasi="{$dv}">{$kp} </a></li>
+            {/foreach}
+          </ul>
+        </nav>
+      </div>
+    </div>
+    {/if}
+  </div>
+  <div class="modal-footer">
+    <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+    {if !$viewDataList}
+    <a type="button" class="btn btn-danger white" id="form-rth-submit" data-dismiss="modal">Simpan</a>
+    {/if}
+  </div>
+</form>
+{include file="parts/contents/iktl/index/rincian/rthScript.html"}

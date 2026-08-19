@@ -1,0 +1,217 @@
+<!-- Modal -->
+<div class="modal text-left" id="tambahData" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data Koefisien IKL
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+        <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="col-md-6 mb-1">
+              <label for="name">Tahun</label>
+              <div class="input-group">
+                <select class="form-control select2 tahun" name="form[tahun]" id="tahun" required="required">
+                  <option value=""> --PILIH TAHUN-- </option>
+                  {for $foo=2015 to ($thisYear+5)}
+                  <option value="{$foo}"> {$foo} </option>
+                  {/for}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-6 mb-1">
+              <label for="name">Hutan lahan kering primer</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="hutan_lahan_kering_primer" name="form[hutan_lahan_kering_primer]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Hutan lahan kering sekunder / bekas tebangan</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="hutan_lahan_kering_sekunder" name="form[hutan_lahan_kering_sekunder]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Hutan mangrove primer</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="hutan_mangrove_primer" name="form[hutan_mangrove_primer]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Hutan rawa primer</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="hutan_rawa_primer" name="form[hutan_rawa_primer]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Hutan tanaman</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="hutan_tanaman" name="form[hutan_tanaman]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Belukar</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="belukar" name="form[belukar]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Perkebunan / Kebun</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="perkebunan" name="form[perkebunan]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Permukiman / Lahan terbangun</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="permukiman" name="form[permukiman]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Lahan terbuka</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="lahan_terbuka" name="form[lahan_terbuka]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Savanna / Padang rumput</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="savanna" name="form[savanna]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Tubuh air</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="tubuh_air" name="form[tubuh_air]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Hutan mangrove sekunder / bekas tebangan</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="hutan_mangrove_sekunder" name="form[hutan_mangrove_sekunder]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Hutan rawa sekunder / bekas tebangan</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="hutan_rawa_sekunder" name="form[hutan_rawa_sekunder]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Belukar rawa</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="belukar_rawa" name="form[belukar_rawa]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Pertanian lahan kering</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="pertanian_lahan_kering" name="form[pertanian_lahan_kering]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Pertanian lahan kering campur semak / kebun campur</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="pertanian_lahan_kering_campur_semak" name="form[pertanian_lahan_kering_campur_semak]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Sawah</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="sawah" name="form[sawah]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Tambak</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="tambak" name="form[tambak]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Bandara / Pelabuhan</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="bandara" name="form[bandara]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Transmigrasi</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="transmigrasi" name="form[transmigrasi]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Pertambangan</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="pertambangan" name="form[pertambangan]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Rawa</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="rawa" name="form[rawa]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">RTH</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="rth" name="form[rth]"  />
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">RTL</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" required placeholder="Nilai" id="rtl" name="form[rtl]"  />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="submit" name="submit" class="btn btn-danger">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{if isset($listExport)}
+<div class="modal text-left" id="unduhDataExcel" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-download-cloud"></i> Download Excel
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row d-flex">
+          {foreach from=$listExport item=v key=k}
+          <div class="list-group col-md-3" style="margin-left: 15px; padding: 0;">
+            <a href="{$baseUrl}refKoefisienIkl/dataExcel/offset/{$v.offset_start}/search/{$search_json}/print/{time()}" class="list-group-item">
+              <i class="ft-file"></i> EXCEL {$k}
+              <p><small>(BARIS : {$v.offset_start}-{$v.offset_end})</small></p>
+            </a>
+          </div>
+          {/foreach}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}

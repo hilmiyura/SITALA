@@ -1,0 +1,24 @@
+<div class="row">
+  <div class="col-xl-12 col-12">
+    <div class="card">
+      {if $pengumuman}
+        <div class="card-header pb-0">
+          <a href="{$baseUrl}{$ctrl}#info">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="marquee">
+                    {foreach from=$pengumuman item=v key=k}
+                    <span>{$v.judul} | {$v.tanggal} | {$v.isi} </span>
+                    {/foreach}
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      {/if}
+      <div class="card-content p-1">
+        <div id="mapnew" style="width: 100% !important; height: 500px !important;"></div>
+      </div>
+    </div>
+  </div>
+</div>

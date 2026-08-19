@@ -1,0 +1,134 @@
+<div class="modal text-left" id="detailRth" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel7">
+          <i class="ft-download-cluod"></i> Rincian RTH
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="repeater-data_rth2" style="overflow-x: auto;">
+            <div class="table-responsive table-border freeze-table">
+              <table class="table">
+                <thead class="bg-info bg-darken-2 white">
+                  <tr>
+                    <th>Jenis RTH</th>
+                    <th>Luas</th>
+                    <th>Nama RTH</th>
+                    <th>Nama Desa</th>
+                    <th>Nama Kecamtan</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Sumber Dana</th>
+                    <th>Nomor SK</th>
+                    <th>Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody data-repeater-list="data_rth">
+                  <tr data-repeater-item>
+                    <td class="p-0">
+                      <select class="custom-select form-control border-0 m-0 position-relative jenis_rth" readonly name="jenis_rth" style="width: 100%" required="">
+                        <option value="">-- PILIH JENIS RTH --</option>
+                        <option value="1">Kebun Raya</option>
+                        <option value="2">Taman Kehati</option>
+                        <option value="3">Hutan Kota</option>
+                        <option value="4">Taman Kota</option>
+                        <option value="5">Taman Hutan Raya</option>
+                        <option value="6">Media Jalan</option>
+                        <option value="7">Sabuk Hijau</option>
+                        <option value="8">Jalur di Bawah Tegangan Tinggi Listrik</option>
+                        <option value="9">Sempadan Sungai</option>
+                        <option value="10">Daerah Peyangga</option>
+                        <option value="11">Kebun Binatang</option>
+                        <option value="12">Arboretum</option>
+                        <option value="13">Taman Rekreasi</option>
+                      </select>
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 luas_rth" readonly placeholder="Luas" name="luas_rth" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 nama_rth" readonly placeholder="Nama RTH" name="nama_rth" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 nama_desa" readonly placeholder="Nama Desa" name="nama_desa" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 nama_kecamatan" readonly placeholder="Nama Kecamatan" name="nama_kecamatan" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 koordinat_lintang" readonly placeholder="Koordinat Lintang" name="koordinat_lintang" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 koordinat_bujur" readonly placeholder="Koordinat Bujur" name="koordinat_bujur" />
+                    </td>
+                    <td class="p-0">
+                      <select class="custom-select form-control border-0 m-0 position-relative sumber_dana" readonly name="sumber_dana" style="width: 100%" required="">
+                        <option value="">-- PILIH SUMBER DANA --</option>
+                        <option value="1">APBN</option>
+                        <option value="2">APBD</option>
+                        <option value="3">SWASTA</option>
+                      </select>
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 nomor_sk" readonly placeholder="Nomor SK" name="nomor_sk" />
+                    </td>
+                    <td class="p-0">
+                      <input type="text" class="form-control border-0 m-0 keterangan" readonly placeholder="Keterangan" name="keterangan" />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- <div class="modal text-left" id="detailRth2" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-table"></i> Rincian RTH
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive table-border freeze-table">
+          <table class="table">
+            <thead class="bg-info bg-darken-2 white">
+              <tr>
+                <th class="v-middle">Jenis RTH</th>
+                <th class="v-middle">Luas RTH</th>
+                <th class="v-middle">Nama RTH</th>
+                <th class="v-middle">Nama Desa</th>
+                <th class="v-middle">Nama Kecamatan</th>
+                <th class="v-middle">Nomor SK</th>
+                <th class="v-middle">Sumber Dana</th>
+                <th class="v-middle">Koordinat Lintang</th>
+                <th class="v-middle">Koordinat Bujur</th>
+                <th class="v-middle">Keterangan</th>
+              </tr>
+            </thead>
+            <tbody id="idRthDetail">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div> -->

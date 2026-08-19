@@ -1,0 +1,70 @@
+<style>
+	table thead tr th {
+		border: 1px solid black;
+	}
+
+	table tbody tr td {
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style>
+<table>
+	<thead>
+		<tr>
+      {foreach from=$data item=v key=k}
+				{if $k=="iku"}
+					<th colspan="{count($v)}">INDEKS KUALITAS UDARA</th>
+				{elseif $k=="ika"}
+					<th colspan="{count($v)}">INDEKS KUALITAS AIR</th>
+				{elseif $k=="ikl"}
+					<th colspan="{count($v)}">INDEKS KUALITAS LAHAN</th>
+				{elseif $k=="ikeg"}
+					<th colspan="{count($v)}">INDEKS KUALITAS EKOSISTEM GAMBUT</th>
+				{elseif $k=="ikal"}
+					<th colspan="{count($v)}">INDEKS KUALITAS LAUT</th>
+				{/if}
+				<th></th>
+      {/foreach}
+		</tr>
+		<tr>
+      {foreach from=$data item=v key=k}
+				{foreach from=$v item=vi key=ki}
+					<th>{$ki}</th>
+				{/foreach}
+				<th></th>
+      {/foreach}
+		</tr>
+	</thead>
+  	<tbody>
+			{for $i=0 to $max_main}
+				<tr>
+					{foreach from=$data item=v key=k}
+						{foreach from=$v item=vi key=ki}
+							<td>{$vi['main'][$i]['isian']|nl2br}</td>
+						{/foreach}
+						<td></td>
+		      {/foreach}
+				</tr>
+			{/for}
+
+			<tr>
+				{foreach from=$data item=v key=k}
+					{foreach from=$v item=vi key=ki}
+						<td>RESPON</td>
+					{/foreach}
+					<td></td>
+				{/foreach}
+			</tr>
+
+			{for $j=0 to $max_respon}
+				<tr>
+					{foreach from=$data item=v key=k}
+						{foreach from=$v item=vi key=ki}
+							<td>{$vi['response'][$j]['isian']|nl2br}</td>
+						{/foreach}
+						<td></td>
+		      {/foreach}
+				</tr>
+			{/for}
+  	</tbody>
+</table>

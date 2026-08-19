@@ -1,0 +1,51 @@
+<div class="row">
+  <div class="col-md-10">
+    <form action="" method="POST" enctype="multipart/form-data">
+      <div class="row mt-2">
+        <div class="col-md-3">
+          <select class="form-control select2" name="form[tahun]" style="width:100%;" onchange="this.form.submit();" required>
+            <option value="">-Pilih Tahun-</option>
+            {for $foo=2015 to ($thisYear)}
+            <option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+            {/for}
+          </select>
+        </div>
+        <!-- <div class="col-md-2">
+          <button type="submit" class="btn btn-success" name="search">Selanjutnya</button>
+        </div> -->
+      </div>
+    </form>
+  </div>
+  <div class="col-md-2">
+    <ul class="nav justify-content-end">
+      <li class="nav-item">
+        <a class="nav-link btn btn-info" href="{$baseUrl}{$ctrl}"><i class="ft-arrow-left"></i> Back</a>
+      </li>
+    </ul>
+  </div>
+</div>
+<hr />
+<ul class="nav nav-tabs">
+  <li class="nav-item">
+    <a class="nav-link active" id="base-tab1" data-toggle="tab" href="#tab1">Langit Biru</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="base-tab2" data-toggle="tab" href="#tab2">Pantai Lestari</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="base-tab3" data-toggle="tab" href="#tab3">Kali Bersih</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="base-tab4" data-toggle="tab" href="#tab4">Indonesia Hijau</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="base-tab5" data-toggle="tab" href="#tab5">Gambut Lestari</a>
+  </li>
+</ul>
+<div class="tab-content px-0 pt-1">
+  {include file="parts/contents/$ctrl/$act/tab1.html"}
+  {include file="parts/contents/$ctrl/$act/tab2.html"}
+  {include file="parts/contents/$ctrl/$act/tab3.html"}
+  {include file="parts/contents/$ctrl/$act/tab4.html"}
+  {include file="parts/contents/$ctrl/$act/tab5.html"}
+</div>

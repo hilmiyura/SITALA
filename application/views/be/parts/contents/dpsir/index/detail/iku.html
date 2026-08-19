@@ -1,0 +1,34 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead class="bg-info white">
+          <tr>
+            <th width="1">No</th>
+            <th>Provinsi</th>
+            <th>Kab/kota</th>
+            <th>Alamat</th>
+            <th>Kode Lokasi</th>
+            <th>Peruntukan</th>
+            <th>NO2</th>
+            <th>SO2</th>
+          </tr>
+        </thead>
+        <tbody>
+          {foreach from=$data item=v key=k}
+            <tr>
+              <td>{$k+1}</td>
+              <td>{$v.nama_provinsi}</td>
+              <td>{$v.nama_kabkota}</td>
+              <td>{$v.alamat_detail}</td>
+              <td class="nowrap">{$v.kode_lokasi}</td>
+              <td class="nowrap">{$v.peruntukan}</td>
+              <td class="text-center">{number_format($v.no2,2,".","")}</td>
+              <td class="text-center">{number_format($v.so2,2,".","")}</td>
+            </tr>
+          {/foreach}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

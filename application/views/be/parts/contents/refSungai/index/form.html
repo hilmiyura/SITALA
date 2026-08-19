@@ -1,0 +1,81 @@
+<!-- Modal -->
+<div class="modal text-left" id="tambahData" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data Sungai
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+        <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="col-md-6 mb-1">
+              <label for="name">Sungai</label>
+              <input class="form-control" type="text" name="form[nama]" id="nama" value="" required>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="">DAS</label>
+              <select class="form-control position-relative das-src" name="form[uid_das]" id="uid_das" required style="width:100%;">
+              </select>
+            </div>
+            <div class="col-md-12">
+              <select class="form-control select2 position-relative" name="form[uid_kabkota]" id="uid_kabkota" style="width:100%;">
+                <option value="">--PROVINSI / KABUPATEN / KOTA--</option>
+                {foreach from=$provinsi item=v}
+                  <optgroup label="{$v.nama}">
+                    {foreach from=$v.kabkota item=vi}
+                      <option value="{$v.id}-{$vi.id}">{$v.nama} - {$vi.nama}</option>
+                    {/foreach}
+                  </optgroup>
+                {/foreach}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="submit" name="submit" class="btn btn-danger">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{if isset($listExport)}
+<div class="modal text-left" id="unduhDataExcel" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-download-cloud"></i> Download Excel
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row d-flex">
+          {foreach from=$listExport item=v key=k}
+          <div class="list-group col-md-3" style="margin-left: 15px; padding: 0;">
+            <a href="{$baseUrl}refSungai/dataExcel/offset/{$v.offset_start}/search/{$search_json}/print/{time()}" class="list-group-item">
+              <i class="ft-file"></i> EXCEL {$k}
+              <p><small>(BARIS : {$v.offset_start}-{$v.offset_end})</small></p>
+            </a>
+          </div>
+          {/foreach}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}

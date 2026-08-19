@@ -1,0 +1,264 @@
+<div class="header-navbar navbar-expand-sm navbar navbar-horizontal navbar-fixed navbar-dark navbar-without-dd-arrow navbar-shadow" role="navigation" data-menu="menu-wrapper">
+  <div class="navbar-container main-menu-content" data-menu="menu-container">
+    <ul class="nav navbar-nav" id="main-menu-navigation" data-menu="menu-navigation">
+      <li class="nav-item {$dashboardActive}">
+        <a class="nav-link" href="{$baseUrl}dashboard" data-toggle="">
+          <i class="ft-home"></i><span>Dashboard</span>
+        </a>
+      </li>
+      <li class="dropdown nav-item {$pelaporanActive}" data-menu="dropdown">
+        <a class="dropdown-toggle nav-link" href="javascript:void();" data-toggle="dropdown"><i class="ft-calendar"></i><span>Pelaporan</span></a>
+        <ul class="dropdown-menu">
+          <div class="arrow_box">
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKU") || $me.role_user == 2 || $me.role_user == 3 || $me.role_user ==
+            4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}iku" data-toggle="dropdown">INDEKS KUALITAS UDARA (IKU)</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKA" || $me.komponen == "DIR-RPDM") || $me.role_user == 2 || $me.role_user == 3 ||
+            $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}ika" data-toggle="dropdown">INDEKS KUALITAS AIR (IKA)</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKL" || $me.komponen == "PKG") || $me.role_user == 3 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}iktl" data-toggle="dropdown">INDEKS KUALITAS LAHAN (IKL)</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKAL"  || $me.komponen == "DIR-RPDM") || $me.role_user == 2 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}ikal" data-toggle="dropdown">INDEKS KUALITAS AIR LAUT (IKAL)</a>
+            </li>
+            {/if}
+          </div>
+        </ul>
+      </li>
+      <li class="dropdown nav-item {$verifikasiActive}" data-menu="dropdown">
+        <a class="dropdown-toggle nav-link" href="javascript:void();" data-toggle="dropdown"><i class="la la-check-circle-o"></i><span>Verifikasi</span></a>
+        <ul class="dropdown-menu">
+          <div class="arrow_box">
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKU") || $me.role_user == 2 || $me.role_user == 3 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}iku/verifikasi" data-toggle="dropdown">INDEKS KUALITAS UDARA
+                (IKU)</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKA" || $me.komponen == "DIR-RPDM") || $me.role_user == 2 || $me.role_user == 3 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}ika/verifikasi" data-toggle="dropdown">INDEKS KUALITAS AIR
+                (IKA)</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKL" || $me.komponen == "PKG") || $me.role_user == 2 || $me.role_user == 3 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}iktl/verifikasi" data-toggle="dropdown">INDEKS KUALITAS LAHAN
+                (IKL)</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKAL" || $me.komponen == "DIR-RPDM") || $me.role_user == 2 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}ikal/verifikasi" data-toggle="dropdown">INDEKS KUALITAS AIR LAUT
+                (IKAL)</a>
+            </li>
+            {/if}
+          </div>
+        </ul>
+      </li>
+      <li class="dropdown nav-item {$indeksActive}" data-menu="dropdown">
+        <a class="dropdown-toggle nav-link" href="javascript:void();" data-toggle="dropdown"><i class="la la-calculator"></i><span>Perhitungan</span></a>
+        <ul class="dropdown-menu">
+          <div class="arrow_box">
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKU") || $me.role_user == 2 || $me.role_user == 3 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}iku/indeks" data-toggle="dropdown">INDEKS KUALITAS UDARA
+                (IKU)</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKA" || $me.komponen == "DIR-RPDM") || $me.role_user == 2 || $me.role_user == 3 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}ika/indeks" data-toggle="dropdown">INDEKS KUALITAS AIR (IKA)</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKL" || $me.komponen == "PKG") || $me.role_user == 2 || $me.role_user == 3 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}iktl/indeks" data-toggle="dropdown">INDEKS KUALITAS LAHAN
+                (IKL)</a>
+            </li>
+            {/if}
+            <!-- <li data-menu="">
+              <a
+                class="dropdown-item"
+                href="{$baseUrl}ikeg/indeks"
+                data-toggle="dropdown"
+                >INDEKS KUALITAS EKOSISTEM GAMBUT (IKEG)</a
+              >
+            </li> -->
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKAL" || $me.komponen == "DIR-RPDM") || $me.role_user == 2 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}ikal/indeks" data-toggle="dropdown">INDEKS KUALITAS AIR LAUT
+                (IKAL)</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || $me.komponen == "PKG"}
+              <li data-menu="">
+                <a class="dropdown-item" href="{$baseUrl}ikeg_rf" data-toggle="dropdown">INDEKS KUALITAS EKOSISTEM GAMBUT (IKEG)</a>
+              </li>
+            {/if}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}iklh" data-toggle="dropdown">INDEKS KUALITAS LINGKUNGAN HIDUP
+                (IKLH)</a>
+            </li>
+            <!-- <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}iklhRaport" data-toggle="dropdown">RAPORT INDEKS KUALITAS LINGKUNGAN HIDUP
+                (IKLH)</a>
+            </li> -->
+          </div>
+        </ul>
+      </li>
+      <!-- <li class="nav-item {$dpsirActive}">
+        <a class="nav-link" href="{$baseUrl}dpsir" data-toggle="">
+          <i class="la la-tasks"></i><span>DPSIR</span>
+        </a>
+      </li> -->
+      <li class="dropdown nav-item {$dpsirActive}" data-menu="dropdown">
+        <a class="dropdown-toggle nav-link" href="javascript:void();" data-toggle="dropdown"><i class="la la-tasks"></i><span>DPSIR</span></a>
+        <ul class="dropdown-menu">
+          <div class="arrow_box">
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}dpsir" data-toggle="dropdown">ISIAN DPSIR</a>
+            </li>
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}dpsirStatus" data-toggle="dropdown">STATUS DPSIR</a>
+            </li>
+          </div>
+        </ul>
+      </li>
+      <!-- <li class="nav-item {$iklhActive}">
+        <a class="nav-link" href="{$baseUrl}iklh" data-toggle="">
+          <i class="ft-bar-chart-2"></i><span>Indeks Kualitas Lingkungan Hidup</span>
+        </a>
+      </li> -->
+      {if $me.role_user == 0 || $me.role_user == 1 || $me.role_user == 6}
+      <li class="dropdown nav-item {$indeksResponActive}" data-menu="dropdown">
+        <a class="dropdown-toggle nav-link" href="javascript:void();" data-toggle="dropdown"><i class="ft-bar-chart"></i><span>Indeks Respon</span></a>
+        <ul class="dropdown-menu">
+          <div class="arrow_box">
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}indeksRespon" data-toggle="dropdown">ISIAN INDEKS RESPON</a>
+            </li>
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}rekapIndeksRespon" data-toggle="dropdown">REKAP INDEKS RESPON</a>
+            </li>
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}evaluasiIndeksRespon" data-toggle="dropdown">EVALUASI INDEKS
+                RESPON</a>
+            </li>
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}rekapEvaluasiIndeksRespon" data-toggle="dropdown">REKAP EVALUASI
+                INDEKS RESPON</a>
+            </li>
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}rekapBobot" data-toggle="dropdown">REKAP BOBOT
+                INDEKS RESPON</a>
+            </li>
+          </div>
+        </ul>
+      </li>
+      {else}
+      <li class="nav-item {$indeksResponActive}">
+        <a class="nav-link" href="{$baseUrl}indeksRespon" data-toggle="">
+          <i class="ft-bar-chart"></i><span>Indeks Respon</span>
+        </a>
+      </li>
+      {/if}
+      <li class="nav-item {$raportActive}">
+        <a class="nav-link" href="{$baseUrl}iklhRaport" data-toggle="">
+          <i class="ft-book"></i><span>Raport</span>
+        </a>
+      </li>
+      {if $me.role_user != 6}
+      <li class="nav-item {$faqActive}">
+        <a class="nav-link" href="{$baseUrl}faq" data-toggle="">
+          <i class="ft-help-circle"></i><span>Faq</span>
+        </a>
+      </li>
+      <li class="nav-item {$ticketActive}">
+        <a class="nav-link" href="{$baseUrl}ticket" data-toggle="">
+          <i class="ft-message-circle"></i><span>Support Ticket</span>
+        </a>
+      </li>
+      <li class="dropdown nav-item {$masterActive}" data-menu="dropdown">
+        <a class="dropdown-toggle nav-link" href="javascript:void();" data-toggle="dropdown"><i class="la la-support"></i><span>Pengaturan</span></a>
+        <ul class="dropdown-menu">
+          <div class="arrow_box">
+            {if $me.role_user == 0 || $me.komponen == 'IKA'}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}refDas" data-toggle="dropdown">Daerah Aliran Sungai (DAS)</a>
+            </li>
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}refSungai" data-toggle="dropdown">Sungai</a>
+            </li>
+            {/if}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}lokasiPemantauan" data-toggle="dropdown">Lokasi Pemantauan</a>
+            </li>
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}monitoringLok/iku" data-toggle="dropdown">Monitoring Lokasi
+                Pemantauan</a>
+            </li>
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}refLab" data-toggle="dropdown">Laboratorium Terakreditasi</a>
+            </li>
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}usersDetailPeriode" data-toggle="dropdown">Mangrove dan Ekosistem Gambut</a>
+            </li>
+            {if $me.role_user != 0 && $me.role_user != 1}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}targetiklh" data-toggle="dropdown">Target Nilai IKLH</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || $me.role_user == 1}
+              <li data-menu="">
+                <a class="dropdown-item" href="{$baseUrl}nilaiDkk" data-toggle="dropdown">Faktor Koreksi Gambut</a>
+              </li>
+              <li data-menu="">
+                <a class="dropdown-item" href="{$baseUrl}refKoefisienIkl" data-toggle="dropdown">Koefisien Tutupan Lahan</a>
+              </li>
+              <li data-menu="">
+                <a class="dropdown-item" href="{$baseUrl}targetiklh" data-toggle="dropdown">Target Nilai IKLH</a>
+              </li>
+              <li data-menu="">
+                <a class="dropdown-item" href="{$baseUrl}nilaipelengkapiklh" data-toggle="dropdown">Nilai Pelengkap IKLH</a>
+              </li>
+              <li data-menu="">
+                <a class="dropdown-item" href="{$baseUrl}refBobotProvinsi" data-toggle="dropdown">Bobot Provinsi</a>
+              </li>
+              <li data-menu="">
+                <a class="dropdown-item" href="{$baseUrl}users" data-toggle="dropdown">Daftar Pengguna</a>
+              </li>
+              {if $me.role_user == 0 || $me.role_user == 1}
+                {if $me.komponen == NULL}
+                  <li data-menu="">
+                    <a class="dropdown-item" href="{$baseUrl}locksystem" data-toggle="dropdown">Lock System</a>
+                  </li>
+                  <li data-menu="">
+                    <a class="dropdown-item" href="{$baseUrl}ref/pengumuman" data-toggle="dropdown">Pengumuman</a>
+                  </li>
+                  <li data-menu="">
+                    <a class="dropdown-item" href="{$baseUrl}ref/faq" data-toggle="dropdown">FAQ</a>
+                  </li>
+                {/if}
+              {/if}
+            {/if}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}users/profile" data-toggle="dropdown">Profil</a>
+            </li>
+          </div>
+        </ul>
+      </li>
+      {/if}
+    </ul>
+  </div>
+</div>

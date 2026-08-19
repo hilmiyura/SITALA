@@ -1,0 +1,125 @@
+<div class="content-wrapper">
+  <div class="content-wrapper-before" style="height: 40%;"></div>
+  <div class="content-header row">
+  </div>
+  <div class="content-body">
+    <div id="user-profile">
+      <div class="row">
+        <div class="col-sm-12 col-xl-12">
+          <div class="media d-flex m-1 ">
+            <div class="align-left p-1">
+              <a href="#" class="profile-image">
+                <img src="assets/app-assets/images/portrait/small/usr-1.jpeg" class="rounded-circle img-border height-100" alt="Card image">
+              </a>
+            </div>
+            <div class="media-body text-left  mt-1">
+              <h3 class="font-large-1 white">{$form.name}
+                <span class="font-medium-1 white">(
+                  {if $form.role_user == 1}
+                  User Pusat
+                  {else if $form.role_user == 2}
+                  User Provinsi {$form.nama_provinsi}
+                  {else if $form.role_user == 3}
+                  User {$form.nama_kabkota}
+                  {else if $form.role_user == 4}
+                  User P3E Regional {$form.ur_regional}
+                  {else if $form.role_user == 6}
+                  User Inspektorat
+                  {else}
+                  Administrator
+                  {/if}
+                  )</span>
+              </h3>
+              <p class="white">
+                {if $form.active}
+                <i class="ft-user-check"> </i> {$form.username}
+                {else}
+                <i class="ft-user-x"> </i> {$form.username}
+                {/if}
+              </p>
+              <p class="white">
+                <i class="ft-clock"> </i>{$form.last_access} - {$me.ip} - (last Login)
+              </p>
+
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-xl-6">
+          <div class="media d-flex m-1 ">
+
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        {if $message}
+        <div class="col-md-12">
+          <div class="alert alert-danger alert-dismissible mb-2" role="alert">
+            <strong>Informasi !</strong> {$message}
+          </div>
+        </div>
+        {/if}
+        <div class="col-xl-12 col-lg-12 col-md-12">
+          <!--Project Timeline div starts-->
+          <div id="timeline">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-wrap bar-primary">
+                  <div class="card-title">Form Profile</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-block">
+                  <form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+                    <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
+                    <div class="modal-body">
+                      <div class="form-row">
+                        <div class="col-md-12 mb-2">
+                          <label for="name">Nama</label>
+                          <input readonly="readonly" type="text" class="form-control position-relative" name="form[name]" id="name" placeholder="Nama" value="{$form.name}" required="" />
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <label for="name">Password Lama</label>
+                          <input type="password" class="form-control position-relative" name="form[password_lama]" id="password_lama" placeholder="Password Lama" value="" required="" />
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <label for="name">Password Baru</label>
+                          <div class="input-group">
+                            <input type="password" class="form-control position-relative" name="form[password]" id="password" placeholder="Password Baru" value="" required="" />
+                            <div class="input-group-append pointer show-pwd" status="hide">
+                              <span class="input-group-text show-pwd-group"><i class="icon-ft ft ft-eye-off"></i></span>
+                            </div>
+                            <small><span class="text-danger">Password harus lebih dari 7 karakter, mengandung huruf BESAR, huruf kecil dan angka</span></small>
+                          </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <label for="name">Konfirmasi Password Baru</label>
+                          <div class="input-group">
+                            <input type="password" class="form-control position-relative" name="form[konfirmasi_password]" id="konfirmasi_password" placeholder="Konfirmasi Password Baru" value="" required="" />
+                            <div class="input-group-append pointer show-pwd-confirm" status="hide">
+                              <span class="input-group-text show-pwd-confirm-group"><i class="icon-ft-confirm ft ft-eye-off"></i></span>
+                            </div>
+                            <small><span class="text-danger">Konfirmasi password baru harus sama dengan password baru</span></small>
+                          </div>
+                        </div>
+                        <div class="col-md-2">
+                          <input type="submit" name="submit" id="submit" disabled class="btn btn-danger position-relative " value="SUBMIT" style="margin-top:27px;">
+                        </div>
+                        {if $form.role_user == 2 || $form.role_user == 3}
+                        <div class="col-md-12 mb-3">
+                          {include file="parts/contents/$ctrl/$act/detailPeriode.html"}
+                        </div>
+                        {/if}
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--Project Timeline div ends-->
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

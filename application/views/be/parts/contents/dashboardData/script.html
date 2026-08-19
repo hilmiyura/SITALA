@@ -1,0 +1,124 @@
+<script type="text/javascript">
+  $(".show-data-tahun").on("click", function(){
+    var val = $(this).attr("tahun");
+    window.location.href = baseUrl+ctrl+"/index/x/"+val;
+  })
+
+  var sumary = {$sumary|@json_encode nofilter};
+</script>
+{literal}
+<script type="text/javascript">
+  $(document).ready(function(){
+    let bgColor = {'success':'#5ed84f','warning':'#fdb901','danger':'#fa626b'};
+
+    setTimeout( function(){
+      dataChart("iku");
+      dataChart("ika");
+      dataChart("ikal");
+      dataChart("ikl");
+    },1000);
+
+    function dataChart(aspek){
+      var dataValue = [
+        {
+          name: "unverifed",
+          y: sumary[aspek]['unverify'],
+          sliced: false,
+          selected: false,
+          color: bgColor['warning']
+        },
+        {
+          name: 'verified',
+          y: sumary[aspek]['verify'],
+          sliced: true,
+          selected: true,
+          color: bgColor['success']
+        },
+        {
+          name: 'rejected',
+          y: sumary[aspek]['reject'],
+          sliced: false,
+          selected: false,
+          color: bgColor['danger']
+        }
+      ];
+      gc1(dataValue, 'chart-pie-'+aspek);
+    }
+
+    function gc1(dataChart, div){
+      var chart = {
+        type: 'pie',
+        reserveSpace: false,
+        backgroundColor: 'rgba(0,0,0,0)',
+        options3d: {
+           enabled: true,
+           alpha: 45,
+           beta: 0
+        }
+      };
+      var title = {
+          text: ''
+      };
+      var tooltip = {
+          // pointFormat: '{series.name}: <b>{point.y:.1f}</b>'
+          pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+      };
+      var plotOptions = {
+          pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            depth: 35,
+            dataLabels: {
+                // enabled: true,
+                // format: '<center><b>{point.y:.1f}</b><br>{point.name}</center>'
+                format: '<center><b>{point.percentage:.1f}%</b><br>{point.name}</center>',
+                enabled: true,
+                color: 'black',
+                inside: false,
+                style: {
+                    fontWeight: 300,
+                    fontSize: 13
+                },
+            },
+            events: {
+              click: function(event) {
+                // console.log(event);
+              }
+            }
+          }
+        };
+      var series = [{
+          type: 'pie',
+          name: 'PELAPORAN',
+          data: dataChart
+      }];
+      var json = {};
+      json.chart = chart;
+      json.title = title;
+      json.tooltip = tooltip;
+      json.plotOptions = plotOptions;
+      json.series = series;
+      $('#'+div).highcharts(json);
+    }
+
+    // getSebaran();
+    // function getSebaran(){
+    //   $.ajax({
+    //     url:baseUrl+ctrl+"/getSebaranTitik",
+    //     method:"GET",
+    //     success: function(response){
+    //       var res = JSON.parse(response);
+    //       res.data.forEach((item, i) => {
+    //         console.log(item);
+    //       });
+    //     }
+    //   })
+    // }
+  });
+
+
+
+
+</script>
+
+{/literal}

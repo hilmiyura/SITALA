@@ -1,0 +1,146 @@
+<!-- Modal -->
+<div class="modal text-left" id="tambahData" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+        <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="col-md-6 mb-1">
+              <label for="name">Provinsi</label>
+              <select class="select2 form-control position-relative provinsi_select" to="uid_kabkota" id="uid_provinsi" name="form[uid_provinsi]" style="width: 100%" required>
+                <option value="">--PILIH PROVINSI--</option>
+                {foreach from=$provinsi item=v}
+                <option value="{$v.kd_propinsi}">{$v.nama_propinsi}</option>
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Kab/kota</label>
+              <select class="select2 form-control position-relative" id="uid_kabkota" name="form[uid_kabkota]" style="width: 100%">
+                <option value="">--PILIH KAB/KOTA--</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Tahun</label>
+              <select class="select2 form-control position-relative" id="tahun" name="form[tahun]" style="width: 100%" required>
+                <option value="">--PILIH TAHUN--</option>
+                {for $foo=2015 to ($thisYear+5)}
+                <option value="{$foo}">{$foo}</option>
+                {/for}
+              </select>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Peruntukan</label>
+              <select class="select2 form-control position-relative" id="peruntukan" name="form[peruntukan]" style="width: 100%" required>
+                <option value="">--PILIH PERUNTUKAN--</option>
+                <option value="1">KABUPATEN / KOTA</option>
+                {if $me.role_user != 3}
+                <option value="2">PROVINSI</option>
+                {/if}
+              </select>
+            </div>
+          </div>
+          <h4 class="form-section"><i class="ft-edit"></i>Nilai DKK</h4>
+          <div class="form-row">
+            <div class="col-md-12 mb-1">
+              <label for="name">NILAI</label>
+              <input type="text" class="form-control position-relative" name="form[nilai]" id="nilai" placeholder="Nilai" value="" required="" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="submit" name="submit" class="btn btn-danger">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- form excel -->
+<div class="modal text-left" id="tambahDataExcel" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data Faktor Koreksi Gambut
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
+        <div class="modal-body">
+          <h4 class="form-section"><i class="ft-edit"></i>Faktor Koreksi Gambut IKLH</h4>
+          <div class="alert alert-danger text-center">
+            Download kembali template excel dikarenakan ada update system. <br> Pastikan sudah menggunakan template excel terbaru.
+          </div>
+          <div class="form-row mb-1">
+            <div class="col-md-6 mb-1">
+              <label for="name"> File Excel </label>
+              <div class="input-group">
+                <input type="file" name="file_excel" required="" />
+                <span class="danger">format file excel harus (.xls)</span>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name"> </label>
+              <div class="input-group">
+                <span><a href="{$baseUrl}temp/format_excel/dkk_iklh_upload.xls?={$time}">Download format excel</a></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="submit" name="submit-excel" class="btn btn-danger">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{if isset($listExport)}
+<div class="modal text-left" id="unduhDataExcel" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-download-cloud"></i> Download Excel
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row d-flex">
+          {foreach from=$listExport item=v key=k}
+          <div class="list-group col-md-3" style="margin-left: 15px; padding: 0;">
+            <a href="{$baseUrl}nilaiDkk/dataExcel/offset/{$v.offset_start}/search/{$search_json}/print/{time()}" class="list-group-item">
+              <i class="ft-file"></i> EXCEL {$k}
+              <p><small>(BARIS : {$v.offset_start}-{$v.offset_end})</small></p>
+            </a>
+          </div>
+          {/foreach}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}

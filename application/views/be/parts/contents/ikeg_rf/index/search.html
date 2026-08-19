@@ -1,0 +1,33 @@
+<div class="row">
+  <div class="col-xl-12 col-lg-12 col-md-12">
+    <form class="form form-horizontal" method="post">
+      <div class="form-group row mb-0">
+        <div class="col-md-12">
+          <div class="form-group row mb-0">
+            <div class="col-md-7">
+              <input type="text" class="form-control mb-1" id="kataKunci" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+            </div>
+            <div class="col-md-2">
+              <select class="form-control select2" name="form[tahun]" required="required">
+                <option value=""> --PILIH TAHUN-- </option>
+                {for $foo=2015 to ($thisYear+5)}
+                <option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+                {/for}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <div class="btn-group btn-block" role="group" aria-label="Basic example">
+                <button type="submit" name="search" value="1" class="btn btn-info" style="padding: 10px;">
+                  <small><i class="ft-search"></i> SEARCH</small>
+                </button>
+                <a href="{$baseUrl}{$ctrl}/{$act}" class="btn btn-secondary" style="padding: 10px;">
+                  <small><i class="ft-refresh-cw"></i> RESET</small>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr />
+    </form>
+  </div>
+</div>

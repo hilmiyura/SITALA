@@ -1,0 +1,102 @@
+{if ($me.role_user == 1 && $aksesAdmin == 1) || $me.role_user == 0}
+<div class="row mb-1">
+  <div class="col-md-12">
+    <!-- <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData">
+      <i class="ft-plus-circle"></i> Tambah Data
+    </button> -->
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahDataExcel">
+      <i class="ft-upload-cloud"></i> Upload Excel
+    </button>
+  </div>
+</div>
+{/if}
+{include file="parts/block/block_search_users_detail_periode.html"}
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table table-bordered" style="width:200%;">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th rowspan="2" class="text-center" style="width:1%">#</th>
+        <th rowspan="2" class="v-middle" style="width:5%">PROVINSI</th>
+        <th rowspan="2" class="v-middle" style="width:5%">KAB/KOTA</th>
+        <th rowspan="2" class="v-middle" style="width:1%">TAHUN</th>
+        <th rowspan="2" class="v-middle" style="width:6%">Luas Mangrove</th>
+        <th colspan="5" class="v-middle" style="width:30%">Status Kerusakan Ekosistem Gambut</th>
+        <th colspan="2" class="v-middle" style="width:10%">Fungsi Ekosistem Gambut</th>
+      </tr>
+      <tr>
+        <th class="v-middle">Rusak Berat</th>
+        <th class="v-middle">Rusak Ringan</th>
+        <th class="v-middle">Rusak Sangat Berat</th>
+        <th class="v-middle">Rusak Sedang</th>
+        <th class="v-middle">Tidak Rusak</th>
+        <th class="v-middle">Budaya</th>
+        <th class="v-middle">Lindung</th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v}
+      <tr {if !$v.nama_kabkota} style="background-color: #e2ecf3;" {/if}>
+        <td class="text-center">{counter}</td>
+        <td>{if $v.nama_kabkota}{$v.nama_provinsi}{else}<b>{$v.nama_provinsi}</b>{/if}</td>
+        <td>{if $v.nama_kabkota}{$v.nama_kabkota}{else}{/if}</td>
+        <td class="text-center">{$v.periode}</td>
+        <!-- <td>{$v.luas_mangrove}</td>
+        <td>{$v.eg_rusak_berat}</td>
+        <td>{$v.eg_rusak_ringan}</td>
+        <td>{$v.eg_rusak_sangat_berat}</td>
+        <td>{$v.eg_rusak_sedang}</td>
+        <td>{$v.eg_tidak_rusak}</td>
+        <td>{$v.eg_fungsi_budaya}</td>
+        <td>{$v.eg_fungsi_lindung}</td> -->
+        <td>
+          <div class="input-group">
+            <input type="text" types="number" class="form-control numberFormat onset-type" fd="luas_mangrove" tahun="{$search.tahun}" prov="{$v.uid_provinsi}" kab="{$v.uid_kabkota}" value="{$v.luas_mangrove}" placeholder="Luas Mangrove" {if $aksesAdmin != 1} disabled {/if}>
+            <div class="input-group-append">
+              <span class="input-group-text">ha</span>
+            </div>
+          </div>
+          <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+        </td>
+        <td>
+          <input type="text" types="number" class="form-control numberFormat onset-type " fd="eg_rusak_berat" tahun="{$search.tahun}" prov="{$v.uid_provinsi}" kab="{$v.uid_kabkota}" value="{$v.eg_rusak_berat}" placeholder="Rusak Berat" style="width:100%;" {if $aksesAdmin != 1} disabled {/if}>
+          <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+        </td>
+        <td>
+          <input type="text" types="number" class="form-control numberFormat onset-type " fd="eg_rusak_ringan" tahun="{$search.tahun}" prov="{$v.uid_provinsi}" kab="{$v.uid_kabkota}" value="{$v.eg_rusak_ringan}" placeholder="Rusak Ringan"  style="width:100%;" {if $aksesAdmin != 1} disabled {/if}>
+          <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+        </td>
+        <td>
+          <input type="text" types="number" class="form-control numberFormat onset-type " fd="eg_rusak_sangat_berat" tahun="{$search.tahun}" prov="{$v.uid_provinsi}" kab="{$v.uid_kabkota}" value="{$v.eg_rusak_sangat_berat}" placeholder="Rusak Sangat Berat" style="width:100%;" {if $aksesAdmin != 1} disabled {/if}>
+          <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+        </td>
+        <td>
+          <input type="text" types="number" class="form-control numberFormat onset-type " fd="eg_rusak_sedang" tahun="{$search.tahun}" prov="{$v.uid_provinsi}" kab="{$v.uid_kabkota}" value="{$v.eg_rusak_sedang}" placeholder="Rusak Sedang" style="width:100%;" {if $aksesAdmin != 1} disabled {/if}>
+          <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+        </td>
+        <td>
+          <input type="text" types="number" class="form-control numberFormat onset-type " fd="eg_tidak_rusak" tahun="{$search.tahun}" prov="{$v.uid_provinsi}" kab="{$v.uid_kabkota}" value="{$v.eg_tidak_rusak}" placeholder="Tidak Rusak" style="width:100%;" {if $aksesAdmin != 1} disabled {/if}>
+          <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+        </td>
+        <td>
+          <input type="text" types="number" class="form-control numberFormat onset-type " fd="eg_fungsi_budaya" tahun="{$search.tahun}" prov="{$v.uid_provinsi}" kab="{$v.uid_kabkota}" value="{$v.eg_fungsi_budaya}" placeholder="Fungsi Budaya" style="width:100%;" {if $aksesAdmin != 1} disabled {/if}>
+          <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+        </td>
+        <td>
+          <input type="text" types="number" class="form-control numberFormat onset-type " fd="eg_fungsi_lindung" tahun="{$search.tahun}" prov="{$v.uid_provinsi}" kab="{$v.uid_kabkota}" value="{$v.eg_fungsi_lindung}" placeholder="Fungsi Lindung" style="width:100%;" {if $aksesAdmin != 1} disabled {/if}>
+          <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+        </td>
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="12" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+  {include file="parts/block/block_pagination.html"}
+</div>

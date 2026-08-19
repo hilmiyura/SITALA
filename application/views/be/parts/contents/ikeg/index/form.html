@@ -1,0 +1,141 @@
+<!-- Modal -->
+<div class="modal text-left" id="tambahData" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info bg-darken-2 white">
+                <h4 class="modal-title white" id="myModalLabel6"><i class="ft-plus-circle"></i> Tambah Data IKEG</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+            		<input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
+        			<div class="modal-body">
+        				<h4 class="form-section"><i class="la la-map-marker"></i>Lokasi Pemantauan</h4>
+                    <div class="form-row mb-1" >
+                    		<div class="col-md-12 mb-1">
+                        		<label for="name">Lokasi Pemantauan</label>
+                           	<select class="select2 form-control position-relative" id="uid_lokasi_pemantauan" name="form[uid_lokasi_pemantauan]" style="width: 100%;" >
+                           		<option value="">--TAMBAH LOKASI--</option>
+                           		{foreach from=$lokasi item=v}
+                           			<option value="{$v.uid_lokasi_pemantauan}">{$v.alamat}</option>
+                           		{/foreach}
+                           	</select>
+                        </div>
+                        <div class="col-md-12 mb-1">
+                        		<label for="name">Alamat Lahan Gambut</label>
+                           	 <input type="text" class="form-control position-relative" name="form[alamat]" id="alamat" placeholder="Alamat Lahan Gambut" value="" required="">
+                        </div>
+                        <div class="col-md-12 mb-1">
+                        		<label for="name">Provinsi</label>
+                           	<select class="select2 form-control position-relative provinsi_select" to="uid_kabkota" id="uid_provinsi" name="form[uid_provinsi]" style="width: 100%;" >
+                           		<option value="">--PILIH PROVINSI--</option>
+                           		{foreach from=$provinsi item=v}
+                           			<option value="{$v.id}">{$v.nama_provinsi}</option>
+                           		{/foreach}
+                           	</select>
+                        </div>
+	                    <div class="col-md-12 mb-1">
+	                    		<label for="name">Kab/kota</label>
+	                       	<select class="select2 form-control position-relative " id="uid_kabkota" name="form[uid_kabkota]" style="width: 100%;" >
+	                       		<option value="">--PILIH KAB/KOTA--</option>
+	                       	</select>
+	                    </div>
+	                    <div class="col-md-12 mb-1">
+                            <label for="name">Latitude</label>
+                            <input type="text" class="form-control position-relative" name="form[latitude]" id="latitude" placeholder="Latitude" value="" required="">
+                            <!-- <div class="valid-tooltip"></div> -->
+                            <p class="help-block">
+								<small class="text-muted"> Format Decimal Degrees. Jika format dalam bentuk DMS (Degress, Minutes, Seconds)
+								silakan conver dahulu ke format Decimal Degress. Untuk Bilangan Desimal Gunakan Pemisah Titik.
+								<br>
+								Link Converter DMS to Decimal Degress : <a href="http://www.onlineconversion.com/map_decimaldegrees.htm" target="_blank">klik disini</a>.
+								<br>
+								Untuk Lintang Selatan (LS) tambahkan tanda minus (-) di depan angka.
+								<br>
+								</small>
+							</p>
+                        </div>
+                         <div class="col-md-12 mb-1">
+                            <label for="name">Longitude</label>
+                            <input type="text" class="form-control position-relative" name="form[longitude]" id="longitude" placeholder="Longitude" value="" required="">
+                            <!-- <div class="valid-tooltip"></div> -->
+                            <p class="help-block">
+								<small class="text-muted"> Format Decimal Degrees. Jika format dalam bentuk DMS (Degress, Minutes, Seconds)
+								silakan conver dahulu ke format Decimal Degress. Untuk Bilangan Desimal Gunakan Pemisah Titik.
+								<br>
+								Link Converter DMS to Decimal Degress : <a href="http://www.onlineconversion.com/map_decimaldegrees.htm" target="_blank">klik disini</a> 
+								</small>
+							</p>
+                        </div>
+	           		</div>
+	           		<h4 class="form-section"><i class="ft-edit"></i>Pemantauan</h4>
+	           		<div class="form-row mb-1" >
+                        <div class="col-md-6">
+                        		<label for="name">Tanggal Pemantauan</label>
+                           	<input type="date" class="form-control" id="tanggal" name="form[tanggal]" value="{$now}" />
+                        </div>
+	           		</div>
+	           		<div class="form-row mb-1">
+	           			<div class="table-responsive" style="padding: 8px;border: 1px solid #f4f5fa;">
+	           				<table style="width: 100%;">
+		           				<thead>
+		           					<tr>
+		           						<th rowspan="2" class="text-center">KRITERIA</th>
+		           						<th colspan="2" class="text-center">LUAS (HA)</th>
+		           					</tr>
+		           					<tr>
+		           						<th class="text-center">
+		           							FLEG<br>
+		           							<sub>FUNGSI LINDUNG EKOSISTEM GAMBUT</sub>
+		           						</th>
+		           						<th class="text-center">
+		           							FBEG<br>
+		           							<sub>FUNGSI BUDIDAYA EKOSISTEM GAMBUT</sub>
+		           						</th>
+		           					</tr>
+		           				</thead>
+		           				<tbody>
+		           					<tr>
+		           						<td colspan="3">
+		           							<hr>
+		           						</td>
+		           					</tr>
+		           					<tr>
+		           						<th>AREAL TERBAKAR</th>
+		           						<th><input type="text" class="form-control" placeholder="Nilai" id="areal_terbakar_fleg" name="form[areal_terbakar_fleg]"></th>
+		           						<th><input type="text" class="form-control" placeholder="Nilai" id="areal_terbakar_fbeg" name="form[areal_terbakar_fbeg]"></th>
+		           					</tr>
+		           					<tr>
+		           						<th>NON TERBAKAR</th>
+		           						<th><input type="text" class="form-control" placeholder="Nilai" id="non_terbakar_fleg" name="form[non_terbakar_fleg]"></th>
+		           						<th><input type="text" class="form-control" placeholder="Nilai" id="non_terbakar_fbeg" name="form[non_terbakar_fbeg]"></th>
+		           					</tr>
+		           					<tr>
+		           						<td colspan="3">
+		           							<hr>
+		           						</td>
+		           					</tr>
+		           					<tr>
+		           						<th>KANAL</th>
+		           						<th><input type="text" class="form-control" placeholder="Nilai" id="kanal_fleg" name="form[kanal_fleg]"></th>
+		           						<th><input type="text" class="form-control" placeholder="Nilai" id="kanal_fbeg" name="form[kanal_fbeg]"></th>
+		           					</tr>
+		           					<tr>
+		           						<th>NON KANAL</th>
+		           						<th><input type="text" class="form-control" placeholder="Nilai" id="non_kanal_fleg" name="form[non_kanal_fleg]"></th>
+		           						<th><input type="text" class="form-control" placeholder="Nilai" id="non_kanal_fbeg" name="form[non_kanal_fbeg]"></th>
+		           					</tr>
+		           				</tbody>
+	           				</table>
+	           			</div>
+	           		</div>
+	            </div>
+	            <div class="modal-footer">
+	                <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+	                <button type="submit" name="submit" class="btn btn-danger">Simpan</button>
+	            </div>
+	  		</form>
+        </div>
+    </div>
+</div>

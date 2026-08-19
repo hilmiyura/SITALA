@@ -1,0 +1,244 @@
+<!-- Modal -->
+<div
+  class="modal text-left"
+  id="tambahData"
+  role="dialog"
+  aria-labelledby="myModalLabel6"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data IKTL
+        </h4>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form
+        class="form_with_load"
+        method="POST"
+        action=""
+        enctype="multipart/form-data"
+      >
+        <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
+        <div class="modal-body">
+          {if $me.role_user != 3}
+            <h4 class="form-section">
+              <i class="la la-map-marker"></i>Lokasi Pemantauan
+            </h4>
+          {/if}
+          <div class="form-row mb-1">
+            {if $me.role_user !=2 && $me.role_user !=3}
+            <div class="col-md-12 mb-1">
+              <label for="name">Provinsi</label>
+              <select class="select2 form-control position-relative provinsi_select" to="uid_kabkota" id="uid_provinsi" name="form[uid_provinsi]" style="width: 100%" required="">
+                <option value="">--PILIH PROVINSI--</option>
+                {foreach from=$provinsi item=v}
+                <option value="{$v.kd_propinsi}">{$v.nama_propinsi}</option>
+                {/foreach}
+              </select>
+            </div>
+            {/if}
+            {if $me.role_user !=3}
+            <div class="col-md-12 mb-1">
+              <label for="name">Kab/kota</label>
+              <select class="select2 form-control position-relative" id="uid_kabkota" name="form[uid_kabkota]" style="width: 100%" required="">
+                <option value="">--PILIH KAB/KOTA--</option>
+                {foreach from=$kabkota item=v}
+                  <option value="{$v.kd_kota}">{$v.nama_kabkot}</option>
+                {/foreach}
+              </select>
+            </div>
+            {/if}
+          </div>
+          <h4 class="form-section"><i class="ft-edit"></i>Pemantauan</h4>
+          <div class="form-row mb-1">
+            <div class="col-md-6 mb-1">
+              <label for="name">Tanggal Pemantauan</label>
+              <input
+                type="date"
+                class="form-control"
+                id="tanggal"
+                name="form[tanggal]"
+                value="{$now}"
+              />
+            </div>
+          </div>
+          <h6 class="form-section">Diisi oleh pusat</h6>
+          <div class="form-row mb-1">
+            <div class="col-md-6">
+              <label for="name">Luas Wilayah (LW)</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Nilai"
+                  id="luas_wilayah"
+                  name="form[luas_wilayah]"
+                  {if $me.role_user !=1} readonly {/if}
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Luas Hutan (LH)</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Nilai"
+                  id="luas_hutan"
+                  name="form[luas_hutan]"
+                  {if $me.role_user !=1} readonly {/if}
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Luas Belukar Dalam Kawasan</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Nilai"
+                  id="luas_belukar_dalam_kawasan"
+                  name="form[luas_belukar_dalam_kawasan]"
+                  {if $me.role_user !=1} readonly {/if}
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Luas Belukar pada Fungsi Lindung</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Nilai"
+                  id="luas_belukar_pada_fungsi_lindung"
+                  name="form[luas_belukar_pada_fungsi_lindung]"
+                  {if $me.role_user !=1} readonly {/if}
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Faktor Koreksi Gambut</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Nilai"
+                  id="dkk"
+                  name="form[dkk]"
+                  {if $me.role_user !=1} readonly {/if}
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">0-1</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">RHL <sub>(Rehabilitasi Hutan dan Lahan)</sub></label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Nilai"
+                  id="rhl"
+                  name="form[rhl]"
+                  {if $me.role_user !=1} readonly {/if}
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <h6 class="form-section">Diisi oleh kabupaten/kota</h6>
+          <div class="form-row mb-1">
+            <div class="col-md-6 mb-1">
+              <label for="name">Kebun Raya (Data LIPI)</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Nilai"
+                  id="kebun_raya_data_lipi"
+                  name="form[kebun_raya_data_lipi]"
+                  {if $me.role_user !=3} readonly {/if}
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">RTH <sub>(Data Cipta Karya+ DLH prov)</sub></label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Nilai"
+                  id="rth"
+                  name="form[rth]"
+                  {if $me.role_user !=3} readonly {/if}
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Taman Kehati</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Nilai"
+                  id="taman_kehati"
+                  name="form[taman_kehati]"
+                  {if $me.role_user !=3} readonly {/if}
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Lampiran</label>
+              <input type="file" class="form-control mb-1" id="lampiran" name="lampiran"/>
+              <span class="help-block lampiran-download" style="display:none"></span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a
+            type="button"
+            class="btn grey btn-secondary white"
+            data-dismiss="modal"
+            >Close</a
+          >
+          <button type="submit" name="submit" class="btn btn-danger">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

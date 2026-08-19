@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html class="loading" lang="en" data-textdirection="ltr">
+<!-- BEGIN: Head-->
+
+<head>
+	{include file="parts/block/block_head.html"}
+</head>
+<!-- END: Head-->
+
+<!-- BEGIN: Body-->
+
+<body class="horizontal-layout horizontal-menu 2-columns" data-open="hover" data-menu="horizontal-menu" data-color="bg-gradient-x-blue-cyan" data-col="2-columns">
+	<!-- BEGIN: Header-->
+	<!-- <div> -->
+	<!-- <div class="ribbonwrapinner">
+            <div class="ribbontext">DEVELOPMENT</div>
+        </div> -->
+	<!-- </div> -->
+	<!-- fixed-top-->
+	{include file="parts/block/block_nav.html"}
+	<!-- END: Header-->
+
+
+	<!-- BEGIN: Main Menu-->
+	{include file="parts/block/block_menu.html"}
+	<!-- END: Main Menu-->
+
+	<!-- BEGIN: Content-->
+	<div class="app-content content">
+		{if $act != "profile"}
+		<div class="content-wrapper">
+			<div class="content-wrapper-before"></div>
+			<div class="content-header row">
+				<div class="content-header-left col-md-5 col-12 mb-2">
+					<h4 class="content-header-title" style="font-size: 1.1rem;">{$icons} {$title}</h4>
+				</div>
+				<div class="content-header-right col-md-7 col-12">
+					<div class="breadcrumbs-top float-md-right">
+						<div class="breadcrumb-wrapper mr-1">
+							<ol class="breadcrumb">
+								<li class="breadcrumb-item"><a href="{$baseUrl}">HOME</a>
+								</li>
+								{if $act == "verifikasi" || $act == "indeks"}
+									<li class="breadcrumb-item"><a href="{$baseUrl}{$ctrl}/{$act}" style="text-transform: uppercase;">{$title}</a>
+								{elseif $ctrl == "dashboardData"}
+								<li class="breadcrumb-item"><a href="{$baseUrl}{$ctrl}" style="text-transform: uppercase;">{$title} | </a>
+									<div class="btn-group">
+					          <a class="pointer" type="button" id="dropdownMenuButton6" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TAHUN {$tahunAktif}</a>
+					          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton6" x-placement="top-start">
+					            {foreach from=$years item=Y}
+					            	<a class="dropdown-item show-data-tahun black" tahun="{$Y}">TAHUN {$Y}</a>
+					            {/foreach}
+					          </div>
+					        </div>
+								{else}
+									<li class="breadcrumb-item"><a href="{$baseUrl}{$ctrl}" style="text-transform: uppercase;">{$title}</a>
+								{/if}
+							</ol>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="content-body">
+				<!--Grid options-->
+				<section id="grid-options" class="row">
+					{if isset($messageLock)}
+					<div class="col-md-12">
+						<div class="alert alert-warning alert-dismissible mb-2" role="alert">
+							<strong>Informasi !</strong>
+							{$messageLock}
+						</div>
+					</div>
+					{/if}
+					<div class="col-md-12">
+						{if $message}
+						<div class="alert alert-danger alert-dismissible mb-2" role="alert">
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">×</span>
+							</button>
+							<strong>Informasi !</strong> {$message}
+						</div>
+						{/if}
+
+						{if $ctrl != "dashboardData"}
+							<div class="card">
+								<!-- <div class="card-header">
+		                  <h4 class="card-title">{$title}</h4>
+		                  <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
+		                  <div class="heading-elements">
+		                      <ul class="list-inline mb-0">
+		                          <li><a data-action="collapse"><i class="ft-minus"></i></a></li>
+		                          <li><a data-action="expand"><i class="ft-maximize"></i></a></li>
+		                      </ul>
+		                  </div>
+		              </div> -->
+								<div class="card-content collapse show mt-2">
+									<div class="card-body pt-0">
+										{include file="parts/block/block_loading.html"}
+										{include file="parts/block/block_modal.html"}
+										{include file="parts/contents/{$ctrl}/{$act}/default.html"}
+									</div>
+								</div>
+							</div>
+						{else}
+							{include file="parts/block/block_loading.html"}
+							{include file="parts/block/block_modal.html"}
+							{include file="parts/contents/{$ctrl}/{$act}/default.html"}
+						{/if}
+					</div>
+				</section>
+			</div>
+		</div>
+		{else}
+		{include file="parts/block/block_loading.html"}
+		{include file="parts/contents/{$ctrl}/{$act}/default.html"}
+		{/if}
+	</div>
+	<!-- END: Content-->
+
+
+	<!-- BEGIN: Footer-->
+	{include file="parts/block/block_top.html"}
+	<!-- END: Footer-->
+	{include file="parts/block/block_script.html"}
+</body>
+<!-- END: Body-->
+
+</html>

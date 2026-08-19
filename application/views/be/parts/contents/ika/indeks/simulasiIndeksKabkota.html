@@ -1,0 +1,129 @@
+<div class="row">
+  <div class="col-sm-12">
+    <input type="text" class="form-control mb-1" id="seachFieldKabkota" onkeyup="searchData('dataTableKabkota','seachFieldKabkota')" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+  </div>
+  <!-- <div class="col-sm-2 float-md-right">
+		<a href="{$baseUrl}{$ctrl}/exportData/ex/kabkota/y/{$search.tahun}" target="_blank" class="btn btn-success float-md-right"><i class="ft-download"></i> EXPORT EXCEL</a>
+	</div> -->
+</div>
+<div class="table-responsive table-border freeze-table">
+  {if $view}
+  <table class="table" id="dataTableKabkota">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th rowspan="2 " class="v-middle">No</th>
+        <th rowspan="2" class="v-middle text-center">Kabupaten/Kota</th>
+        <!-- <th colspan="8" class="text-center">PARAMETER / BAKUMUTU (Ci/Lij)</th> -->
+        <th colspan="4" class="text-center">JUMLAH TITIK</th>
+        <th colspan="4" class="text-center">NILAI INDEKS PER MUTU</th>
+        <th rowspan="2" class="v-middle text-center">IKA</th>
+        <th rowspan="2" class="v-middle text-center">IKA INA</th>
+        <th rowspan="2" class="v-middle text-center">IKA INA MUTU</th>
+        <th rowspan="2" class="v-middle text-center" style="width: 200px;">Action</th>
+      </tr>
+      <tr>
+        <th>Memenuhi</th>
+        <th>Ringan</th>
+        <th>Sedang</th>
+        <th>Berat</th>
+        <th>Memenuhi</th>
+        <th>Ringan</th>
+        <th>Sedang</th>
+        <th>Berat</th>
+        <!-- <th class="v-middle">PH</th>
+	                <th class="v-middle">BOD</th>
+	                <th class="v-middle">COD</th>
+	                <th class="v-middle">TSS</th>
+	                <th class="v-middle">DO</th>
+	                <th class="v-middle">NO<sub class="white">3</sub>-N</th>
+	                <th class="v-middle">TOTAL PHOSPHAT</th>
+	                <th class="v-middle">FECAL COLIFORM</th>
+	                	<th class="v-middle">RATAAN</th>
+	                	<th class="v-middle">MAKSIMUM</th>
+	                	<th class="v-middle">IPj</th> -->
+      </tr>
+    </thead>
+    <tbody>
+      {$cnKabkota = 1}
+      {foreach from=$view item=v}
+      {$v.json_data = $v.json_data|@json_decode:true}
+      {if $v.jenis_indeks == 0}
+      <tr>
+        <td>{$cnKabkota}</td>
+        <td>
+          <!-- <b>{$v.kode_lokasi}</b><br> -->
+          <b>{$v.nama_kabkota}</b><br>
+          Provinsi {$v.nama_provinsi}
+        </td>
+        <td class="text-center">
+          {$v.jumlah_titik_memenuhi}
+          <br>--<br>
+          <span class="jumlah-titik-memenuhi-{$v.uid_indeks_ika}-kabkota"></span>
+        </td>
+        <td class="text-center">
+          {$v.jumlah_titik_ringan}
+          <br>--<br>
+          <span class="jumlah-titik-ringan-{$v.uid_indeks_ika}-kabkota"></span>
+        </td>
+        <td class="text-center">
+          {$v.jumlah_titik_sedang}
+          <br>--<br>
+          <span class="jumlah-titik-sedang-{$v.uid_indeks_ika}-kabkota"></span>
+        </td>
+        <td class="border-right-td text-center">
+          {$v.jumlah_titik_berat}
+          <br>--<br>
+          <span class="jumlah-titik-berat-{$v.uid_indeks_ika}-kabkota"></span>
+        </td>
+        <td class="text-center">
+          {number_format($v.nilai_mutu_memenuhi,2,".","")}
+          <br>--<br>
+          <span class="nilai-mutu-memenuhi-{$v.uid_indeks_ika}-kabkota"></span>
+        </td>
+        <td class="text-center">
+          {number_format($v.nilai_mutu_ringan,2,".","")}
+          <br>--<br>
+          <span class="nilai-mutu-ringan-{$v.uid_indeks_ika}-kabkota"></span>
+        </td>
+        <td class="text-center">
+          {number_format($v.nilai_mutu_sedang,2,".","")}
+          <br>--<br>
+          <span class="nilai-mutu-sedang-{$v.uid_indeks_ika}-kabkota"></span>
+        </td>
+        <td class="text-center">
+          {number_format($v.nilai_mutu_berat,2,".","")}
+          <br>--<br>
+          <span class="nilai-mutu-berat-{$v.uid_indeks_ika}-kabkota"></span>
+        </td>
+        <td class="text-center">
+          {number_format($v.nilai_indeks,2,".","")}
+          <br>--<br>
+          <span class="nilai-indeks-{$v.uid_indeks_ika}-kabkota"></span>
+        </td>
+        <td class="text-center">
+          -
+          <br>--<br>
+          <span class="nilai-indeks-ina-{$v.uid_indeks_ika}-kabkota"></span>
+        </td>
+        <td class="text-center">
+          -
+          <br>--<br>
+          <span class="nilai-indeks-ina-mutu-{$v.uid_indeks_ika}-kabkota"></span>
+        </td>
+        <td class="text-center">
+          <button type="button" data-uid="{$v.uid_indeks_ika}" id="btn-hitung-simulasi-kabkota" class="btn btn-sm {if $activeBtn == $v.uid_indeks_ika  || $v.status_hitung == 1} btn-success {else} btn-warning {/if}">
+            <small class="white">Hitung</small>
+          </button>
+        </td>
+      </tr>
+      <p style="display: none">{$cnKabkota++}</p>
+      {/if}
+      {/foreach}
+    </tbody>
+  </table>
+  {else}
+  <div class="alert alert-danger text-center">
+    <strong>Tidak Ada Data</strong>
+  </div>
+  {/if}
+</div>

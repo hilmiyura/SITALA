@@ -1,0 +1,102 @@
+{if $me.role_user == 1 || $me.role_user == 0}
+<div class="row mb-1">
+  <div class="col-md-12">
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData">
+      <i class="ft-plus-circle"></i> Tambah Data
+    </button>
+  </div>
+</div>
+{/if}
+{include file="parts/block/block_search_koefisien.html"}
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table table-striped">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th class="text-center" style="width: 70px">#</th>
+        <th class="v-middle text-center">NO</th>
+        <th class="v-middle text-center">Tahun</th>
+        <th class="v-middle text-center">Hutan lahan kering primer</th>
+        <th class="v-middle text-center">Hutan lahan kering sekunder / bekas tebangan</th>
+        <th class="v-middle text-center">Hutan mangrove primer</th>
+        <th class="v-middle text-center">Hutan rawa primer</th>
+        <th class="v-middle text-center">Hutan tanaman</th>
+        <th class="v-middle text-center">Belukar</th>
+        <th class="v-middle text-center">Perkebunan / Kebun</th>
+        <th class="v-middle text-center">Permukiman / Lahan terbangun</th>
+        <th class="v-middle text-center">Lahan terbuka</th>
+        <th class="v-middle text-center">Savanna / Padang rumput</th>
+        <th class="v-middle text-center">Tubuh air</th>
+        <th class="v-middle text-center">Hutan mangrove sekunder / bekas tebangan</th>
+        <th class="v-middle text-center">Hutan rawa sekunder / bekas tebangan</th>
+        <th class="v-middle text-center">Belukar rawa</th>
+        <th class="v-middle text-center">Pertanian lahan kering</th>
+        <th class="v-middle text-center">Pertanian lahan kering  campur semak / kebun campur</th>
+        <th class="v-middle text-center">Sawah</th>
+        <th class="v-middle text-center">Tambak</th>
+        <th class="v-middle text-center">Bandara / Pelabuhan</th>
+        <th class="v-middle text-center">Transmigrasi</th>
+        <th class="v-middle text-center">Pertambangan</th>
+        <th class="v-middle text-center">Rawa</th>
+        <th class="v-middle text-center">RTH</th>
+        <th class="v-middle text-center">RTL</th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v}
+      <tr>
+        <td class="text-center nowrap">
+          {if $me.role_user == 1 || $me.role_user == 0}
+          <button class="btn border-secondary badge badge-danger round delete-dialog" data-uid="{$v.$primaryKey}" data-ajax="{$ctrl}/deletedData">
+            <a href="javascript:void(0);" title="Delete">
+              <i class="ft-trash-2"></i>
+            </a>
+          </button>
+          <button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.$primaryKey}" title="Edit">
+            <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+          </button>
+          {else}
+          --
+          {/if}
+        </td>
+
+        <td class="text-center">{counter}</td>
+        <td>{$v.tahun}</td>
+        <td>{$v.hutan_lahan_kering_primer}</td>
+        <td>{$v.hutan_lahan_kering_sekunder}</td>
+        <td>{$v.hutan_mangrove_primer}</td>
+        <td>{$v.hutan_rawa_primer}</td>
+        <td>{$v.hutan_tanaman}</td>
+        <td>{$v.belukar}</td>
+        <td>{$v.perkebunan}</td>
+        <td>{$v.permukiman}</td>
+        <td>{$v.lahan_terbuka}</td>
+        <td>{$v.savanna}</td>
+        <td>{$v.tubuh_air}</td>
+        <td>{$v.hutan_mangrove_sekunder}</td>
+        <td>{$v.hutan_rawa_sekunder}</td>
+        <td>{$v.belukar_rawa}</td>
+        <td>{$v.pertanian_lahan_kering}</td>
+        <td>{$v.pertanian_lahan_kering_campur_semak}</td>
+        <td>{$v.sawah}</td>
+        <td>{$v.tambak}</td>
+        <td>{$v.bandara}</td>
+        <td>{$v.transmigrasi}</td>
+        <td>{$v.pertambangan}</td>
+        <td>{$v.rawa}</td>
+        <td>{$v.rth}</td>
+        <td>{$v.rtl}</td>
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="25" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+  {include file="parts/block/block_pagination.html"}
+</div>

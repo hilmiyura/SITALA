@@ -1,0 +1,73 @@
+<div class="row">
+  <div class="col-xl-12 col-lg-12 col-md-12">
+    <form class="form form-horizontal" method="post" action="{$baseUrl}{$ctrl}/{$act}">
+      <div class="form-group row mb-0">
+        <div class="col-md-12">
+          <div class="form-group row mb-0">
+            {if $me.role_user == 0 || $me.role_user == 1}
+            <div class="col-md-3">
+              <select class="form-control select2 provinsi_select2" to="src-kabkota2" name="form[src_prop]">
+                <option value=""> --SEMUA PROPINSI-- </option>
+                {foreach from=$propSelect item=i}
+                <option value="{$i.kd_propinsi}" {if $i.kd_propinsi==$search.src_prop}selected{/if}> {$i.nama_propinsi} </option>
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-control select2" id="src-kabkota2" name="form[src_kabkota2]">
+                <option value="">--PILIH KAB/KOTA--</option>
+                <!-- {foreach from=$kabkotaSelect2 item=i}
+                <option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota2}selected{/if}> {$i.nama_kabkot} </option>
+                {/foreach} -->
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-control select2" name="form[tahun]">
+                <option value=""> --PILIH TAHUN-- </option>
+                {for $foo=2015 to ($thisYear+5)}
+                <option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+                {/for}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <div class="btn-group btn-block" role="group" aria-label="Basic example">
+                <button type="submit" name="search" value="1" class="btn btn-info" style="padding: 10px;">
+                  <small><i class="ft-search"></i> SEARCH</small>
+                </button>
+                <a href="{$baseUrl}{$ctrl}/{$act}" class="btn btn-secondary" style="padding: 10px;">
+                  <small><i class="ft-refresh-cw"></i> RESET</small>
+                </a>
+                <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#unduhDataExcel" style="padding: 10px;">
+                  <small><i class="ft-download"></i> EXCEL</small>
+                </button> -->
+              </div>
+            </div>
+            {else}
+            <div class="col-md-6">
+              <select class="form-control select2" name="form[tahun]">
+                <option value=""> --PILIH TAHUN-- </option>
+                {for $foo=2015 to ($thisYear+5)}
+                <option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+                {/for}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <div class="btn-group btn-block" role="group" aria-label="Basic example">
+                <button type="submit" name="search" value="1" class="btn btn-info" style="padding: 10px;">
+                  <small><i class="ft-search"></i> SEARCH</small>
+                </button>
+                <a href="{$baseUrl}{$ctrl}/{$act}" class="btn btn-secondary" style="padding: 10px;">
+                  <small><i class="ft-refresh-cw"></i> RESET</small>
+                </a>
+                <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#unduhDataExcel" style="padding: 10px;">
+                  <small><i class="ft-download"></i> EXCEL</small>
+                </button> -->
+              </div>
+            </div>
+            {/if}
+          </div>
+        </div>
+        <hr />
+    </form>
+  </div>
+</div>

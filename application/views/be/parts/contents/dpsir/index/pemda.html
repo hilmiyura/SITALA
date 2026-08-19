@@ -1,0 +1,186 @@
+<div class="row mb-1 pl-1 pr-1">
+  <div class="col-md-2">
+    <select class="select2 form-control" id="src_tahun">
+      {for $yi=2023 to $thisYear}
+      <option value="{$yi}" {if $yi==$thisYear} selected {/if}>{$yi}</option>
+      {/for}
+    </select>
+  </div>
+  <div class="col-md-4">
+    <select class="select2 form-control" id="src_komponen">
+      {foreach from=$komponen item=vk}
+      <option value="{$vk.uid_rf_component}">{$vk.name}</option>
+      {/foreach}
+    </select>
+  </div>
+  <div class="col-md-4">
+    <select class="select2 form-control" id="src_kabkota">
+      {foreach from=$daerah item=vd}
+      {if $me.uid_kabkota}
+      {foreach from=$vd.provinsi item=vdi}
+      {foreach from=$vdi.kabkota item=vdj}
+      {if $me.uid_kabkota == $vdj.kd_kabkota}
+      <option value="{$vd.kd_regional}-{$vdi.kd_provinsi}-{$vdj.kd_kabkota}" selected>{$vdj.nama_kabkota}</option>
+      {/if}
+      {/foreach}
+      {/foreach}
+      {elseif $me.uid_provinsi}
+      {foreach from=$vd.provinsi item=vdi}
+      {$counter_i = 0}
+      <optgroup label="Provinsi {$vdi.nama_provinsi}">
+        {foreach from=$vdi.kabkota item=vdj}
+        {if $counter_i == 0}
+        <option value="{$vd.kd_regional}-{$vdi.kd_provinsi}-0">{$vdi.nama_provinsi}</option>
+        {$counter_i = 1}
+        {/if}
+        <option value="{$vd.kd_regional}-{$vdi.kd_provinsi}-{$vdj.kd_kabkota}">{$vdj.nama_kabkota}</option>
+        {/foreach}
+      </optgroup>
+      {/foreach}
+      {else}
+      {foreach from=$vd.provinsi item=vdi}
+      {$counter_i = 0}
+      <optgroup label="Provinsi {$vdi.nama_provinsi}">
+        {foreach from=$vdi.kabkota item=vdj}
+        {if $counter_i == 0}
+        <option value="{$vd.kd_regional}-{$vdi.kd_provinsi}-0">{$vdi.nama_provinsi}</option>
+        {$counter_i = 1}
+        {/if}
+        <option value="{$vd.kd_regional}-{$vdi.kd_provinsi}-{$vdj.kd_kabkota}">{$vdj.nama_kabkota}</option>
+        {/foreach}
+      </optgroup>
+      {/foreach}
+      {/if}
+      {/foreach}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <a class="pointer btn btn-primary text-white btn-block" id="btn-download" target="_blank"> <i class="ft-download"></i> export</a>
+  </div>
+</div>
+<div class="row mb-1">
+  <div class="col-md-12">
+    <div class="table-responsive">
+      <table class="table" style="width:100%">
+        <tr>
+          <td class="no-border pl-1 pr-1" style="width:25%;">
+            <table style="width:100%">
+              <tr>
+                <th class="no-border bg-danger white add-content" kategori="DRIVER" uid="">DRIVER
+                  {if $lockAction == 0}
+                  {if $me.uid_provinsi > 0 || $me.uid_kabkota > 0}
+                  <span class="pull-right pointer btn-add-title"><i class="ft-plus icon-add"></i></span>
+                  {/if}
+                  {/if}
+                </th>
+              </tr>
+              <tr>
+                <td class="no-border box-content-parent pr-2 pl-2">
+                  <div class="content-isian content-input-DRIVER"></div>
+                  <div class="content-isian content-isian-DRIVER"></div>
+                </td>
+              </tr>
+
+              <tr id="title-response-DRIVER" class="title-response-DRIVER" style="display:none;">
+                <th class="no-border bg-danger white">RESPONSE</th>
+              </tr>
+              <tr>
+                <td class="no-border pr-2 pl-2 content-response-DRIVER">
+                  <div class="content-isian response-input-DRIVER"></div>
+                  <div class="content-isian response-isian-DRIVER"></div>
+                </td>
+              </tr>
+
+            </table>
+          </td>
+          <td class="no-border pl-1 pr-1" style="width:25%;">
+            <table style="width:100%">
+              <tr>
+                <th class="no-border bg-orange white add-content" kategori="PRESSURE" uid="">PRESSURE
+                  {if $lockAction == 0}
+                  {if $me.uid_provinsi > 0 || $me.uid_kabkota > 0}
+                  <span class="pull-right pointer btn-add-title"><i class="ft-plus icon-add"></i></span>
+                  {/if}
+                  {/if}
+                </th>
+              </tr>
+              <tr>
+                <td class="no-border box-content-parent pr-2 pl-2">
+                  <div class="content-isian content-input-PRESSURE"></div>
+                  <div class="content-isian content-isian-PRESSURE"></div>
+                </td>
+              </tr>
+
+              <tr id="title-response-PRESSURE" class="title-response-PRESSURE" style="display:none;">
+                <th class="no-border bg-orange white">RESPONSE</th>
+              </tr>
+              <tr>
+                <td class="no-border pr-2 pl-2 content-response-PRESSURE">
+                  <div class="content-isian response-input-PRESSURE"></div>
+                  <div class="content-isian response-isian-PRESSURE"></div>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td class="no-border pl-1 pr-1" style="width:25%;">
+            <table style="width:100%">
+              <tr>
+                <th class="no-border bg-warning white add-content" kategori="STATE" uid="">STATE
+                  {if $lockAction == 0}
+                  {if $me.uid_provinsi > 0 || $me.uid_kabkota > 0 || $me.role_user <= 1} <span class="pull-right pointer btn-add-title btn-add-title-STATE"><i class="ft-plus icon-add"></i></span>
+                    {/if}
+                    {/if}
+                </th>
+              </tr>
+              <tr>
+                <td class="no-border box-content-parent pr-2 pl-2">
+                  <div class="content-isian content-input-STATE"></div>
+                  <div class="content-isian content-isian-STATE"></div>
+                </td>
+              </tr>
+
+              <tr id="title-response-STATE" class="title-response-STATE" style="display:none;">
+                <th class="no-border bg-warning white">RESPONSE</th>
+              </tr>
+              <tr>
+                <td class="no-border pr-2 pl-2 content-response-STATE">
+                  <div class="content-isian response-input-STATE"></div>
+                  <div class="content-isian response-isian-STATE"></div>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td class="no-border pl-1 pr-1" style="width:25%;">
+            <table style="width:100%">
+              <tr>
+                <th class="no-border bg-success white add-content" kategori="IMPACT" uid="">IMPACT
+                  {if $lockAction == 0}
+                  {if $me.uid_provinsi > 0 || $me.uid_kabkota > 0}
+                  <span class="pull-right pointer btn-add-title"><i class="ft-plus icon-add"></i></span>
+                  {/if}
+                  {/if}
+                </th>
+              </tr>
+              <tr>
+                <td class="no-border box-content-parent pr-2 pl-2">
+                  <div class="content-isian content-input-IMPACT"></div>
+                  <div class="content-isian content-isian-IMPACT"></div>
+                </td>
+              </tr>
+
+              <tr id="title-response-IMPACT" class="title-response-IMPACT" style="display:none;">
+                <th class="no-border bg-success white">RESPONSE</th>
+              </tr>
+              <tr>
+                <td class="no-border pr-2 pl-2 content-response-IMPACT">
+                  <div class="content-isian response-input-IMPACT"></div>
+                  <div class="content-isian response-isian-IMPACT"></div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>

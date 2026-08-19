@@ -1,0 +1,36 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead class="bg-info white">
+          <tr>
+            <th width="1">No</th>
+            <th>Titik</th>
+            <th>Katagori</th>
+            <th>Alamat</th>
+            <th>Provinsi</th>
+            <th>Kab/Kota</th>
+            <th>Status Mutu</th>
+            <th>Prioritas</th>
+            <th>Parameter Kritis</th>
+          </tr>
+        </thead>
+        <tbody>
+          {foreach from=$data item=v key=k}
+            <tr>
+              <td>{$k+1}</td>
+              <td class="nowrap">{$v.kode_lokasi}</td>
+              <td class="nowrap">{if $v.kategori == 1}AIR SUNGAI{elseif $v.kategori == 2}BADAN AIR GAMBUT{elseif $v.kategori == 3}DANAU/SITU{/if} </td>
+      				<td>{$v.alamat}, {$v.alamat_detail}</td>
+              <td>{$v.nama_kabkota}</td>
+      				<td>{$v.nama_provinsi}</td>
+              <td class="nowrap text-center">{number_format($v.pij2,2,".","")}<br>{$v.status_mutu_2}</td>
+              <td>{$v.prioritas}</td>
+              <td>{$v.parameter_kritis}</td>
+            </tr>
+          {/foreach}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,75 @@
+{if isset($listExport)}
+<div class="modal text-left" id="unduhDataExcel" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-download-cloud"></i> Download Excel
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row d-flex">
+          {foreach from=$listExport item=v key=k}
+          <div class="list-group col-md-3" style="margin-left: 15px;margin-bottom 15px; padding: 0;">
+            <a href="{$baseUrl}iku/dataExcel2/offset/{$v.offset_start}/search/{$search_json}/print/{time()}" class="list-group-item">
+              <i class="ft-file"></i> EXCEL {$k}
+              <p><small>(BARIS : {$v.offset_start}-{$v.offset_end})</small></p>
+            </a>
+          </div>
+          {/foreach}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}
+<!-- modal catatan -->
+<div class="modal text-left" id="catatanVerifikator" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Catatan pelaporan
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
+        <div class="modal-body">
+          <!-- <h4 class="form-section">
+            <i class="la la-map-marker"></i>Catatan pelaporan
+          </h4> -->
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1">
+              <label for="name">Catatan *</label>
+              <input type="hidden" id="id-pelaporan" name="" value="">
+              <textarea name="catatan_verifikator" id="catatan-verifikator-txt" class="form-control" rows="8" cols="80"></textarea>
+              <span class="" id="catatan-verifikator-txt-length"></span>
+            </div>
+          </div>
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1">
+              <label for="">Rekomendasi Catatan *</label>
+              <select class="select2 form-control position-relative" multiple="true" id="catatan-verifikator-select" style="width:100%;">
+                {foreach from=$rf_catatan item=v}
+                <option value="{$v.text}">{$v.text}</option>
+                {/foreach}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <a href="javascript:();" data-toggle="modal" data-target="#catatanVerifikator" name="submit" class="btn btn-danger simpan-catatan-verifikator">Simpan</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

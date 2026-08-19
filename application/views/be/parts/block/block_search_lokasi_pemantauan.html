@@ -1,0 +1,162 @@
+<div class="row">
+  <div class="col-xl-12 col-lg-12 col-md-12">
+    <form class="form form-horizontal" method="post" action="{$baseUrl}{$ctrl}/{$act}">
+      <div class="form-group row mb-0">
+        <div class="col-md-12">
+          <div class="form-group row mb-0">
+            <div class="col-md-6">
+              <input type="text" class="form-control mb-1" id="kataKunci" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+            </div>
+            <div class="col-md-3">
+              <select class="form-control select2" name="form[nama_perusahaan]">
+                <option value=""> --DIPANTAU PERUSAHAAN-- </option>
+                <option value="1" {if $search.nama_perusahaan == 1}selected{/if}>YA</option>
+                <option value="2" {if $search.nama_perusahaan == 2}selected{/if}>TIDAK</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-control select2" name="form[uid_rf_pelaksana]">
+                <option value=""> --PILIH PELAKSANA PEMANTAUAN-- </option>
+                {foreach from=$pelaksana item=i}
+                <option value="{$i.uid_rf_pelaksana}" {if $i.uid_rf_pelaksana==$search.uid_rf_pelaksana}selected{/if}> {$i.name} </option>
+                {/foreach}
+              </select>
+            </div>
+            {if $me.role_user==2}
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2" disabled name="form[src_reg]">
+                  {foreach from=$regional item=i}
+                  <option value="{$i.kd_regional}" selected> {$i.ur_regional} </option>
+                  {/foreach}
+                </select>
+              </div>
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2 provinsi_select2" disabled id="src-provinsi2" to="src-kabkota2" name="form[src_prop]">
+                  <option value="">{$me.name}</option>
+                </select>
+              </div>
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2" id="src-kabkota2" name="form[src_kabkota2]">
+                  <option value="">--PILIH KAB/KOTA--</option>
+                  {foreach from=$kabkotaSelect2 item=i}
+                    <option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota2}selected{/if}> {$i.nama_kabkot}</option>
+                  {/foreach}
+                </select>
+              </div>
+            {elseif $me.role_user==3}
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2" disabled name="form[src_reg]">
+                  {foreach from=$regional item=i}
+                  <option value="{$i.kd_regional}" {if $i.kd_regional==$search.src_reg}selected{/if}> {$i.ur_regional} </option>
+                  {/foreach}
+                </select>
+              </div>
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2 provinsi_select2" disabled id="src-provinsi2" to="src-kabkota2" name="form[src_prop]">
+                  <option value=""> --PILIH PROVINSI-- </option>
+                  {foreach from=$provinsiSelect2 item=i}
+                    <option value="{$i.kd_propinsi}" {if $i.kd_propinsi==$search.src_prop}selected{/if}> {$i.nama_propinsi}</option>
+                  {/foreach}
+                </select>
+              </div>
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2" disabled id="src-kabkota2" name="form[src_kabkota2]">
+                  <option value="">{$me.name}</option>
+                </select>
+              </div>
+            {elseif $me.role_user==4 || $me.role_user==5}
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2 regional_select2" disabled to="src-provinsi2" name="form[src_reg]">
+                  <option value=""> {$me.name} </option>
+                </select>
+              </div>
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2 provinsi_select2" id="src-provinsi2" to="src-kabkota2" name="form[src_prop]">
+                  <option value=""> --PILIH PROVINSI-- </option>
+                  {foreach from=$provinsiSelect2 item=i}
+                    <option value="{$i.kd_propinsi}" {if $i.kd_propinsi==$search.src_prop}selected{/if}> {$i.nama_propinsi}</option>
+                  {/foreach}
+                </select>
+              </div>
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2" id="src-kabkota2" name="form[src_kabkota2]">
+                  <option value="">--PILIH KAB/KOTA--</option>
+                  {foreach from=$kabkotaSelect2 item=i}
+                    <option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota2}selected{/if}> {$i.nama_kabkot}</option>
+                  {/foreach}
+                </select>
+              </div>
+            {else}
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2 regional_select2" to="src-provinsi2" name="form[src_reg]">
+                  <option value=""> --SEMUA REGIONAL-- </option>
+                  {foreach from=$regional item=i}
+                  <option value="{$i.kd_regional}" {if $i.kd_regional==$search.src_reg}selected{/if}> {$i.ur_regional}</option>
+                  {/foreach}
+                </select>
+              </div>
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2 provinsi_select2" id="src-provinsi2" to="src-kabkota2" name="form[src_prop]">
+                  <option value=""> --PILIH PROVINSI-- </option>
+                  {foreach from=$provinsiSelect2 item=i}
+                    <option value="{$i.kd_propinsi}" {if $i.kd_propinsi==$search.src_prop}selected{/if}> {$i.nama_propinsi}</option>
+                  {/foreach}
+                </select>
+              </div>
+              <div class="col-md-3 mb-1">
+                <select class="form-control select2" id="src-kabkota2" name="form[src_kabkota2]">
+                  <option value="">--PILIH KAB/KOTA--</option>
+                  {foreach from=$kabkotaSelect2 item=i}
+                    <option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota2}selected{/if}> {$i.nama_kabkot}</option>
+                  {/foreach}
+                </select>
+              </div>
+            {/if}
+            <div class="col-md-3">
+              <select class="form-control select2" name="form[tahun]">
+                <option value=""> --PILIH TAHUN-- </option>
+                {for $foo=2015 to ($thisYear+5)}
+                <option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+                {/for}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-control select2" name="form[uid_rf_component]">
+                <option value=""> --PILIH KOMPONEN PELAPORAN-- </option>
+                {foreach from=$komponen item=i}
+                <option value="{$i.uid_rf_component}" {if $i.uid_rf_component==$search.uid_rf_component}selected{/if}> {$i.name} </option>
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-control select2" name="form[status_lokasi]">
+                <option value=""> --PILIH STATUS LOKASI-- </option>
+                <option value="1" {if $search.status_lokasi=="1"}selected{/if}> DIGUNAKAN </option>
+                <option value="2" {if $search.status_lokasi=="2"}selected{/if}> BELUM DIGUNAKAN </option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <div class="btn-group btn-block" role="group" aria-label="Basic example">
+                <button type="submit" name="search" value="1" class="btn btn-info" style="padding: 10px;">
+                  <small><i class="ft-search"></i> SEARCH</small>
+                </button>
+                <a href="{$baseUrl}{$ctrl}/{$act}" class="btn btn-secondary" style="padding: 10px;">
+                  <small><i class="ft-refresh-cw"></i> RESET</small>
+                </a>
+                {if $act != "verifikasi" && $ctrl != "nilaiDkk" && $ctrl != "targetiklh" && $ctrl != "users" && $ctrl != "ref"}
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#unduhDataExcel" style="padding: 10px;">
+                  <small><i class="ft-download"></i> EXCEL</small>
+                </button>
+                {/if}
+                <!-- <button type="button" class="btn btn-info" data-toggle="modal" data-target="#maps" style="padding: 10px;">
+                  <small><i class="ft-map"></i> MAPS</small>
+                </button> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr />
+    </form>
+  </div>
+</div>

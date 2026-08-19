@@ -1,0 +1,66 @@
+<style>
+	table thead tr th {
+		border: 1px solid black;
+	}
+
+	td {
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style>
+<table>
+	<thead>
+		<tr style="color: white;">
+			<th rowspan="2" bgcolor="#1E9FC4">No</th>
+			<th rowspan="2" bgcolor="#1E9FC4">Provinsi</th>
+			<th colspan="2" bgcolor="#1E9FC4">IKA</th>
+			<th colspan="2" bgcolor="#1E9FC4">IKU</th>
+			<th colspan="2" bgcolor="#1E9FC4">IKL</th>
+			<th colspan="2" bgcolor="#1E9FC4">IKAL</th>
+			<th colspan="2" bgcolor="#1E9FC4">IKLH</th>
+			<th rowspan="2" bgcolor="#1E9FC4">Rating</th>
+		</tr>
+		<tr style="color: white;">
+			<th bgcolor="#1E9FC4">Target</th>
+			<th bgcolor="#1E9FC4">Capaian</th>
+			<th bgcolor="#1E9FC4">Target</th>
+			<th bgcolor="#1E9FC4">Capaian</th>
+			<th bgcolor="#1E9FC4">Target</th>
+			<th bgcolor="#1E9FC4">Capaian</th>
+			<th bgcolor="#1E9FC4">Target</th>
+			<th bgcolor="#1E9FC4">Capaian</th>
+			<th bgcolor="#1E9FC4">Target</th>
+			<th bgcolor="#1E9FC4">Capaian</th>
+		</tr>
+	</thead>
+	<tbody>
+		{$cnProvinsi = 1}
+		{foreach from=$viewp item=v}
+		{if $v.iklh > 0}
+		{$ratings = $functions->rating($rating,number_format($v.iklh,2,".",""))}
+		<tr>
+			<td>{$cnProvinsi}</td>
+			<td>{$v.nama_provinsi}</td>
+			<td>{number_format($v.target_ika,2,".","")}</td>
+			<td>{number_format($v.ika,2,".","")}</td>
+			<td>{number_format($v.target_iku,2,".","")}</td>
+			<td>{number_format($v.iku,2,".","")}</td>
+			<td>{number_format($v.target_ikl,2,".","")}</td>
+			<td>{number_format($v.ikl,2,".","")}</td>
+			<td>{number_format($v.target_ikal,2,".","")}</td>
+			<td>{number_format($v.ikal,2,".","")}</td>
+			<td>{number_format($v.target,2,".","")}</td>
+			<td>
+				{if $v.ika > 0 || $v.iku > 0 || $v.ikl > 0 || $v.ikal > 0}
+				{number_format($v.iklh,2,".","")}
+				{else}
+				<b>-</b>
+				{/if}
+			</td>
+			<td> {if $v.ika || $v.iku || $v.ikl} {$ratings.rating} {else} <b>-</b> {/if} </td>
+		</tr>
+		{$cnProvinsi = $cnProvinsi + 1}
+		{/if}
+		{/foreach}
+	</tbody>
+</table>

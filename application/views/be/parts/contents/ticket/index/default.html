@@ -1,0 +1,6 @@
+{if isset($reply)}
+  {include file="parts/contents/$ctrl/$act/form.html"}
+{else}
+  {include file="parts/contents/$ctrl/$act/table.html"}
+  {include file="parts/contents/$ctrl/$act/modal.html"}
+{/if}

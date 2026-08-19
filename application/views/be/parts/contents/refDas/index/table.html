@@ -1,0 +1,55 @@
+{if $me.role_user == 1 || $me.role_user == 0}
+<div class="row mb-1">
+  <div class="col-md-12">
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData">
+      <i class="ft-plus-circle"></i> Tambah Data
+    </button>
+  </div>
+</div>
+{/if}
+{include file="parts/block/block_search_das.html"}
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table table-striped">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th colspan="2" class="text-center" style="width: 70px">#</th>
+        <th class="v-middle">NAMA DAS</th>
+        <th class="v-middle">KODE DAS</th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v}
+      <tr>
+        <td class="text-center">
+          {if $me.role_user == 1 || $me.role_user == 0}
+          <button class="btn border-secondary badge badge-danger round delete-dialog" data-uid="{$v.$primaryKey}" data-ajax="{$ctrl}/deletedData">
+            <a href="javascript:void(0);" title="Delete">
+              <i class="ft-trash-2"></i>
+            </a>
+          </button>
+          <button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.$primaryKey}" title="Edit">
+            <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+          </button>
+          {else}
+          --
+          {/if}
+        </td>
+
+        <td class="text-center">{counter}</td>
+        <td>{$v.nama}</td>
+        <td>{$v.kode}</td>
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="4" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+  {include file="parts/block/block_pagination.html"}
+</div>

@@ -1,0 +1,129 @@
+<div class="row">
+  <div class="col-md-12">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" id="base-tab1" data-toggle="tab" aria-controls="tab1" href="#tab1" aria-expanded="true">Daftar FAQ</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="base-tab2" data-toggle="tab" aria-controls="tab2" href="#tab2" aria-expanded="false">Topik FAQ</a>
+      </li>
+    </ul>
+    <div class="tab-content pt-1">
+      <div role="tabpanel" class="tab-pane active" id="tab1" aria-expanded="true" aria-labelledby="base-tab1">
+        <div class="row mb-1">
+          <div class="col-md-3">
+            <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData2">
+              <i class="ft-plus-circle"></i> Tambah Data FAQ
+            </button>
+          </div>
+        </div>
+        {include file="parts/block/block_search_faq.html"}
+        <div class="table-responsive" style="padding: 8px; border: 1px solid #f4f5fa">
+          <table class="table">
+            <thead class="bg-info bg-darken-2 white">
+              <tr>
+                <th colspan="2" class="text-center" style="width: 70px">#</th>
+                <th rowspan="2" class="v-middle">Tanggal</th>
+                <th rowspan="2" class="v-middle">Pertanyaan</th>
+                <th rowspan="2" class="v-middle">Topik</th>
+                <th rowspan="2" class="v-middle">Lampiran</th>
+                <th rowspan="2" class="v-middle">Publish</th>
+              </tr>
+              <tr>
+                <th width="50" class="text-center">Action</th>
+                <th width="10" class="text-center">No</th>
+              </tr>
+            </thead>
+            <tbody>
+              {counter start=$page print=false}
+              {foreach from=$view item=v key=k}
+              <tr>
+                <th class="text-center">
+                  {if $me.role_user <= 1} <button class="btn border-secondary badge badge-danger round delete-dialog" data-uid="{$v.$primaryKey}" data-ajax="{$ctrl}/deletedData/tbl/faq/pk/uid_faq">
+                    <a href="javascript:void(0);" title="Delete">
+                      <i class="ft-trash-2"></i>
+                    </a>
+                    </button>
+                    <button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData2" data-uid="{$v.$primaryKey}" title="Edit">
+                      <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+                    </button>
+                    {/if}
+                </th>
+
+                <th class="text-center">{counter}</th>
+                <td>{$v.tanggal}</td>
+                <td><a class="text-primary" data-toggle="collapse" data-target="#collapseA{$k}" aria-expanded="true" aria-controls="collapseA{$k}"> {$v.isi} </a></td>
+                <td> {$v.nama_topik} </td>
+                <td>
+                  {if $v.lampiran}
+                  <a href="{$baseUrl}uploads/faq/{$v.lampiran}" class="btn btn-primary btn-sm" target="_blank"><i class="ft ft-download"></i></a>
+                  {else}
+                  -
+                  {/if}
+                </td>
+                <td>
+                  {if $v.status == 1}
+                  <div class="badge border-success success badge-border">YA</div>
+                  {else}
+                  <div class="badge border-danger danger badge-border">TIDAK</div>
+                  {/if}
+                </td>
+              </tr>
+              <tr id="collapseA{$k}" class="collapse" bgcolor="aliceblue">
+                <td colspan="2"></td>
+                <td colspan="5"><b>Jawaban : </b>{$v.jawaban}</td>
+              </tr>
+              {/foreach}
+            </tbody>
+          </table>
+          {include file="parts/block/block_pagination.html"}
+        </div>
+      </div>
+      <div class="tab-pane" id="tab2" aria-labelledby="base-tab2">
+        <div class="row mb-1">
+          <div class="col-md-3">
+            <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData3">
+              <i class="ft-plus-circle"></i> Tambah Data Topik
+            </button>
+          </div>
+        </div>
+        <div class="table-responsive" style="padding: 8px; border: 1px solid #f4f5fa">
+          <table class="table">
+            <thead class="bg-info bg-darken-2 white">
+              <tr>
+                <th colspan="2" class="text-center" style="width: 70px">#</th>
+                <th rowspan="2" class="v-middle text-center">Nama Topik</th>
+              </tr>
+              <tr>
+                <th width="50" class="text-center">Action</th>
+                <th width="10" class="text-center">No</th>
+              </tr>
+            </thead>
+            <tbody>
+              {$no = 1}
+              {foreach from=$topik item=i key=e}
+              <tr>
+                <th class="text-center">
+                  {if $me.role_user <= 1} <button class="btn border-secondary badge badge-danger round delete-dialog" data-uid="{$i.uid_topik}" data-ajax="{$ctrl}/deletedData/tbl/rf_topik/pk/uid_topik">
+                    <a href="javascript:void(0);" title="Delete">
+                      <i class="ft-trash-2"></i>
+                    </a>
+                    </button>
+                    <button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData3" data-uid="{$i.uid_topik}" title="Edit">
+                      <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+                    </button>
+                    {/if}
+                </th>
+
+                <th class="text-center">{$no++}</th>
+                <td class="text-center">{$i.nama_topik}</td>
+              </tr>
+              {/foreach}
+            </tbody>
+          </table>
+          {include file="parts/block/block_pagination.html"}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

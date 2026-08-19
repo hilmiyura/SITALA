@@ -1,0 +1,34 @@
+<!-- Modal -->
+<div class="modal fade text-left" id="primary" tabindex="-1" role="dialog" aria-labelledby="myModalLabel8" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-warning white">
+        <h4 class="modal-title white" id="myModalLabel8">Simulasi Perhitungan IKA</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-12 col-xs-12 col-md-12 col-lg-4 col-xl-4 mb-1">
+            <select class="form-control select2 select-year-indeks" name="" style="width:100%;">
+              <option value="">-- PILIH TAHUN --</option>
+              {for $foo=2015 to $thisYear}
+              <option value="{$foo}"> {$foo} </option>
+              {/for}
+            </select>
+          </div>
+          <div class="col-md-12">
+            <div class="alert alert-info">
+              Data yang dihitung simulasi adalah data yang sudah diverifikasi oleh pusat
+            </div>
+          </div>
+        </div>
+        <div class="simulasi-content"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn grey btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

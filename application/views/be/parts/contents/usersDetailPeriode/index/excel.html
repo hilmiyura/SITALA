@@ -1,0 +1,66 @@
+<table>
+  <thead>
+    <tr style="color: white;">
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">NO</th>
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">PROVINSI</th>
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">KAB/KOTA</th>
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">TAHUN</th>
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">LUAS MANGROVE</th>
+      <th colspan="5" bgcolor="#1E9FC4" style="border: 1px solid black;">STATUS KERUSAKAN EKOSISTEM GAMBUT</th>
+      <th colspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">FUNGSI EKOSISTEM GAMBUT</th>
+    </tr>
+    <tr>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">RUSAK BERAT</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">RUSAK RINGAN</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">RUSAK SANGAT BERAT</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">RUSAK SEDANG</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">TIDAK RUSAK</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">BUDAYA</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">LINDUNG</th>
+    </tr>
+  </thead>
+  <tbody>
+    {foreach from=$viewExcel.data item=data}
+    <tr>
+      <td style="border: 1px solid black;vertical-align:top;">{counter}</td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $data.nama_kabkota}{$data.nama_provinsi}{else}<b>{$data.nama_provinsi}</b>{/if}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $data.nama_kabkota}{$data.nama_kabkota}{else}{/if}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.periode}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.luas_mangrove}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.eg_rusak_berat}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.eg_rusak_ringan}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.eg_rusak_sangat_berat}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.eg_rusak_sedang}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.eg_tidak_rusak}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.eg_fungsi_budaya}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.eg_fungsi_lindung}
+      </td>
+    </tr>
+    {foreachelse}
+    <tr style="color: white;">
+      <td colspan="12" align="center" bgcolor="#FA535D" style="border: 1px solid black;vertical-align:top;">BELUM ADA DATA</td>
+    </tr>
+    {/foreach}
+  </tbody>
+</table>

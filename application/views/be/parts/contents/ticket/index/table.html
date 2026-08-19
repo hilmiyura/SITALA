@@ -1,0 +1,62 @@
+{if $me.role_user > 1}
+<div class="row mb-1">
+  <div class="col-md-3">
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#modalTicket">
+      <i class="ft-plus-circle"></i> Buat Ticket
+    </button>
+  </div>
+</div>
+{/if}
+{include file="parts/block/block_search_ticket.html"}
+<div class="row">
+  <div class="col-md-12">
+    <div class="table-responsive">
+      <table class="table">
+        <thead class="bg-info bg-darken-2 white">
+          <tr>
+            <th>No</th>
+            <th>User</th>
+            <th>Topik</th>
+            <th>Tentang</th>
+            <th>Update</th>
+            <th>Pesan</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {counter start=$page print=false}
+          {foreach from=$view item=v key=k}
+          <tr>
+            <th class="text-center">{counter}</th>
+            <td class="nowrap">
+              {$v.nama_user}
+              <br>
+              {if $v.nama_kabkota}
+                {$v.nama_kabkota}<br>
+                Provinsi {$v.nama_provinsi}
+              {else if $v.nama_provinsi}
+                Provinsi {$v.nama_provinsi}
+              {else if $v.nama_regional}
+                Regional {$v.nama_regional}
+              {else} - {/if}
+            </td>
+            <td>{$v.nama_topik}</td>
+            <td>
+              <b><a href="{$baseUrl}ticket/index/reply/{$v.uid_ticket|base64_encode}">{$v.tentang}</a></b>
+            </td>
+            <td class="nowrap">{date("Y-m-d H:i:s", $v.crdate)}</td>
+            <td>
+              <!-- {if $v.pesan_balasan}
+                <span class="badge badge-warning">Pesan Balasan</span>
+                <br>
+              {/if} -->
+              {$v.pesan|truncate:50:"...":true}
+            </td>
+            <td>{if $v.status == 1} <span class="badge badge-danger">CLOSE</span> {else} <span class="badge badge-success">OPEN</span> {/if}</td>
+          </tr>
+          {/foreach}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

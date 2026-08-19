@@ -1,0 +1,48 @@
+<div class="row">
+  <div class="col-xl-12 col-lg-12 col-md-12">
+    <form class="form form-horizontal" method="post">
+      <div class="form-group row mb-0">
+        <div class="col-md-12">
+          <div class="form-group row mb-0">
+            <div class="col-md-4">
+              <input type="text" class="form-control mb-1" id="kataKunci" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+            </div>
+            <div class="col-md-3">
+              <select class="form-control select2 position-relative" name="form[uid_kabkota]" style="width:100%;">
+                <option value="">--PROVINSI / KABUPATEN / KOTA--</option>
+                {foreach from=$provinsi item=v}
+                  <option value="{$v.id}" {if $search.uid_kabkota == $v.id } selected {/if}>{$v.nama}</option>
+                  {foreach from=$v.kabkota item=vi}
+                    <option value="{$v.id}-{$vi.id}" {if $search.uid_kabkota == $v.id|cat:-{$vi.id} } selected {/if}>{$v.nama} - {$vi.nama}</option>
+                  {/foreach}
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-2">
+              <select class="form-control select2 position-relative" name="form[verifikasi]" style="width:100%;">
+                <option value="">--STATUS VERIFKASI--</option>
+                <option value="0" {if is_numeric($search.verifikasi) && $search.verifikasi == 0 } selected {/if}>BELUM VERIFIKASI</option>
+                <option value="1" {if is_numeric($search.verifikasi) && $search.verifikasi == 1 } selected {/if}>VALID</option>
+                <option value="2" {if is_numeric($search.verifikasi) && $search.verifikasi == 2 } selected {/if}>INVALID</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <div class="btn-group btn-block" role="group" aria-label="Basic example">
+                <button type="submit" name="search" value="1" class="btn btn-info" style="padding: 10px;">
+                  <small><i class="ft-search"></i> SEARCH</small>
+                </button>
+                <a href="{$baseUrl}{$ctrl}/{$act}" class="btn btn-secondary" style="padding: 10px;">
+                  <small><i class="ft-refresh-cw"></i> RESET</small>
+                </a>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#unduhDataExcel" style="padding: 10px;">
+                  <small><i class="ft-download"></i> EXCEL</small>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr />
+      </div>
+    </form>
+  </div>
+</div>

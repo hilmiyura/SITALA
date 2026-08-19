@@ -1,0 +1,70 @@
+<style>
+  table thead tr th {
+    border: 1px solid black;
+  }
+
+  table tbody tr td {
+    border: 1px solid black;
+    vertical-align: top;
+  }
+</style>
+<table class="table table-border">
+  <thead>
+    <tr style="color: white;">
+      <th bgcolor="#1E9FC4">NO</th>
+      <th bgcolor="#1E9FC4">Verifikasi</th>
+      <th bgcolor="#1E9FC4">JENIS RTH</th>
+      <th bgcolor="#1E9FC4">LUAS</th>
+      <th bgcolor="#1E9FC4">NAMA RTH</th>
+      <th bgcolor="#1E9FC4">NAMA DESA</th>
+      <th bgcolor="#1E9FC4">NAMA KECAMATAN</th>
+      <th bgcolor="#1E9FC4">LATITUDE</th>
+      <th bgcolor="#1E9FC4">LONGITUDE</th>
+      <th bgcolor="#1E9FC4">SUMBER DANA</th>
+      <th bgcolor="#1E9FC4">NOMOR SK</th>
+      <th bgcolor="#1E9FC4">KETERANGAN</th>
+      <th bgcolor="#1E9FC4">Catatan</th>
+    </tr>
+  </thead>
+  <tbody>
+    {foreach from=$dataExcel item=v key=k}
+      <tr>
+        <td>
+          {if is_numeric($paginationStart)}
+            {$paginationStart+($k+1)}
+          {else}
+            {$k+1}
+          {/if}
+        </td>
+        <td>
+          {if $v.verify == 1}
+            Verified
+          {elseif $v.verify == 2}
+            Rejected
+          {/if}
+        </td>
+        <td>
+          {foreach from=$jenisRth item=vi}
+            {if $vi.idx == $v.jenis_rth} {$vi.name} {/if}
+          {/foreach}
+        </td>
+        <td>{$v.luas_rth}</td>
+        <td>{$v.nama_rth}</td>
+        <td>{$v.nama_desa}</td>
+        <td>{$v.nama_kecamatan}</td>
+        <td>'{$v.koordinat_lintang}</td>
+        <td>'{$v.koordinat_bujur}</td>
+        <td>
+          {if $v.sumber_dana == '1'} APBN {/if}
+          {if $v.sumber_dana == '2'} APBD {/if}
+          {if $v.sumber_dana == '3'} SWASTA {/if}
+        </td>
+        <td>{$v.nomor_sk}</td>
+        <td>
+          {$v.keterangan}
+        </td>
+        <td>{$v.catatan}</td>
+      </tr>
+    {/foreach}
+  </tbody>
+</table>

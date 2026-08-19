@@ -1,0 +1,64 @@
+<style>
+	table thead tr th {
+		border: 1px solid black;
+	}
+
+	td {
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style>
+<table>
+	<thead>
+		<tr style="color: white;">
+			<th rowspan="2" bgcolor="#1E9FC4">No</th>
+			<th rowspan="2" bgcolor="#1E9FC4">Kabupaten/Kota</th>
+			<th rowspan="2" bgcolor="#1E9FC4">Provinsi</th>
+			<th colspan="2" bgcolor="#1E9FC4">IKA</th>
+			<th colspan="2" bgcolor="#1E9FC4">IKU</th>
+			<th colspan="2" bgcolor="#1E9FC4">IKL</th>
+			<th colspan="2" bgcolor="#1E9FC4">IKLH</th>
+			<th rowspan="2" bgcolor="#1E9FC4">Rating</th>
+		</tr>
+		<tr style="color: white;">
+			<th bgcolor="#1E9FC4">Target</th>
+			<th bgcolor="#1E9FC4">Capaian</th>
+			<th bgcolor="#1E9FC4">Target</th>
+			<th bgcolor="#1E9FC4">Capaian</th>
+			<th bgcolor="#1E9FC4">Target</th>
+			<th bgcolor="#1E9FC4">Capaian</th>
+			<th bgcolor="#1E9FC4">Target</th>
+			<th bgcolor="#1E9FC4">Capaian</th>
+		</tr>
+	</thead>
+	<tbody>
+		{$cnKabkota = 1}
+		{foreach from=$viewk item=v}
+		{if $v.iklh > 0}
+		{$ratings = $functions->rating($rating,number_format($v.iklh,2,".",""))}
+		<tr>
+			<td>{$cnKabkota}</td>
+			<td><b>{$v.nama_kabkota}</b></td>
+			<td>{$v.nama_provinsi}</td>
+			<td>{if $v.target_ika > 100} 100 {else} {number_format($v.target_ika,2,".","")} {/if}</td>
+			<td>{if $v.ika > 100} 100 {else} {number_format($v.ika,2,".","")} {/if}</td>
+			<td>{if $v.target_iku > 100} 100 {else} {number_format($v.target_iku,2,".","")} {/if}</td>
+			<td>{if $v.iku > 100} 100 {else} {number_format($v.iku,2,".","")} {/if}</td>
+			<td>{if $v.target_ikl > 100} 100 {else} {number_format($v.target_ikl,2,".","")} {/if}</td>
+			<td>{if $v.ikl > 100} 100 {else} {number_format($v.ikl,2,".","")} {/if}</td>
+
+			<td>{if $v.target > 100} 100 {else} {number_format($v.target,2,".","")} {/if}</td>
+			<td>
+				{if $v.ika > 0 || $v.iku > 0 || $v.ikl > 0}
+				{if $v.iklh > 100} 100 {else} {number_format($v.iklh,2,".","")} {/if}
+				{else}
+				<b>-</b>
+				{/if}
+			</td>
+			<td> {if $v.ika || $v.iku || $v.ikl} {$ratings.rating} {else} <b>-</b> {/if} </td>
+		</tr>
+		{$cnKabkota = $cnKabkota + 1}
+		{/if}
+		{/foreach}
+	</tbody>
+</table>

@@ -1,0 +1,162 @@
+<style>
+  table thead tr th {
+    border: 1px solid black;
+  }
+
+  table tbody tr td {
+    border: 1px solid black;
+    vertical-align: top;
+  }
+</style>
+<table>
+  <thead>
+    <tr style="color: white;">
+      <th rowspan="2" bgcolor="#1E9FC4">NO</th>
+      {if $search.tampil_data == 1}
+      <th rowspan="2" bgcolor="#1E9FC4">Kode Lokasi</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Alamat</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Sungai</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Das</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Tanggal</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Kategori</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Kab/Kota</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Provinsi</th>
+      <th colspan="2" bgcolor="#1E9FC4">Titik Koordinat</th>
+      {elseif $search.tampil_data == 2}
+      <th rowspan="2" bgcolor="#1E9FC4">Titik</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Alamat</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Sungai</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Das</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Kategori</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Kab/Kota</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Provinsi</th>
+      <th colspan="2" bgcolor="#1E9FC4">Titik Koordinat</th>
+      {else}
+      <th rowspan="2" bgcolor="#1E9FC4">Sungai</th>
+      {/if}
+      <!-- <th rowspan="2" bgcolor="#1E9FC4">Pemantauan</th>
+      {if $search.tampil_data != 3}
+      <th rowspan="2" bgcolor="#1E9FC4">Kategori</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Kab/Kota</th>
+      <th rowspan="2" bgcolor="#1E9FC4">Provinsi</th>
+      {if $search.tampil_data == 1}
+      <th colspan="2" bgcolor="#1E9FC4">Titik Koordinat</th>
+      {/if}
+      {/if} -->
+      <th colspan="4" bgcolor="#1E9FC4">STATUS MUTU</th>
+    </tr>
+    <tr style="color: white;">
+      {if $search.tampil_data <= 2}
+      <th bgcolor="#1E9FC4">Latitude</th>
+      <th bgcolor="#1E9FC4">Longitude</th>
+      {/if}
+      <th bgcolor="#1E9FC4">KELAS 1</th>
+      <th bgcolor="#1E9FC4">KELAS 2</th>
+      <th bgcolor="#1E9FC4">KELAS 3</th>
+      <th bgcolor="#1E9FC4">KELAS 4</th>
+    </tr>
+  </thead>
+  <tbody>
+    {foreach from=$viewMutu item=v}
+    <tr>
+      <td class="text-center">{$offset++}</td>
+      {if $search.tampil_data == 1}
+      <td>{$v.kode_lokasi}</td>
+      <td>{$v.alamat}, {$v.alamat_detail}</td>
+      <td>{$v.titik_nama_sungai}</td>
+      <td>{$v.titik_nama_das}</td>
+      <td>
+        <div class="badge badge-success">
+          {$format->dateFormat($v.tanggal)}
+        </div>
+      </td>
+      <td> {if $v.kategori == 1}
+        AIR SUNGAI
+        {elseif $v.kategori == 2}
+        BADAN AIR GAMBUT
+        {elseif $v.kategori == 3}
+        DANAU/SITU
+        {/if} </td>
+      <td>{$v.nama_kabkota}</td>
+      <td>{$v.nama_provinsi}</td>
+      <td class="text-center">'{$v.latitude}</td>
+      <td class="text-center">'{$v.longitude}</td>
+      {elseif $search.tampil_data == 2}
+      <td>{$v.kode_lokasi}</td>
+      <td>{$v.alamat}, {$v.alamat_detail}</td>
+      <td>{$v.titik_nama_sungai}</td>
+      <td>{$v.titik_nama_das}</td>
+      <td> {if $v.kategori == 1}
+        AIR SUNGAI
+        {elseif $v.kategori == 2}
+        BADAN AIR GAMBUT
+        {elseif $v.kategori == 3}
+        DANAU/SITU
+        {/if} </td>
+      <td>{$v.nama_kabkota}</td>
+      <td>{$v.nama_provinsi}</td>
+      <td class="text-center">'{$v.latitude}</td>
+      <td class="text-center">'{$v.longitude}</td>
+      {else}
+      <td>{$v.nama_sungai}</td>
+      {/if}
+      <!-- <td> {if $search.tampil_data != 3}
+        {$v.kode_lokasi}
+        <br />
+        {$v.alamat}
+        <br />
+        {$v.alamat_detail}
+        <br />
+        {else}
+        {$v.nama_sungai}
+        <br />
+        {/if}
+        {if $search.tampil_data == 1}
+        <div class="badge badge-success">
+          {$format->dateFormat($v.tanggal)}
+        </div> {/if}
+      </td>
+      {if $search.tampil_data != 3}
+      <td> {if $v.kategori == 1}
+        AIR SUNGAI
+        {elseif $v.kategori == 2}
+        BADAN AIR GAMBUT
+        {elseif $v.kategori == 3}
+        DANAU/SITU
+        {/if} </td>
+      <td>{$v.nama_kabkota}</td>
+      <td>{$v.nama_provinsi}</td>
+      {if $search.tampil_data == 1}
+      <td class="text-center">'{$v.latitude}</td>
+      <td class="text-center">'{$v.longitude}</td>
+      {/if}
+      {/if} -->
+      <td class="text-center">{number_format($v.pij1,2,".","")}
+        <br>
+        {$v.status_mutu_1}
+      </td>
+      <td class="text-center">{number_format($v.pij2,2,".","")}
+        <br>
+        {$v.status_mutu_2}
+      </td>
+      <td class="text-center">{number_format($v.pij3,2,".","")}
+        <br>
+        {$v.status_mutu_3}
+      </td>
+      <td class="text-center">{number_format($v.pij4,2,".","")}
+        <br>
+        {$v.status_mutu_4}
+      </td>
+    </tr>
+    {foreachelse}
+
+    <tr>
+      <td {if $search.tampil_data !=3}colspan="11" {else}colspan="6" {/if} class="p-0">
+        <div class="alert alert-danger text-center">
+          <strong>Tidak Ada Data</strong>
+        </div>
+      </td>
+    </tr>
+    {/foreach}
+  </tbody>
+</table>

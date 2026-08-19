@@ -1,0 +1,133 @@
+{if $me.role_user==3}
+  <div class="row">
+    <div class="col-xl-4 col-lg-6 col-md-12">
+      <div class="card">
+        <div class="card-header text-center">
+          <h4 class="card-title black"> <i class="primary la la-cloud"></i> Indeks Kualitas Udara</h4>
+          <hr class="hr-horizontal">
+        </div>
+        <div class="card-content">
+          <div class="card-body pt-0 pb-1 text-center">
+            <h6 class="display-3 primary lighten-2">{$sumary.iku.unverify}</h6>
+            <h6 class="display-5 blue-grey lighten-2">Data Unverified</h6>
+            <!-- <h6 class="text-bold-600 black">Unverified/Total : <span>/{$sumary.iku.total}</span></h6>
+            <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+              <div class="progress-bar bg-gradient-x-purple-blue" role="progressbar" style="width: {$sumary.iku.persen_un}%" aria-valuenow="{$sumary.iku.persen_un}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-4 col-lg-6 col-md-12">
+      <div class="card">
+        <div class="card-header text-center">
+          <h4 class="card-title black"> <i class="danger la la-tint"></i> Indeks Kualitas Air</h4>
+          <hr class="hr-horizontal">
+        </div>
+        <div class="card-content">
+          <div class="card-body pt-0 pb-1 text-center">
+            <h6 class="display-3 danger lighten-2">{$sumary.ika.unverify}</h6>
+            <h6 class="display-5 blue-grey lighten-2">Data Unverified</h6>
+            <!-- <h6 class="text-bold-600 black">Unverified/Total : <span>/{$sumary.ika.total}</span></h6>
+            <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+              <div class="progress-bar bg-gradient-x-purple-red" role="progressbar" style="width: {$sumary.ika.persen_un}%" aria-valuenow="{$sumary.ika.persen_un}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-4 col-lg-6 col-md-12">
+      <div class="card">
+        <div class="card-header text-center">
+          <h4 class="card-title black"> <i class="success la la-line-chart"></i> Indeks Kualitas Lahan</h4>
+          <hr class="hr-horizontal">
+        </div>
+        <div class="card-content">
+          <div class="card-body pt-0 pb-1 text-center">
+            <h6 class="display-3 success lighten-2">{$sumary.ikl.unverify}</h6>
+            <h6 class="display-5 blue-grey lighten-2">Data Unverified</h6>
+            <!-- <h6 class="text-bold-600 black">Unverified/Total : <span>/{$sumary.ikl.total}</span></h6>
+            <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+              <div class="progress-bar bg-gradient-x-blue-green" role="progressbar" style="width: {$sumary.ikl.persen_un}%" aria-valuenow="{$sumary.ikl.persen_un}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{else}
+  <div class="row">
+    <div class="col-xl-3 col-lg-6 col-md-12">
+      <div class="card">
+        <div class="card-header text-center">
+          <h4 class="card-title black"> <i class="primary la la-cloud"></i> Indeks Kualitas Udara</h4>
+          <hr class="hr-horizontal">
+        </div>
+        <div class="card-content">
+          <div class="card-body pt-0 pb-1 text-center">
+            <h6 class="display-3 primary lighten-2">{$sumary.iku.unverify}</h6>
+            <h6 class="display-5 blue-grey lighten-2">Data Unverified</h6>
+            <!-- <h6 class="text-bold-600 black">Unverified/Total : <span>/{$sumary.iku.total}</span></h6>
+            <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+              <div class="progress-bar bg-gradient-x-purple-blue" role="progressbar" style="width: {$sumary.iku.persen_un}%" aria-valuenow="{$sumary.iku.persen_un}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 col-md-12">
+      <div class="card">
+        <div class="card-header text-center">
+          <h4 class="card-title black"> <i class="danger la la-tint"></i> Indeks Kualitas Air</h4>
+          <hr class="hr-horizontal">
+        </div>
+        <div class="card-content">
+          <div class="card-body pt-0 pb-1 text-center">
+            <h6 class="display-3 danger lighten-2">{$sumary.ika.unverify}</h6>
+            <h6 class="display-5 blue-grey lighten-2">Data Unverified</h6>
+            <!-- <h6 class="text-bold-600 black">Unverified/Total : <span>/{$sumary.ika.total}</span></h6>
+            <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+              <div class="progress-bar bg-gradient-x-purple-red" role="progressbar" style="width: {$sumary.ika.persen_un}%" aria-valuenow="{$sumary.ika.persen_un}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 col-md-12">
+      <div class="card">
+        <div class="card-header text-center">
+          <h4 class="card-title black"> <i class="warning la la-map"></i> Indeks Kualitas Air Laut</h4>
+          <hr class="hr-horizontal">
+        </div>
+        <div class="card-content">
+          <div class="card-body pt-0 pb-1 text-center">
+            <h6 class="display-3 warning lighten-2">{$sumary.ikal.unverify}</h6>
+            <h6 class="display-5 blue-grey lighten-2">Data Unverified</h6>
+            <!-- <h6 class="text-bold-600 black">Unverified/Total : <span>/{$sumary.ikal.total}</span></h6>
+            <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+              <div class="progress-bar bg-gradient-x-orange-yellow" role="progressbar" style="width: {$sumary.ikal.persen_un}%" aria-valuenow="{$sumary.ikal.persen_un}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 col-md-12">
+      <div class="card">
+        <div class="card-header text-center">
+          <h4 class="card-title black"> <i class="success la la-line-chart"></i> Indeks Kualitas Lahan</h4>
+          <hr class="hr-horizontal">
+        </div>
+        <div class="card-content">
+          <div class="card-body pt-0 pb-1 text-center">
+            <h6 class="display-3 success lighten-2">{$sumary.ikl.unverify}</h6>
+            <h6 class="display-5 blue-grey lighten-2">Data Unverified</h6>
+            <!-- <h6 class="text-bold-600 black">Unverified/Total : <span>/{$sumary.ikl.total}</span></h6>
+            <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+              <div class="progress-bar bg-gradient-x-blue-green" role="progressbar" style="width: {$sumary.ikl.persen_un}%" aria-valuenow="{$sumary.ikl.persen_un}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{/if}

@@ -1,0 +1,61 @@
+<section class="container">
+  <div class="row container">
+    <div class="col-md-12">
+      <p class="h4 mb-1"><span class="badge badge-info">{$ticket_data[0].nama_topik}</span> {$ticket_data[0].tentang}</p>
+      <span><i class="ft-user"></i> {$ticket_data[0].nama_user}</span>
+    </div>
+  </div>
+  <div class="row container">
+    <div class="col-md-12 p-2">
+      <!-- <ul class="list-unstyled mt-1">
+        <li class="h3"><i class="ft-message-circle"></i> <span class="h4">{date("Y-m-d", $ticket_data[0].crdate)} | {$ticket_data[0].nama_user}</span></li>
+        <li class="px-2 h6">
+          {$ticket_data[0].pesan}
+        </li>
+      </ul> -->
+      {foreach from=$ticket_data item=v key=k}
+        <ul class="list-unstyled mb-2">
+          <li class="h3 {if $me.uid_users == $v.cruser}text-warning{else}text-success{/if}">
+            {if $me.uid_users == $v.cruser}
+              <span class="px-1"><i class="la la-mail-reply" style="font-weight:bold !important;"></i></span>
+            {else}
+              <span class="px-1"><i class="la la-mail-forward" style="font-weight:bold !important;"></i></span>
+            {/if}
+            <span class="h5">{date("Y-m-d H:i:s", $v.crdate)} | {$v.nama_user}</span></li>
+          <li class="px-2">
+            {$v.pesan}
+            {if $v.lampiran}
+            <br>
+            <a href="{$baseUrl}uploads/ticket/{$v.lampiran}" target="_blank" class="btn btn-sm btn-light"><i class="ft-file"></i> Lihat Lampiran</a>
+            {/if}
+          </li>
+          <li class="px-2"><hr></li>
+        </ul>
+      {/foreach}
+      {if $ticket_data[0].status == 0}
+      <ul class="list-unstyled mt-5">
+        <li class="px-2">Balas pesan</li>
+        <li class="px-2">
+          <form class="" method="post">
+            <div class="row">
+              <input type="hidden" name="form[uid_ticket]" value="{$ticket_data[0].uid_ticket}">
+              <div class="col-md-12 mb-1">
+                <textarea class="form-control" name="form[pesan]" rows="3" placeholder="Balas pesan"></textarea>
+              </div>
+              <div class="col-md-12">
+                <button type="submit" name="submit" class="btn btn-primary btn-block"><i class="ft-send"></i> Balas Pesan</button>
+              </div>
+              <div class="col-md-12 mt-3">
+                Jika ingin menyelesaikan ticket, silahkan klik tombol dibawah<br>
+                <button type="submit" name="closesumbit" class="btn btn-danger btn-sm"><i class="ft-send"></i> Tutup Ticket</button>
+              </div>
+            </div>
+          </form>
+        </li>
+      </ul>
+      {else}
+
+      {/if}
+    </div>
+  </div>
+</section>

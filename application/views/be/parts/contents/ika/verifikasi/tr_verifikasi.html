@@ -1,0 +1,473 @@
+<tr class="tr_detail" id="tr-detail-{$v.uid_pelaporan_ika}" style="display:none;">
+  <td colspan="9" class="pl-0 pr-0">
+    <div style="width:100%;display: inline-flex;width:100%">
+      <div style="width:40%" id="shu-detail-{$v.uid_pelaporan_ika}"></div>
+      <div style="width:60%;">
+        <table class="table table-bordered">
+          <tr>
+            <td class="ptd nowrap">
+              Debit Air <sup>(m3/s)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.debit > 0}{$v.debit}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              PH <sup></sup><br><sup>(Potential Hydrogen)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.ph > 0}{if $v.ph > 9}<span style="color: red;">{$v.ph}</span>{else}{$v.ph}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              BOD <sup>(mg/L)</sup><br><sup>(Biological Oxygen Demand)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.bod > 0}{if $v.bod > 3}<span style="color: red;">{$v.bod}</span>{else}{$v.bod}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              COD <sup>(mg/L)</sup><br><sup>(Chemical Oxygen Demand)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.cod > 0}{if $v.cod > 25}<span style="color: red;">{$v.cod}</span>{else}{$v.cod}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              TSS <sup>(mg/L)</sup><br><sup>(Total Susppended Solid)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.tss > 0}{if $v.tss > 50}<span style="color: red;">{$v.tss}</span>{else}{$v.tss}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              DO <sup>(mg/L)</sup><br><sup>(Dissolved Oxygen)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.do_p > 0}{if $v.do_p < 4}<span style="color: red;">{$v.do_p}</span>{else}{$v.do_p}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              NO <sup>(mg/L)</sup><br><sup>(Nitrat)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.no3_n > 0}{if $v.no3_n > 10}<span style="color: red;">{$v.no3_n}</span>{else}{$v.no3_n}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              TOTAL PHOSPHAT<sup>mg/L</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.total_phosphat > 0}{if $v.total_phosphat > 0.2}<span style="color: red;">{$v.total_phosphat}</span>{else}{$v.total_phosphat}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              FECAL COLIFORM<sup>MPN/100 mL</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.fecal_coliform > 0}{if $v.fecal_coliform > 1000}<span style="color: red;">{$v.fecal_coliform}</span>{else}{$v.fecal_coliform}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              KECERAHAN <sup>m</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.kecerahan > 0}{if $v.kecerahan > 4}<span style="color: red;">{$v.kecerahan}</span>{else}{$v.kecerahan}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              KLOROFIL <sup>mg/m<sup>3</sup></sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.klorofil_a > 0}{if $v.klorofil_a > 50}<span style="color: red;">{$v.klorofil_a}</span>{else}{$v.klorofil_a}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              TOTAL COLIFORM<sup>MPN/100 mL</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.total_coliform > 0}{if $v.total_coliform > 5000}<span style="color: red;">{$v.total_coliform}</span>{else}{$v.total_coliform}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              TEMPERATUR AIR <sup><sup>0</sup>C</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.temperatur_air > 0}{if $v.temperatur_air > -0}<span style="color: red;">{$v.temperatur_air}</span>{else}{$v.temperatur_air}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              TEMPERATUR UDARA <sup><sup>0</sup>C</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.temperatur_udara > 0}{if $v.temperatur_udara > -0}<span style="color: red;">{$v.temperatur_udara}</span>{else}{$v.temperatur_udara}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              MINYAK LEMAK<sup>mg/L</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.minyak_lemak > 0}{if $v.minyak_lemak > 1}<span style="color: red;">{$v.minyak_lemak}</span>{else}{$v.minyak_lemak}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              DETERGEN <sup>mg/L</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.detergen_total > 0}{if $v.detergen_total > 0.2}<span style="color: red;">{$v.detergen_total}</span>{else}{$v.detergen_total}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              FENOL <sup>mg/L</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.fenol > 0}{if $v.fenol > 000.5}<span style="color: red;">{$v.fenol}</span>{else}{$v.fenol}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              TDS <sup>(mg/L)</sup><br><sup>(Total Dissolved Solid)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.tds > 0}{if $v.tds > 1000}<span style="color: red;">{$v.tds}</span>{else}{$v.tds}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              SULFAT <sup>mg/L</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.sulfat > 0}{if $v.sulfat > 300}<span style="color: red;">{$v.sulfat}</span>{else}{$v.sulfat}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              KLORIDA <sup>mg/L</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.klorida > 0}{if $v.klorida > 300}<span style="color: red;">{$v.klorida}</span>{else}{$v.klorida}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              NITRIT <sup>mg/L</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.nitrit > 0}{if $v.nitrit > 0.06}<span style="color: red;">{$v.nitrit}</span>{else}{$v.nitrit}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              AMONIAK <sup>mg/L</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.amoniak > 0}{if $v.amoniak > 0.2}<span style="color: red;">{$v.amoniak}</span>{else}{$v.amoniak}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              TOTAL N<sup>(mg/L)</sup><br><sup>(Total Nitrogen)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.total_nitrogen > 0}{if $v.kategori == 3}{if $v.total_nitrogen > 0.75}<span style="color: red;">{$v.total_nitrogen}</span>{else}{$v.total_nitrogen}{/if}{else}{if $v.total_nitrogen > 15}<span style="color: red;">{$v.total_nitrogen}</span>{else}{$v.total_nitrogen}{/if}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              FLOURIDA <sup>mg/L</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.florida > 0}{if $v.florida > 1.5}<span style="color: red;">{$v.florida}</span>{else}{$v.florida}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              BELERANG <sup>mg/L</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.belerang_sbg_h2s > 0}{if $v.belerang_sbg_h2s > 0.002}<span style="color: red;">{$v.belerang_sbg_h2s}</span>{else}{$v.belerang_sbg_h2s}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              SIANIDA <sup>mg/L</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.sianida > 0}{if $v.sianida > 0.02}<span style="color: red;">{$v.sianida}</span>{else}{$v.sianida}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              KLORIN <sup>mg/L</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.klorin_bebas > 0}{if $v.klorin_bebas > 0.03}<span style="color: red;">{$v.klorin_bebas}</span>{else}{$v.klorin_bebas}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              WARNA <sup>Pt-Co Unit</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.warna > 0}{if $v.warna > 50}<span style="color: red;">{$v.warna}</span>{else}{$v.warna}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              SAMPAH <sup>-</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.sampah > 0}{if $v.sampah > -0}<span style="color: red;">{$v.sampah}</span>{else}{$v.sampah}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              BA <sup>(mg/L)</sup><br><sup>(Barium)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.ba > 0}{if $v.ba > -0}<span style="color: red;">{$v.ba}</span>{else}{$v.ba}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              BO <sup>(mg/L)</sup><br><sup>(Boron)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.bo > 0}{if $v.bo > 1}<span style="color: red;">{$v.bo}</span>{else}{$v.bo}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              HG <sup>(mg/L)</sup><br><sup>(Hydrargyrum)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.hg > 0}{if $v.hg > 0.002}<span style="color: red;">{$v.hg}</span>{else}{$v.hg}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              AS <sup>(mg/L)</sup><br><sup>(Arsenik)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.as_ > 0}{if $v.as_ > 0.05}<span style="color: red;">{$v.as_}</span>{else}{$v.as_}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              SE <sup>(mg/L)</sup><br><sup>(Selenium)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.se > 0}{if $v.se > 0.05}<span style="color: red;">{$v.se}</span>{else}{$v.se}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              FE <sup>(mg/L)</sup><br><sup>(Ferrum)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.fe > 0}{if $v.fe > -0}<span style="color: red;">{$v.fe}</span>{else}{$v.fe}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              CD <sup>(mg/L)</sup><br><sup>(Kadmium)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.cd > 0}{if $v.cd > 0.01}<span style="color: red;">{$v.cd}</span>{else}{$v.cd}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              CO <sup>(mg/L)</sup><br><sup>(Kobalt)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.co > 0}{if $v.co > 0.2}<span style="color: red;">{$v.co}</span>{else}{$v.co}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              MN <sup>(mg/L)</sup><br><sup>(Mangan)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.mn > 0}{if $v.mn > -0}<span style="color: red;">{$v.mn}</span>{else}{$v.mn}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              NI <sup>(mg/L)</sup><br><sup>(Nikel)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.ni > 0}{if $v.ni > 0.05}<span style="color: red;">{$v.ni}</span>{else}{$v.ni}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              ZN <sup>(mg/L)</sup><br><sup>(Zinc)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.zn > 0}{if $v.zn > 0.05}<span style="color: red;">{$v.zn}</span>{else}{$v.zn}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              CU <sup>(mg/L)</sup><br><sup>(Cuprum)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.cu > 0}{if $v.cu > 0.02}<span style="color: red;">{$v.cu}</span>{else}{$v.cu}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              PB <sup>(mg/L)</sup><br><sup>(Plumbum)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.pb > 0}{if $v.pb > 0.03}<span style="color: red;">{$v.pb}</span>{else}{$v.pb}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              CR <sup>(mg/L)</sup><br><sup>(Kromium)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.cr_6 > 0}{if $v.cr_6 > 0.05}<span style="color: red;">{$v.cr_6}</span>{else}{$v.cr_6}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              ALDRIN <sup>(µg/L)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.aldrin > 0}{if $v.aldrin > -0}<span style="color: red;">{$v.aldrin}</span>{else}{$v.aldrin}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              BHC <sup>(µg/L)</sup><br><sup>(Benzene Hexachloride)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.bhc > 0}{if $v.bhc > 210}<span style="color: red;">{$v.bhc}</span>{else}{$v.bhc}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              CHLORDANE <sup>(µg/L)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.chlordane > 0}{if $v.chlordane > -0}<span style="color: red;">{$v.chlordane}</span>{else}{$v.chlordane}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              DDT <sup>(µg/L)</sup><br><sup>(Dichoro Diphenyl Trichlorethane)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.ddt > 0}{if $v.ddt > 2}<span style="color: red;">{$v.ddt}</span>{else}{$v.ddt}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              ENDRIN <sup>(µg/L)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.endrin > 0}{if $v.endrin > 4}<span style="color: red;">{$v.endrin}</span>{else}{$v.endrin}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              HEPTACHLOR <sup>(µg/L)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.heptachlor > 0}{if $v.heptachlor > -0}<span style="color: red;">{$v.heptachlor}</span>{else}{$v.heptachlor}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              LINDANE <sup>(µg/L)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.lindane > 0}{if $v.lindane > -0}<span style="color: red;">{$v.lindane}</span>{else}{$v.lindane}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              METHOXYCHLOR <sup>(µg/L)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.methoxychlor > 0}{if $v.methoxychlor > -0}<span style="color: red;">{$v.methoxychlor}</span>{else}{$v.methoxychlor}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              TOXAPAN <sup>(µg/L)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.toxapan > 0}{if $v.toxapan > -0}<span style="color: red;">{$v.toxapan}</span>{else}{$v.toxapan}{/if}{else}-{/if}</b>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="ptd nowrap">
+              RADIOAKTIVITAS <sup>(Bq/L)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.radioaktivitas_gross_a > 0}{if $v.radioaktivitas_gross_a > 0.1}<span style="color: red;">{$v.radioaktivitas_gross_a}</span>{else}{$v.radioaktivitas_gross_a}{/if}{else}-{/if}</b>
+            </td>
+
+            <td class="ptd nowrap">
+              RADIOAKTIVITAS <sup>(Bq/L)</sup>
+              <br>
+            </td>
+            <td class="ptd nowrap text-center">
+              <b>{if $v.radioaktivitas_gross_b > 0}{if $v.radioaktivitas_gross_b > 1}<span style="color: red;">{$v.radioaktivitas_gross_b}</span>{else}{$v.radioaktivitas_gross_b}{/if}{else}-{/if}</b>
+            </td>
+
+            <td colspan="4"></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </td>
+  <td colspan="60"></td>
+</tr>

@@ -1,0 +1,64 @@
+<div class="row">
+	<div class="col-xl-12 col-lg-12 col-md-12">
+		<h2 class="text-center mb-2" style="font-weight:bold;">Frequently Asked Question</h2>
+		<form autocomplete="off" method="post" action="{$baseUrl}{$ctrl}/{$act}">
+			<div class="row">
+				<div class="col-10">
+					<fieldset class="form-group">
+						<input type="text" class="form-control" placeholder="Kata kunci" name="form[keyword]" value="{if isset($search.keyword) && $search.keyword}{$search.keyword}{/if}" fInput>
+					</fieldset>
+				</div>
+				<div class="col-2">
+					<div class="btn-group btn-block" role="group" aria-label="Basic example">
+						<button type="submit" name="search" class="btn btn-primary"><small><i class="ft ft-search"></i> CARI</small></button>
+						<a href="{$baseUrl}{$ctrl}/{$act}" class="btn btn-secondary" style="padding: 10px;">
+							<small><i class="ft-refresh-cw"></i> RESET</small>
+						</a>
+					</div>
+				</div>
+			</div>
+		</form>
+		<hr>
+		<div class="row">
+			<div class="col-8">
+				<h3>FAQ {if $topik}- {$topik}{/if}</h3>
+				<hr class="mb-0">
+				<div id="collapse" class="card-accordion">
+					<div class="card collapse-icon accordion-icon-rotate">
+						{foreach from=$view item=v key=k}
+						<div class="card">
+							<div class="card-header p-1" id="headingCOne">
+								<h5 class="mb-0">
+									<button class="btn btn-link" data-toggle="collapse" data-target="#collapse{$k}" aria-expanded="true" aria-controls="collapse{$k}">
+										<i class="ft ft-help-circle"></i> {$v.isi}
+									</button>
+								</h5>
+							</div>
+
+							<div id="collapse{$k}" class="collapse" aria-labelledby="heading{$k}">
+								<div class="card-body p-1" style="background:#f8f8f8;">
+									<p>
+										{strip_tags($v.jawaban)}
+									</p>
+								</div>
+							</div>
+						</div>
+						{/foreach}
+					</div>
+				</div>
+			</div>
+			<div class="col-4">
+				<h3>TOPIK FAQ</h3>
+				<hr class="mb-0">
+				<ul class="list-group list-group-flush">
+					{foreach from=$faq item=w key=e}
+					<li class="list-group-item p-1" style="border-top:0;">
+						<a href="{$baseUrl}faq/index/uid/{$w.uid_topik}">{$w.nama_topik}</a>
+					</li>
+					{/foreach}
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+</div>

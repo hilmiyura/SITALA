@@ -1,0 +1,53 @@
+{include file="parts/contents/$ctrl/indeks/modal.html"}
+<!-- {if $me.role_user == 0 || $me.role_user == 1}
+<ul class="nav pb-1">
+  <li class="nav-item">
+    <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#primary">SIMULASI PERHITUNGAN IKU</button>
+  </li>
+</ul>
+{/if} -->
+<ul class="nav nav-tabs">
+  {if $me.role_user != 3}
+    <li class="nav-item">
+      <a class="nav-link {if !$showProv && !$showN && !$showM } active {/if} iku_lokasi" id="base-tab1" data-toggle="tab" aria-controls="tab1" href="#tab1" aria-expanded="true">Kabupaten/Kota</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {if $showProv } active {/if} iku_lokasi" id="base-tab2" data-toggle="tab" aria-controls="tab2" href="#tab2" aria-expanded="false">Provinsi</a>
+    </li>
+    {if $me.role_user != 2 && $me.role_user != 4}
+      <li class="nav-item">
+        <a class="nav-link {if $showN } active {/if} iku_lokasi" id="base-tab3" data-toggle="tab" aria-controls="tab3" href="#tab3" aria-expanded="false">Nasional</a>
+      </li>
+    {/if}
+  {/if}
+  <li class="nav-item">
+    <a class="nav-link {if $showM && !$vSungai && !$showProv && !$showN } active {/if} iku_lokasi" id="base-tab4" data-toggle="tab" aria-controls="tab" href="#tab4" aria-expanded="false">Lokasi</a>
+  </li>
+  <!-- <li class="nav-item">
+      <a class="nav-link {if $vSungai && !$showProv}active{/if} ika_sungai" id="base-tab3" data-toggle="tab" aria-controls="tab3" href="#tab3" aria-expanded="false">Sungai</a>
+    </li> -->
+  <li class="li-src" {if $showM && !$vSungai && !$showProv && !$showN } style="margin-left: auto; display:none;" {else} style="margin-left: auto;" {/if}>
+    {include file="parts/block/block_search_indeks.html"}
+  </li>
+</ul>
+<div class="tab-content px-0 pt-1">
+  <div role="tabpanel" class="tab-pane {if !$showProv && !$showN && !$showM } active {/if}" id="tab1" aria-expanded="true" aria-labelledby="base-tab1">
+    {include file="parts/contents/$ctrl/indeks/indeksKabkota.html"}
+  </div>
+  {if $me.role_user != 3}
+    <div class="tab-pane {if $showProv } active {/if}" id="tab2" aria-labelledby="base-tab2">
+      {include file="parts/contents/$ctrl/indeks/indeksProvinsi.html"}
+    </div>
+    {if $me.role_user != 2}
+      <div class="tab-pane {if $showN } active {/if}" id="tab3" aria-labelledby="base-tab3">
+        {include file="parts/contents/$ctrl/indeks/indeksNasional.html"}
+      </div>
+    {/if}
+  {/if}
+  <div class="tab-pane {if $showM && !$vSungai && !$showProv && !$showN } active {/if}" id="tab4" aria-labelledby="base-tab4">
+    {include file="parts/contents/$ctrl/indeks/indeksLokasi.html"}
+  </div>
+  <!-- <div class="tab-pane" id="tab3" aria-labelledby="base-tab3">
+
+    </div> -->
+</div>

@@ -1,0 +1,62 @@
+{if ($me.role_user == 1 && aksesAdmin == 1) || $me.role_user == 0}
+<div class="row mb-1">
+  <div class="col-md-12">
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData">
+      <i class="ft-plus-circle"></i> Tambah Data
+    </button>
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahDataExcel">
+      <i class="ft-upload-cloud"></i> Upload Excel
+    </button>
+  </div>
+</div>
+{/if}
+{include file="parts/block/block_search_nilaipelengkap_iklh.html"}
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th colspan="2" class="text-center" style="width: 70px">#</th>
+        <th class="v-middle">PROVINSI</th>
+        <th class="v-middle">KAB/KOTA</th>
+        <th class="v-middle">TAHUN</th>
+        <th class="v-middle">IKU PM25 SATELIT</th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v}
+      <tr {if !$v.nama_kabkota} style="background-color: #e2ecf3;" {/if}>
+        <td class="text-center">
+          {if ($me.role_user == 1 && $aksesAdmin) || $me.role_user == 0}
+          <button class="btn border-secondary badge badge-danger round delete-dialog" data-uid="{$v.$primaryKey}" data-ajax="{$ctrl}/deletedData">
+            <a href="javascript:void(0);" title="Delete">
+              <i class="ft-trash-2"></i>
+            </a>
+          </button>
+          <button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.$primaryKey}" title="Edit">
+            <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+          </button>
+          {else}
+          --
+          {/if}
+        </td>
+
+        <td class="text-center">{counter}</td>
+        <td>{if $v.nama_kabkota}{$v.nama_provinsi}{else}<b>{$v.nama_provinsi}</b>{/if}</td>
+        <td>{if $v.nama_kabkota}{$v.nama_kabkota}{else}{/if}</td>
+        <td>{$v.tahun}</td>
+        <td>{$v.iku_pm25_satelit}</td>
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="10" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+  {include file="parts/block/block_pagination.html"}
+</div>

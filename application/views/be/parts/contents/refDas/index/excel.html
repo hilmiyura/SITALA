@@ -1,0 +1,22 @@
+<table>
+  <thead>
+    <tr style="color: white;">
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">NO</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">NAMA DAS</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">KODE DAS</th>
+    </tr>
+  </thead>
+  <tbody>
+    {foreach from=$viewExcel.data item=data}
+    <tr>
+      <td style="border: 1px solid black;vertical-align:top;">{counter}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.nama}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.kode}</td>
+    </tr>
+    {foreachelse}
+    <tr style="color: white;">
+      <td colspan="3" align="center" bgcolor="#FA535D" style="border: 1px solid black;vertical-align:top;">BELUM ADA DATA</td>
+    </tr>
+    {/foreach}
+  </tbody>
+</table>

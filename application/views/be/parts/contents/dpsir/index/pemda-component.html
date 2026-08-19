@@ -1,0 +1,61 @@
+{foreach from=$data item=v}
+<div class="row box-content-dpsir box-content-dpsir-{$v.uid_dpsir_isian_pemda}">
+  <div class="col-md-12 pt-1 pb-1">
+    {$v.isian|nl2br}
+  </div>
+  <div class="col-md-12 pb-1">
+    <div class="pull-left">
+      {if $v.parent == 0}
+      <span class="primary"><small><b>{$komponen}-{$v.uid_dpsir_isian_pemda}</b></small></span><br>
+      {else}
+      <span class="primary"><small><b>{$v.kategori_respon}</b></small></span>-<span class="primary"><small><b>{$komponen}-{$v.parent}</b></small></span>
+      <br>
+      {/if}
+      {if $v.kode_isian != '' || $v.isian_role == 'PUSAT'}
+      <span class="info"><small><b>PUSAT</b></small></span>
+      {elseif $v.chdate}
+      <small>{date('Y-m-d H:i:s', $v.chdate)}</small>
+      {else}
+      <small>{date('Y-m-d H:i:s', $v.crdate)}</small>
+      {/if}
+    </div>
+    {if $v.kode_isian != '' || $v.isian_role == 'PUSAT'}
+    <div class="pull-right" style="margin-top: 10px;">
+
+      {if $v.kode_isian == '' && $me.role_user <= 1} {if $v.parent==0} <span title="hapus" class="pointer badge badge-danger delete-content" kategori="{$v.kategori_isian}" uid="{$v.uid_dpsir_isian_pemda}" parent="{if $v.parent}{$v.parent}{/if}"><i
+          class="ft-trash"></i></span>
+        <span title="edit" class="pointer badge badge-success add-content" kategori="{$v.kategori_isian}" uid="{$v.uid_dpsir_isian_pemda}" parent="{if $v.parent}{$v.parent}{/if}"><i class="ft-edit"></i></span>
+        {/if}
+        {/if}
+        {if $v._nodetail != 1 }
+        {if $v.kode_isian != ''}
+        <span title="detail" class="pointer badge badge-info detail-content" kategori="{$v.kategori_isian}" uid="{$v.uid_dpsir_isian_pemda}" parent=""><i class="ft-eye"></i></span>
+        {elseif $v.isian_lampiran != ''}
+        <span title="detail" class="pointer badge badge-info detail-content" kategori="{$v.kategori_isian}" uid="{$v.uid_dpsir_isian_pemda}" parent=""><i class="ft-eye"></i></span>
+        {/if}
+        {/if}
+        {if $me.uid_provinsi > 0 || $me.uid_kabkota > 0}
+        {if $lockAction == 0}
+        <span title="respon" class="pointer badge badge-warning respon-content" kategori="{$v.kategori_isian}" uid="" parent="{$v.uid_dpsir_isian_pemda}"><i class="ft-share"></i></span>
+        {/if}
+        {/if}
+    </div>
+    {elseif $me.uid_provinsi > 0 || $me.uid_kabkota > 0}
+    {if $me.uid_provinsi == $v.uid_provinsi && $me.uid_kabkota == $v.uid_kabkota}
+    {if $lockAction == 0}
+    <div class="pull-right" style="margin-top: 10px;">
+      {if $v.parent == 0}
+      <span title="hapus" class="pointer badge badge-danger delete-content" kategori="{$v.kategori_isian}" uid="{$v.uid_dpsir_isian_pemda}"><i class="ft-trash"></i></span>
+      <span title="edit" class="pointer badge badge-success add-content" kategori="{$v.kategori_isian}" uid="{$v.uid_dpsir_isian_pemda}"><i class="ft-edit"></i></span>
+      <span title="respon" class="pointer badge badge-warning respon-content" kategori="{$v.kategori_isian}" uid="" parent="{$v.uid_dpsir_isian_pemda}"><i class="ft-share"></i></span>
+      {else}
+      <span title="hapus" class="pointer badge badge-danger delete-content" kategori="{$v.kategori_isian}" uid="{$v.uid_dpsir_isian_pemda}" parent="{if $v.parent}{$v.parent}{/if}"><i class="ft-trash"></i></span>
+      <span title="edit" class="pointer badge badge-success add-content" kategori="{$v.kategori_isian}" uid="{$v.uid_dpsir_isian_pemda}" parent="{if $v.parent}{$v.parent}{/if}"><i class="ft-edit"></i></span>
+      {/if}
+    </div>
+    {/if}
+    {/if}
+    {/if}
+  </div>
+</div>
+{/foreach}

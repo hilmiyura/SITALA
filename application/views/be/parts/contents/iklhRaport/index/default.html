@@ -1,0 +1,47 @@
+<ul class="nav nav-tabs">
+    {if $me.role_user != 3}
+    <li class="nav-item">
+        <a class="nav-link {if !$showNas && !$showProv}active{/if} ika_sungai" id="base-tab1" data-toggle="tab" aria-controls="tab1" href="#tab1" aria-expanded="true">Kabupaten/Kota</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link ika_sungai {if $showProv}active{/if}" id="base-tab2" data-toggle="tab" aria-controls="tab2" href="#tab2" aria-expanded="false">Provinsi</a>
+    </li>
+      {if $me.role_user != 2 && $me.role_user != 4}
+
+      {/if}
+    {/if}
+    <li style="margin-left: auto">
+       {include file="parts/block/block_search_indeks.html"}
+    </li>
+</ul>
+<div class="tab-content px-0 pt-1">
+  <div role="tabpanel" class="tab-pane {if !$vSungai && !$showProv}active{/if}" id="tab1" aria-expanded="true" aria-labelledby="base-tab1">
+      {include file="parts/contents/$ctrl/index/indeksKabkota.html"}
+  </div>
+  {if $me.role_user != 3}
+  <div class="tab-pane {if $showProv}active{/if}" id="tab2" aria-labelledby="base-tab2">
+      {include file="parts/contents/$ctrl/index/indeksProvinsi.html"}
+  </div>
+    {if $me.role_user != 2}
+
+    {/if}
+  {/if}
+</div>
+<div class="tab-content px-0 pt-1">
+	<table class="table table-bordered" style="width: 35%;margin:0 auto;">
+  		<thead class="bg-primary bg-darken-2 white">
+  			<tr>
+  				<th class="text-center">SKOR</th>
+  				<th class="text-center">KRITERIA</th>
+  			</tr>
+  		</thead>
+  		<tbody>
+  			{foreach from=$rating item=v}
+  				<tr class="bg-{$v.color}">
+  					<td class="text-center white">{$v.rate_display}</td>
+  					<td class="text-center white">{$v.rating}</td>
+  				</tr>
+  			{/foreach}
+  		</tbody>
+  	</table>
+</div>

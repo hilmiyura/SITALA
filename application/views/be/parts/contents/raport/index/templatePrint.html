@@ -1,0 +1,155 @@
+<style>
+  body{
+    font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+	thead {
+	    background-color: #0f4e74;
+	    color: #ffffff;
+	}
+	.wd-100{
+		width:150px;
+	}
+	.text-center {
+	    text-align: center !important;
+	}
+  .baseline{
+    vertical-align: baseline !important;
+  }
+</style>
+<div style="padding: 30px;">
+	<div align="center">
+		<table style="width:100%;">
+			<tr>
+				<td style="width: 10%; vertical-align: middle">
+					<img style="width: 75px;" src="{$baseUrl}application/views/be/assets/app-assets/images/logo/logo-klhk-new.png?={time()}" />
+				</td>
+				<td class="text-center" style="width: 80%">
+          <span><b>PROFIL INDEKS KUALITAS LINGKUNGAN HIDUP</b></span>
+          {if $dataShow == 1}
+            <h2><b>Provinsi {$dataRaport.indeks.nama_provinsi}</b></h2>
+            <h5><b>&emsp;</b></h5>
+          {elseif $dataShow == 2}
+            <h2><b>{$dataRaport.indeks.nama_kabkota}</b></h2>
+            <h5><b>Provinsi {$dataRaport.indeks.nama_provinsi}</b></h5>
+          {/if}
+				</td>
+				<td style="width: 10%; text-align:end;">
+					<img style="height:75px;" src="{$baseUrl}application/views/be/assets/app-assets/images/{$dataRaport.indeks.logo}" />
+				</td>
+			</tr>
+		</table>
+		<hr>
+	</div>
+	<div style="margin-top: 20px">
+    {if $group == 'iklh'}
+      <table style="width:100%;">
+        <tbody>
+          <tr>
+            <td style="width:50%;">
+              <table style="width:100%;">
+                <tr>
+                  <td class="text-dark">Kepala Daerah</td>
+                  <td class="text-dark">:</td>
+                  <td>{$dataRaport.indeks.user.kepala_daerah}</td>
+                </tr>
+                <tr>
+                  <td class="text-dark">Luas Wilayah</td>
+                  <td class="text-dark">:</td>
+                  <td>{$dataRaport.indeks.user.luas_wilayah}</td>
+                </tr>
+                <tr>
+                  <td class="text-dark">Populasi</td>
+                  <td class="text-dark">:</td>
+                  <td>{$dataRaport.indeks.user.populasi}</td>
+                </tr>
+              </table>
+            </td>
+            <td style="width:50%;">
+              <table style="width:100%;">
+                <tr>
+                  <td class="text-dark">Kepala DPRD</td>
+                  <td>:</td>
+                  <td>{$dataRaport.indeks.user.kepala_dprd}</td>
+                </tr>
+                <tr>
+                  <td class="text-dark">Kategori Daerah</td>
+                  <td>:</td>
+                  <td>{$dataRaport.indeks.user.kategori_daerah}</td>
+                </tr>
+                <tr>
+                  <td class="text-dark">Pendapatan Per Kapita</td>
+                  <td>:</td>
+                  <td>{$dataRaport.indeks.user.gdp}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    {/if}
+	</div>
+  <div style="margin-top:10px;">
+    <table style="width:100%;">
+      <tr>
+        <td style="width:30%;" class="text-center baseline">
+          <table class="text-center">
+            <tr>
+              <td><b>{$dataRaport.indeks.aspek}</b></td>
+            </tr>
+            <tr>
+              <td>
+                <h1><b>{number_format($dataRaport.indeks.nilai_indeks,2,".","")}</b></h1>
+                {$ratings = $functions->rating($rating,number_format($dataRaport.indeks.nilai_indeks,2,".",""))}
+                <b><span class="text-{$ratings.color}">{$ratings.rating}</span></b>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td style="width:20%">
+        </td>
+        <td style="width:50%" class="baseline">
+          <table class="text-dark">
+            <tr>
+              <td colspan="3" class="text-dark" ><b>Peringkat</b></td>
+            </tr>
+            <tr class="text-dark fs-12">
+              <td>Nasional</td>
+              <td>:</td>
+              <td>{$dataRaport.indeks.peringkat_nasional} {if $group != ''} dari {$dataRaport.indeks.peringkat_nasional_dari} {/if} {if $dataShow == 1}Provinsi{elseif $dataShow == 2}Kabupaten/Kota{/if}</td>
+            </tr>
+            <tr class="fs-12">
+              <td>{if $dataShow == 2}Provinsi{/if}</td>
+              <td>{if $dataShow == 2}:{/if}</td>
+              <td>{if $dataShow == 2}{$dataRaport.indeks.peringkat} {if $group != ''} dari {$dataRaport.indeks.peringkat_dari} {/if}Kabupaten/Kota{/if}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div style="margin-top:10%">
+    {if $group == 'iklh' && $dataShow == "2"}
+      <table style="width:100%" class="text-center">
+        <tr>
+          <td width="width:100%;">
+            <span><b>Posisi {$dataRaport.indeks.aspek}</b></span>
+            <div id="chartdivLine" style="height:220px;width:100%"></div>
+          </td>
+        </tr>
+      </table>
+    {else}
+      <table style="width:100%" class="text-center">
+        <tr>
+          <td width="width:50%;">
+            <span><b>Posisi {$dataRaport.indeks.aspek}</b></span>
+            <div id="chartdivLine" style="height:220px;width:100%"></div>
+          </td>
+          <td width="width:50%;">
+            <span><b>Tren IKLH</b></span>
+            <div id="chartdivScatter" style="height:220px;width:100%"></div>
+          </td>
+        </tr>
+      </table>
+    {/if}
+  </div>
+</div>

@@ -1,0 +1,60 @@
+<table>
+	<thead>
+		<tr style="color: white;">
+			<th bgcolor="#1E9FC4" style="border: 1px solid black;">NO</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">DATA</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">VERIVIKASI</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">JENIS RHL</th>
+			<th bgcolor="#1E9FC4" style="border: 1px solid black;">PELAKSANA RHL</th>
+    	<th bgcolor="#1E9FC4" style="border: 1px solid black;">TAHUN TANAM</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">LATITUDE</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">LONGITUDE</th>
+			<th bgcolor="#1E9FC4" style="border: 1px solid black;">LUAS RHL</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">POLA TANAM RHL</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">JENIS POHON</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">KETERANGAN</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">CATATAN</th>
+	</thead>
+	<tbody>
+		{foreach from=$viewExcel.data item=v key=k}
+		<tr>
+      <td style="border: 1px solid black;vertical-align:top;">{$page+$k}</td>
+			<td style="border: 1px solid black;vertical-align:top;">
+				{if $v.from_data > 0}
+					copy
+				{else}
+					excel
+				{/if}
+			</td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $v.verify == 1}
+          VERIFIED
+        {elseif $v.verify == 2}
+          REJECTED
+        {/if}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {foreach from=$jenisRhl item=vi}
+          {if $vi.idx==$v.jenis_rhl}
+            {$vi.name}
+          {/if}
+        {/foreach}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.nama_rhl}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.tahun_tanam}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.koordinat_lintang}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.koordinat_bujur}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.luas_rhl}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.pola_tanam}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.jenis_pohon}</td>
+
+      <td style="border: 1px solid black;vertical-align:top;">{$v.keterangan}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.catatan}</td>
+		</tr>
+		{foreachelse}
+		<tr style="color: white;">
+			<td colspan="13" align="center" bgcolor="#FA535D" style="border: 1px solid black;vertical-align:top;">BELUM ADA DATA</td>
+		</tr>
+		{/foreach}
+	</tbody>
+</table>

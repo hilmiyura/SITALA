@@ -1,0 +1,166 @@
+{if $me.role_user != 2}
+<div class="row">
+  <div class="col-sm-12">
+    <input type="text" class="form-control mb-1" id="seachFieldProvinsi" onkeyup="searchData('dataTableProvinsi','seachFieldProvinsi')" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+  </div>
+</div>
+{/if}
+<div class="table-responsive table-border freeze-table">
+  {if $view}
+  <table class="table" id="dataTableProvinsi">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th rowspan="3" class="v-middle text-center">No</th>
+        <th rowspan="3" class="v-middle text-center">Provinsi</th>
+        <th colspan="7" class="text-center">Perhitungan Indeks</th>
+        {if $year_indeks <= 2024}
+          <th rowspan="3" class="v-middle text-center">IKU</th>
+        {/if}
+        {if $year_indeks >= 2025}
+          <th rowspan="3" class="v-middle text-center">IKU INA</th>
+        {/if}
+        {if $me.role_user != 3 && $me.role_user != 2 && $me.role_user != 4 }
+        <th rowspan="3" class="v-middle text-center" style="width: 200px;">Action</th>
+        {/if}
+      </tr>
+      <tr>
+        <th colspan="3" class="v-middle text-center">Rataan Per Parameter</th>
+        {if $year_indeks <= 2024}
+          <th colspan="3" class="v-middle text-center">Indeks Dibagi Bakumutu</th>
+        {/if}
+        {if $year_indeks >= 2025}
+          <th colspan="3" class="v-middle text-center">Indeks Parameter</th>
+        {/if}
+        <th class="v-middle text-center">Rataan</th>
+      </tr>
+      <tr>
+        <th class="v-middle text-center">
+          NO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+          <sup>(Nitrogen Dioksida)</sup>
+        </th>
+        <th class="v-middle text-center">
+          SO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+          <sup>(Sulfur Dioksida)</sup>
+        </th>
+        <th class="v-middle text-center">
+          PM2.5<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+          <sup>(Partikulat)</sup>
+        </th>
+        <th class="v-middle text-center">
+          NO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+          <sup>(Nitrogen Dioksida)</sup>
+        </th>
+        <th class="v-middle text-center">
+          SO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+          <sup>(Sulfur Dioksida)</sup>
+        </th>
+        <th class="v-middle text-center">
+          PM2.5<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+          <sup>(Partikulat)</sup>
+        </th>
+        <th class="v-middle text-center">INDEKS</th>
+      </tr>
+    </thead>
+    <tbody>
+      {$cnProvinsi = 1}
+      {foreach from=$view item=v}
+      {$v.json_data = $v.json_data|@json_decode:true}
+      {if $v.jenis_indeks == 1}
+      <tr>
+        <td>{$cnProvinsi}</td>
+        <td>
+          <!-- <b>{$v.kode_lokasi}</b><br> -->
+          <b>{$v.nama_provinsi}</b>
+        </td>
+        <td class="text-center">
+          {if $year_indeks <= 2024}
+            {number_format($v.json_data.rpp.no2,2,".","")}
+          {/if}
+          <br>--<br>
+          <span class="rpp-no2-{$v.uid_indeks_iku}-prov"></span>
+        </td>
+        <td class="text-center">
+          {if $year_indeks <= 2024}
+            {number_format($v.json_data.rpp.so2,2,".","")}
+          {/if}
+          <br>--<br>
+          <span class="rpp-so2-{$v.uid_indeks_iku}-prov"></span>
+        </td>
+        <td class="text-center">
+          {if $year_indeks <= 2024}
+            -
+          {/if}
+          <br>--<br>
+          <span class="rpp-pm25-{$v.uid_indeks_iku}-prov"></span>
+        </td>
+        <td class="text-center">
+          {if $year_indeks <= 2024}
+            {number_format($v.json_data.idbm.no2,2,".","")}
+          {/if}
+          <br>--<br>
+          <span class="idbm-no2-{$v.uid_indeks_iku}-prov"></span>
+        </td>
+        <td class="text-center">
+          {if $year_indeks <= 2024}
+            {number_format($v.json_data.idbm.so2,2,".","")}
+          {/if}
+          <br>--<br>
+          <span class="idbm-so2-{$v.uid_indeks_iku}-prov"></span>
+        </td>
+        <td class="text-center">
+          {if $year_indeks <= 2024}
+            -
+          {/if}
+          <br>--<br>
+          <span class="idbm-pm25-{$v.uid_indeks_iku}-prov"></span>
+        </td>
+
+        <td class="text-center">
+          {if $year_indeks <= 2024}
+            {if $v.json_data.rataanIndeks > 100}100{else}{number_format($v.json_data.rataanIndeks,2,".","")}{/if}
+          {/if}
+          <br>--<br>
+          <span class="rataan-indeks-{$v.uid_indeks_iku}-prov"></span>
+        </td>
+
+        {if $year_indeks <= 2024}
+          <td class="text-center">
+            {if $v.json_data.rataanIndeks && $v.json_data.idbm.so2 && $v.json_data.idbm.no2 && $v.json_data.rpp.so2 && $v.json_data.rpp.no2}
+            {number_format($v.nilai_indeks,2,".","")}
+            {else}
+            -
+            {/if}
+            <br>--<br>
+            <span class="iku-{$v.uid_indeks_iku}-prov"></span>
+          </td>
+        {/if}
+
+        {if $year_indeks >= 2025}
+          <td class="text-center">
+            {if $v.nilai_indeks_ina > 0}
+              {number_format($v.nilai_indeks_ina,2,".","")}
+            {else}
+            -
+            {/if}
+            <br>--<br>
+            <span class="iku-ina-{$v.uid_indeks_iku}-prov"></span>
+          </td>
+        {/if}
+
+        <td class="text-center">
+          <button type="button" data-uid="{$v.uid_indeks_iku}" data-year="{$year_indeks}" id="btn-hitung-simulasi-prov" class="btn btn-sm btn-warning">
+            <small class="white">Hitung Simulasi</small>
+          </button>
+        </td>
+      </tr>
+      {$cnProvinsi = $cnProvinsi + 1}
+      {/if}
+      {/foreach}
+    </tbody>
+  </table>
+  {else}
+  <div class="alert alert-danger text-center">
+    <strong>Tidak Ada Data</strong>
+  </div>
+  {/if}
+</div>

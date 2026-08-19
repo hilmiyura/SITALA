@@ -1,0 +1,26 @@
+<div class="table-responsive table-border freeze-table">
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <td class="text-center w-10">No</td>
+        <td class="text-left">Nama</td>
+        <td class="text-center">Foto</td>
+      </tr>
+    </thead>
+    <tbody>
+      {foreach from=$view item=v key=k}
+        <tr>
+          <td class="text-center">{$k + 1}.</td>
+          <td class="text-left">{$v.nama}</td>
+          <td class="text-center">
+            {if $v.logo}
+              <img src="assets/app-assets/images/{$folder}/{$v.logo}" alt="" width="80" height="80">
+            {else}
+              Belum diinput nama logonya ka
+            {/if}
+          </td>
+        </tr>
+      {/foreach}
+    </tbody>
+  </table>
+</div>

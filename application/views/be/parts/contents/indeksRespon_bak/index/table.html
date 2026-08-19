@@ -1,0 +1,20 @@
+{if $me.role_user == 3 || $me.role_user == 2}
+<div class="row mb-1">
+  <div class="col-md-12">
+    <a class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" href="{$baseUrl}{$ctrl}/respon">
+      <i class="ft-plus-circle"></i> Tambah Data
+    </a>
+  </div>
+</div>
+{/if}
+{include file="parts/block/block_search_indeks_respon.html"}
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  {if $me.role_user == 0 || $me.role_user == 1 || $me.role_user == 4}
+  {include file="parts/contents/$ctrl/$act/tbl_admin.html"}
+  {elseif $me.role_user == 2}
+  {include file="parts/contents/$ctrl/$act/tbl_prov.html"}
+  {else}
+  {include file="parts/contents/$ctrl/$act/tbl_kabkota.html"}
+  {/if}
+  {include file="parts/block/block_pagination.html"}
+</div>

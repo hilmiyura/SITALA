@@ -1,0 +1,203 @@
+
+{if !$verif}
+  {if $lockActionYear == 0}
+    {if ($dataPelaporan.v_provinsi == 0 && $dataPelaporan.v_regional == 0 && $dataPelaporan.v_pusat == 0 || $dataPelaporan.verify_status_reject == 1) &&  $lockAction == 0}
+      <div class="row mb-1">
+        <div class="col-md-12">
+          <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData">
+            <i class="ft-plus-circle"></i> Tambah Data
+          </button>
+          <!-- <button type="button" class="mr-1 mb-1 btn btn-outline-warning btn-min-width btn-glow" data-toggle="modal" data-target="#copyData">
+            <i class="ft-plus-circle"></i> Copy Data
+          </button> -->
+          <button type="button" class="mr-1 mb-1 btn btn-outline-danger btn-min-width btn-glow delete-dialog" data-uid="{$uid_pelaporan_iktl}" data-ajax="{$ctrl}/deletedDataAll/x/{$uid_pelaporan_iktl}">
+            <i class="ft-plus-circle"></i> Hapus Semua Data
+          </button>
+          <!-- <button type="button" class="mr-1 mb-1 btn btn-outline-success btn-min-width btn-glow hitung-data" idx="{$uid_pelaporan_iktl}">
+            <i class="ft-plus-circle"></i> Hitung Data
+          </button> -->
+        </div>
+      </div>
+    {else}
+      <input type="hidden" class="USData" name="statuInput[]" value="1">
+    {/if}
+  {else}
+    <input type="hidden" class="USData" name="statuInput[]" value="1">
+    <span class="badge badge-dark">pelaporan {$lockActionYear} ditutup</span>
+  {/if}
+{else}
+  {if ($me.role_user == 0 || $me.role_user == 1) && $verif > 0 && $lockActionYear == 0}
+    <button type="button" class="mr-1 mb-1 btn btn-outline-danger btn-min-width btn-glow reject-all-data" idx="{$uid_pelaporan_iktl}">
+      Reject Semua Data
+    </button>
+  {/if}
+  {if $lockActionYear != 0}
+    <span class="badge badge-dark">pelaporan {$lockActionYear} ditutup</span>
+    <br>
+  {/if}
+  <input type="hidden" class="USData" name="statuInput[]" value="1">
+{/if}
+{include file="parts/contents/$ctrl/$act/search.html"}
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table table-bordered">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th colspan="16">
+          {$textInfoPelaporan} | {number_format($totalRow,0)} Data RHL
+        </th>
+      </tr>
+      <tr>
+        <th class="text-center">No</th>
+        <th class="v-middle upper">data</th>
+        {if !$verif}
+          {if $lockActionYear == 0}
+            {if ($dataPelaporan.v_provinsi == 0 && $dataPelaporan.v_regional == 0 && $dataPelaporan.v_pusat == 0 || $dataPelaporan.verify_status_reject == 1) &&  $lockAction == 0}
+              <th class="text-center">Aksi</th>
+            {/if}
+          {/if}
+        {/if}
+        <!-- {if $verif > 0}
+        {/if} -->
+        <th class="v-middle upper">verified</th>
+        <th class="v-middle upper">Rejected</th>
+        <!-- {if ($me.role_user == 0 || $me.role_user == 1) && $verif > 0} -->
+        <!-- {else}
+          <th class="v-middle upper">verify</th>
+        {/if} -->
+        <th class="v-middle upper">catatan</th>
+        <th class="v-middle upper">jenis rhl</th>
+        <th class="v-middle upper">pelaksana rhl</th>
+        <th class="v-middle upper">tahun tanam</th>
+        <th class="v-middle upper">koordinat lintang</th>
+        <th class="v-middle upper">koordinat bujur</th>
+        <th class="v-middle upper">luas rhl</th>
+        <th class="v-middle upper">pola tanam rhl</th>
+        <th class="v-middle upper">jenis pohon</th>
+        <th class="v-middle upper">keterangan</th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v key=k}
+      <tr >
+        <td class="text-center">{$k+1+$page}</td>
+        <td class="text-center">
+          {if $v.from_data > 0}
+            copy
+          {else}
+            excel
+          {/if}
+        </td>
+        {if !$verif}
+          {if $lockActionYear == 0}
+            {if ($dataPelaporan.v_provinsi == 0 && $dataPelaporan.v_regional == 0 && $dataPelaporan.v_pusat == 0 || $dataPelaporan.verify_status_reject == 1) &&  $lockAction == 0}
+              <td class="text-center">
+                <button class="btn border-secondary badge badge-danger round delete-dialog" data-uid="{$v[$primaryKey]}" data-ajax="{$ctrl}/deletedData/x/{$uid_pelaporan_iktl}">
+                  <a href="javascript:void(0);" title="Delete">
+                    <i class="ft-trash-2"></i>
+                  </a>
+                </button>
+              </td>
+            {/if}
+          {/if}
+        {/if}
+        {if ($me.role_user == 0 || $me.role_user == 1) && $verif > 0 && $lockActionYear == 0}
+          <td class="text-center pointer on-checked-div text-white {if $v.verify == '1' } bg-success {/if}" name="verify" idx="{$v[$primaryKey]}" value="1" id="checked-{$v[$primaryKey]}-1"><i class="ft-check"></i></td>
+          <td class="text-center pointer on-checked-div text-white {if $v.verify == '2' } bg-danger {/if}" name="verify" idx="{$v[$primaryKey]}" value="2" id="checked-{$v[$primaryKey]}-2"><i class="ft-x"></i></td>
+        {else}
+          <td class="text-center text-white {if $v.verify == '1' } bg-success {/if}" value="1" ><i class="ft-check"></i></td>
+          <td class="text-center text-white {if $v.verify == '2' } bg-danger {/if}" value="2" ><i class="ft-x"></i></td>
+        {/if}
+        <td {if $verif}style="padding:1px;"{/if}>
+          {if ($me.role_user == 0 || $me.role_user == 1) && $verif > 0}
+            <textarea class="form-control border-0 m-0 input-sm on-type on-type-block" on-type-block="1" idx="{$v[$primaryKey]}" name="catatan" style="!important; width:200px;" rows="1" >{$v.catatan}</textarea>
+          {else}
+            {$v.catatan}
+          {/if}
+        </td>
+        <td {if !$verif}style="padding:1px;"{/if}>
+          {if $verif > 0}
+            {foreach from=$jenisRhl item=vi}
+              {if $vi.idx==$v.jenis_rhl}
+                {$vi.name}
+              {/if}
+            {/foreach}
+          {else}
+            <select class="form-control border-0 m-0 select2 input-sm on-change" name="jenis_rhl" idx="{$v[$primaryKey]}" style="!important; width:200px;">
+              <option value="" >--Pilih--</option>
+              {foreach from=$jenisRhl item=vi}
+              <option value="{$vi.idx}" {if $vi.idx==$v.jenis_rhl} selected {/if}>{$vi.name}</option>
+              {/foreach}
+            </select>
+          {/if}
+        </td>
+        <td {if !$verif}style="padding:1px;"{/if}>
+          {if $verif > 0}
+            {$v.nama_rhl}
+          {else}
+            <input type="text" class="form-control border-0 m-0 input-sm on-type" idx="{$v[$primaryKey]}" name="nama_rhl" value="{$v.nama_rhl}" style="!important; width:200px;" >
+          {/if}
+        </td>
+        <td {if !$verif}style="padding:1px;"{/if}>
+          {if $verif > 0}
+            {$v.tahun_tanam}
+          {else}
+            <input type="text" class="form-control border-0 m-0 input-sm on-type" idx="{$v[$primaryKey]}" name="tahun_tanam" value="{$v.tahun_tanam}" style="!important; width:200px;" >
+          {/if}
+        </td>
+        <td {if !$verif}style="padding:1px;"{/if}>
+          {if $verif > 0}
+            {$v.koordinat_lintang}
+          {else}
+            <input type="text" class="form-control border-0 m-0 input-sm on-type" idx="{$v[$primaryKey]}" name="koordinat_lintang" value="{$v.koordinat_lintang}" style="!important; width:200px;" >
+          {/if}
+        </td>
+        <td {if !$verif}style="padding:1px;"{/if}>
+          {if $verif > 0}
+            {$v.koordinat_bujur}
+          {else}
+            <input type="text" class="form-control border-0 m-0 input-sm on-type" idx="{$v[$primaryKey]}" name="koordinat_bujur" value="{$v.koordinat_bujur}" style="!important; width:200px;" >
+          {/if}
+        </td>
+        <td {if !$verif}style="padding:1px;"{/if}>
+          {if $verif > 0}
+            {$v.luas_rhl}
+          {else}
+            <input type="text" class="form-control border-0 m-0 input-sm on-type" idx="{$v[$primaryKey]}" name="luas_rhl" value="{$v.luas_rhl}" style="!important; width:200px;" >
+          {/if}
+        </td>
+        <td {if !$verif}style="padding:1px;"{/if}>
+          {if $verif > 0}
+            {$v.pola_tanam}
+          {else}
+            <input type="text" class="form-control border-0 m-0 input-sm on-type" idx="{$v[$primaryKey]}" name="pola_tanam" value="{$v.pola_tanam}" style="!important; width:200px;" >
+          {/if}
+        </td>
+        <td {if !$verif}style="padding:1px;"{/if}>
+          {if $verif > 0}
+            {$v.jenis_pohon}
+          {else}
+            <input type="text" class="form-control border-0 m-0 input-sm on-type" idx="{$v[$primaryKey]}" name="jenis_pohon" value="{$v.jenis_pohon}" style="!important; width:200px;" >
+          {/if}
+        </td>
+        <td {if !$verif}style="padding:1px;"{/if}>
+          {if $verif > 0}
+            {$v.keterangan}
+          {else}
+            <textarea class="form-control border-0 m-0 input-sm on-type" idx="{$v[$primaryKey]}" name="keterangan" style="!important; width:200px;" rows="1" >{$v.keterangan}</textarea>
+          {/if}
+        </td>
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="14" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+</div>
+{include file="parts/block/block_pagination.html"}

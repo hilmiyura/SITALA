@@ -1,0 +1,319 @@
+{literal}
+<script type="text/javascript">
+  var scrollTobtn = '{/literal}{$scrollTobtn}{literal}';
+  $(document).ready(function() {
+    $('#primary').on('show.bs.modal', function(event) {
+      $(".select-year-indeks").val("").trigger("change");
+      $(".simulasi-content").html("");
+    });
+
+    $(document).on("click", ".detail-data-simulasi", function() {
+      var data_uid_p = $(this).attr("data-uid");
+      var tahun = $(this).attr("tahun");
+      $.ajax({
+        url: baseUrl + "ajax/detailIkal/x/" + data_uid_p + "/t/" + tahun,
+        method: "GET",
+        success: function(req) {
+          if (req.total) {
+            var trDetail = "";
+
+            req.data.forEach((val, i) => {
+              var parameter = JSON.parse(val.json_data);
+              trDetail += "<tr>" +
+                "<td class='text-center'>" + (i + 1) + "</td>" +
+                "<td class=''>" + val.alamat + " <br>" + val.alamat_detail + "</td>" +
+                "<td class='text-center'>" + (parameter.subtotal.tss ? (parameter.subtotal.tss).toFixed(2) : parameter.subtotal.tss) + "</td>" +
+                "<td class='text-center'>" + (parameter.subtotal.do_p ? (parameter.subtotal.do_p).toFixed(2) : parameter.subtotal.do_p) + "</td>" +
+                "<td class='text-center'>" + (parameter.subtotal.minyak_dan_lemak ? (parameter.subtotal.minyak_dan_lemak).toFixed(2) : parameter.subtotal.minyak_dan_lemak) + "</td>" +
+                "<td class='text-center'>" + (parameter.subtotal.amonia_total ? (parameter.subtotal.amonia_total).toFixed(2) : parameter.subtotal.amonia_total) + "</td>" +
+                "<td class='text-center'>" + (parameter.subtotal.orto_fosfat ? (parameter.subtotal.orto_fosfat).toFixed(2) : parameter.subtotal.orto_fosfat) + "</td>" +
+                "<td class='text-center'>" + (parameter.wqi ? (parameter.wqi).toFixed(2) : parameter.wqi) + "</td>" +
+                "<td class='text-center'>" + (parameter.wqr ? parameter.wqr : parameter.wqr) + "</td>" +
+                "</tr>";
+            });
+            $(".tbody-detail-" + data_uid_p).html(trDetail);
+            $(".tr-detail-" + data_uid_p).show("slow");
+          }
+        }
+      });
+    });
+
+    $(document).on("click", ".hide-detail-data-simulasi", function() {
+      var data_uid_p = $(this).attr("data-uid");
+      $(".tr-detail-" + data_uid_p).hide("slow");
+      $(".tbody-detail-" + data_uid_p).html("");
+    });
+
+    $(document).on("click", "#btn-hitung-simulasi-prov", function(event) {
+      var uid = $(this).attr("data-uid");
+      if (uid) {
+        $.ajax({
+          url: baseUrl + "simulasiHitungIKAL/hitungProv/x/" + uid,
+          method: "GET",
+          success: function(request) {
+            var res = JSON.parse(request);
+            if (res.statusCode == 200) {
+              if (res.data) {
+                $(".nilai-indeks-" + uid + "-prov").html(Number(res.data.nilai_indeks).toFixed(2));
+                $(".rating-indeks-" + uid + "-prov").html(res.data.rating_indeks);
+                $(".detail-data-" + uid + "-simulasi").show();
+              }
+            }
+          }
+        });
+      }
+    });
+
+    $(document).on("click", "#btn-hitung-simulasi-nasional", function(event) {
+      var uid = $(this).attr("data-uid");
+      if (uid) {
+        $.ajax({
+          url: baseUrl + "simulasiHitungIKAL/hitungNasional/x/" + uid,
+          method: "GET",
+          success: function(request) {
+            var res = JSON.parse(request);
+            if (res.statusCode == 200) {
+              if (res.data) {
+                $(".ikal-" + uid + "-nasional").html(res.data.toFixed(2));
+              }
+            }
+          }
+        });
+      }
+    });
+
+    $(".select-year-indeks").on("change", function() {
+      var year = $(this).val();
+      if (year != "") {
+        $.ajax({
+          url: baseUrl + "simulasiHitungIKAL/getDataIndeks/x/" + year,
+          method: "GET",
+          success: function(req) {
+            var res = JSON.parse(req);
+            if (res.statusCode == 200) {
+              var data = res;
+              if (data) {
+                $(".simulasi-content").html(data.html);
+              }
+            }
+          }
+        });
+      }
+    });
+    setTimeout(function() {
+      window.scrollTo(0, scrollTobtn);
+    }, 1500);
+  });
+  reset = () => {
+    $("#uid_pelaporan_ikal").val("");
+    $("#tanggal").val("");
+    $('input[name="form[tanggal]_submit"]').attr('value', "");
+    $("#tss").val("");
+    $("#do_p").val("");
+    $("#minyak_dan_lemak").val("");
+    $("#amonia_total").val("");
+    $("#orto_fosfat").val("");
+    $("#uid_rf_peruntukan").val("").trigger("change");
+    $("#alamat").val("");
+    $("#alamat_detail").val("");
+    $("#latitude").val("");
+    $("#longitude").val("");
+    $("#uid_lokasi_pemantauan").val("").trigger("change");
+    $("#periode_pemantauan").val("").trigger("change");
+    $("#uid_provinsi").val("").trigger("change");
+    $(".shu-download").hide();
+    $("#uid_lab").val("").trigger("change");
+  };
+
+  $(".tahun-pemantauan").on("change", function() {
+    var toId = $(this).attr("to");
+    var year = $(this).val();
+    const year2 = new Date(year).getFullYear();
+    // let year = year.getFullYear();
+    $.ajax({
+      url: baseUrl + "ajax/pemantauanIkalByYear/x/" + year2,
+      method: "GET",
+      success: function(req) {
+        var htmls = "<option value=''>--PILIH LOKASI PEMANTAUAN--</option>";
+        if (req.total) {
+          jQuery.each(req.data, function(i, val) {
+            htmls += "<option value='" + val.uid_lokasi_pemantauan + "'>" + val.kode_lokasi + " - " + val.alamat + " - " + val.alamat_detail + "</option>";
+          });
+        }
+        $("#" + toId).html(htmls);
+      }
+    })
+  });
+
+  $("#tambahData").on("show.bs.modal", function(event) {
+    reset();
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var userBy = button.data("uid");
+    if (userBy) {
+      $.ajax({
+        url: baseUrl + ctrl + "/editData/x/" + userBy,
+        method: "GET",
+        success: function(req) {
+          if (req.uid_pelaporan_ikal) {
+            $("#uid_pelaporan_ikal").val(req.uid_pelaporan_ikal);
+            $("#tanggal").val(req.tanggal);
+            $('input[name="form[tanggal]_submit"]').attr('value', req.tanggal);
+            $("#tss").val(req.tss);
+            $("#do_p").val(req.do_p);
+            $("#minyak_dan_lemak").val(req.minyak_dan_lemak);
+            $("#amonia_total").val(req.amonia_total);
+            $("#orto_fosfat").val(req.orto_fosfat);
+            $.ajax({
+              url: baseUrl + "ajax/lokasiById/x/" + req.uid_lokasi_pemantauan,
+              method: "GET",
+              success: function(req) {
+                var htmls = "<option value=''>--PILIH LOKASI PEMANTAUAN--</option>";
+                if (req.total) {
+                  jQuery.each(req.data, function(i, val) {
+                    htmls += "<option value='" + val.uid_lokasi_pemantauan + "' selected>" + val.kode_lokasi + " - " + val.alamat + " - " + val.alamat_detail + "</option>";
+                    $("#alamat").val(val.alamat);
+                    $("#alamat_detail").val(val.alamat_detail);
+                    $("#latitude").val(val.latitude);
+                    $("#longitude").val(val.longitude);
+                  });
+                }
+                $("#uid_lokasi_pemantauan").html(htmls);
+              }
+            });
+            // $("#uid_lokasi_pemantauan").val(req.uid_lokasi_pemantauan).trigger("change");
+            $("#periode_pemantauan").val(req.periode_pemantauan).trigger("change");
+            $("#uid_rf_peruntukan").val(req.uid_rf_peruntukan).trigger("change");
+            $("#uid_provinsi").val(req.uid_provinsi).trigger("change");
+            if (req.shu) {
+              var htmlDownload = '<a title="Download File" class="border-secondary badge badge-dark round" href="' + baseUrl + 'uploads/monitoring/' + req.shu + '" target="_blank" >Download</a>'
+              $(".shu-download").html(htmlDownload);
+              $(".shu-download").show();
+            } else {
+              $(".shu-download").hide();
+            }
+            $("#uid_lab").val(req.uid_lab? req.uid_lab.split(',') : '').trigger("change");
+          }
+        },
+      });
+    }
+  });
+  $("#tambahDataExcel").on("show.bs.modal", function(event) {
+    reset();
+    var button = $(event.relatedTarget); // Button that triggered the modal
+  });
+
+  var lock = '{/literal}{$listLockYear}{literal}'
+  lock = (lock ? JSON.parse(lock) : []);
+  $("#tanggal").on("change", function(){
+    var val = $(this).val();
+    if(val){
+      var yearSelect = new Date(val).getFullYear();
+      if(lock.includes(yearSelect.toString())){
+          swal("Informasi","Tidak dapat melakukan pelaporan tahun "+yearSelect+", periode dikunci","warning");
+          $("#tanggal").val("");
+      }
+    }
+  });
+
+  $(".detail-data").on("click", function() {
+    var data_uid_p = $(this).attr("data-uid");
+    var tahun = $(this).attr("tahun");
+    $.ajax({
+      url: baseUrl + "ajax/detailIkal/x/" + data_uid_p + "/t/" + tahun,
+      method: "GET",
+      success: function(req) {
+        if (req.total) {
+          var trDetail = "";
+
+          req.data.forEach((val, i) => {
+            var parameter = JSON.parse(val.json_data);
+            trDetail += "<tr>" +
+              "<td class='text-center'>" + (i + 1) + "</td>" +
+              "<td class=''>" + val.alamat + " <br>" + val.alamat_detail + "</td>" +
+              "<td class='text-center'>" + (parameter.subtotal.tss ? (parameter.subtotal.tss).toFixed(2) : parameter.subtotal.tss) + "</td>" +
+              "<td class='text-center'>" + (parameter.subtotal.do_p ? (parameter.subtotal.do_p).toFixed(2) : parameter.subtotal.do_p) + "</td>" +
+              "<td class='text-center'>" + (parameter.subtotal.minyak_dan_lemak ? (parameter.subtotal.minyak_dan_lemak).toFixed(2) : parameter.subtotal.minyak_dan_lemak) + "</td>" +
+              "<td class='text-center'>" + (parameter.subtotal.amonia_total ? (parameter.subtotal.amonia_total).toFixed(2) : parameter.subtotal.amonia_total) + "</td>" +
+              "<td class='text-center'>" + (parameter.subtotal.orto_fosfat ? (parameter.subtotal.orto_fosfat).toFixed(2) : parameter.subtotal.orto_fosfat) + "</td>" +
+              "<td class='text-center'>" + (parameter.wqi ? (parameter.wqi).toFixed(2) : parameter.wqi) + "</td>" +
+              "<td class='text-center'>" + (parameter.wqr ? parameter.wqr : parameter.wqr) + "</td>" +
+              "</tr>";
+          });
+          $(".tbody-detail-" + data_uid_p).html(trDetail);
+          $(".tr-detail-" + data_uid_p).show("slow");
+        }
+      }
+    });
+  });
+  // function freezeHeader(toFreeze){
+  //   // alert(toFreeze);
+  //   $(function() {
+  //      $(this).find(toFreeze).freezeTable({
+  //       'freezeColumn': false,
+  //     });
+  //     var freezeTable = new FreezeTable(toFreeze, {'namespace': 'first-table'});
+  //    freezeTable.resize();
+  //   });
+  // }
+  $(".hide-detail-data").on("click", function() {
+    var data_uid_p = $(this).attr("data-uid");
+    $(".tr-detail-" + data_uid_p).hide("slow");
+    $(".tbody-detail-" + data_uid_p).html("");
+  });
+
+  var maxLenghtText = 700;
+  $(".catatan-verifikator").on('click', function() {
+		$("#id-pelaporan").val("");
+		$("#catatan-verifikator-txt").val("");
+		$("#catatan-verifikator-select").val("").trigger("change");
+    $("#catatan-verifikator-txt-length").html("Sudah terisi 0/"+maxLenghtText+" Karakter")
+		var idPelaporan = $(this).attr("data-uid");
+		$("#id-pelaporan").val(idPelaporan);
+		if (idPelaporan) {
+			$.ajax({
+				url: baseUrl + ctrl + "/getCatatanVerifikasi/x/" + idPelaporan,
+				method: "GET",
+				success: function(request) {
+					var req = JSON.parse(request);
+					if (req.statusCode == 200) {
+						$("#catatan-verifikator-txt").val(req.catatan).trigger("keyup");
+						$("#catatan-verifikator-select").val(req.catatanSelect).trigger("change");
+					}
+				}
+			});
+		}
+	});
+
+  $("#catatan-verifikator-txt").on("keyup", function(){
+		var val = $(this).val();
+		var length_text = val.length;
+		if(length_text > maxLenghtText){
+			$("#catatan-verifikator-txt").val(val.substring(0,maxLenghtText));
+      length_text = maxLenghtText;
+		}
+		$("#catatan-verifikator-txt-length").html("*Sudah terisi "+length_text+"/"+maxLenghtText+" Karakter")
+	});
+
+  $(".simpan-catatan-verifikator").on("click hide.bs.modal", function(event) {
+		var idPelaporan = $("#id-pelaporan").val();
+		var catatanVerifikatorTxt = $("#catatan-verifikator-txt").val();
+		var catatanVerifikatorSelect = $("#catatan-verifikator-select").val();
+		if (idPelaporan) {
+			$.ajax({
+				url: baseUrl + ctrl + "/catatanVerifikasi",
+				method: "POST",
+				data: JSON.stringify({
+					uid: idPelaporan,
+					catatan: catatanVerifikatorTxt,
+					catatanSelect: catatanVerifikatorSelect,
+				}),
+				success: function(request) {
+					if (request == 1) {
+						$("#catatan-" + idPelaporan + "-short").html(catatanVerifikatorTxt+(catatanVerifikatorSelect?" "+catatanVerifikatorSelect:""));
+					}
+				}
+			});
+		}
+	});
+</script>
+{/literal}

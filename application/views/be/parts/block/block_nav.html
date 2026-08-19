@@ -1,0 +1,66 @@
+<nav class="header-navbar navbar-expand-md navbar navbar-with-menu navbar-without-dd-arrow navbar-static-top navbar-light navbar-brand-center">
+  <div class="navbar-header">
+    <ul class="nav navbar-nav flex-row">
+      <li class="nav-item mobile-menu d-md-none mr-auto">
+        <a class="nav-link nav-menu-main menu-toggle hidden-xs" href="javascript:void();"><i class="ft-menu font-large-1"></i></a>
+      </li>
+      <li class="nav-item hidden">
+        <a class="navbar-brand" href="{$baseUrl}">
+          <img class="brand-logo" style="width: 100% !important" alt="creaative admin logo" src="assets/app-assets/images/logo/logo_sitala.png?{time()}" />
+          <!-- <h3 class="brand-text">Chameleon</h3> -->
+        </a>
+      </li>
+      <li class="nav-item d-md-none">
+        <a class="nav-link open-navbar-container" data-toggle="collapse" data-target="#navbar-mobile"><i class="la la-ellipsis-v"></i></a>
+      </li>
+    </ul>
+  </div>
+  <div class="navbar-wrapper">
+    <div class="navbar-container content">
+      <div class="collapse navbar-collapse" id="navbar-mobile">
+        <ul class="nav navbar-nav mr-auto float-left">
+          <li class="nav-item d-none d-md-block">
+            <a class="navbar-brand" href="{$baseUrl}">
+              <img class="brand-logo" style="width: 100% !important; height:61px;" alt="creaative admin logo" src="assets/app-assets/images/logo/logo_sitala.png?{time()}" />
+              <!-- <h3 class="brand-text">Chameleon</h3> -->
+            </a>
+          </li>
+        </ul>
+        <ul class="nav navbar-nav float-right">
+          <!-- <li class="nav-item d-none d-md-block" title="FULL SCREEN">
+            <a class="nav-link nav-link-expand text-uppercase mt-1 pt-1" href="javascript:void();"
+              >{$me.name}</a>
+          </li> -->
+          <li class="nav-item d-none d-md-block" title="LOGOOUT">
+            <a class="nav-link">{$me.name}</a>
+          </li>
+          <li class="dropdown dropdown-user nav-item">
+            <a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
+              <span class="avatar avatar-online">
+                <img src="assets/app-assets/images/portrait/small/usr-1.jpeg" alt="avatar">
+              </span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+              <div class="arrow_box_right">
+                <!-- <a class="dropdown-item" href="#">
+                  			<span class="avatar avatar-online">
+                  				<img src="assets/app-assets/images/portrait/small/avatar-s-19.png" alt="avatar">
+                  				<span class="user-name text-bold-700 ml-1">{$me.name}</span>
+                  			</span>
+                  		</a> -->
+                <!-- <div class="dropdown-divider"></div> -->
+                <a class="dropdown-item" href="{$baseUrl}users/profile"><i class="ft-user"></i>Profil</a>
+                {if $me.login_from.uid_users}
+                <div class="dropdown-divider"></div><a class="dropdown-item" href="{$baseUrl}users/backTo"><i class="ft-log-in"></i> Kembali Ke {$me.login_from.name}</a>
+                {/if}
+                <div class="dropdown-divider"></div><a class="dropdown-item" href="{$baseUrl}users/indeksRespon"><i class="ft-log-in"></i>Login Indeks Respon</a>
+
+                <div class="dropdown-divider"></div><a class="dropdown-item" href="{$baseUrl}login/logout"><i class="ft-power"></i> Logout</a>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>

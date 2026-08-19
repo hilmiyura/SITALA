@@ -1,0 +1,82 @@
+
+<!-- form excel -->
+<div class="modal text-left" id="tambahDataExcel" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data Detail Daerah
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
+        <div class="modal-body">
+          <h4 class="form-section"><i class="ft-edit"></i>Detail Daerah</h4>
+          <div class="alert alert-danger text-center">
+            Download kembali template excel dikarenakan ada update system. <br> Pastikan sudah menggunakan template excel terbaru.
+          </div>
+          <div class="alert alert-warning text-center">
+            Jika data provinsi maka kolom kabupaten atau kota diisi dengan huruf kapital NULL
+            <br>
+            Format decimal menggunakan tanda koma (,)
+          </div>
+          <div class="form-row mb-1">
+            <div class="col-md-6 mb-1">
+              <label for="name"> File Excel </label>
+              <div class="input-group">
+                <input type="file" name="file_excel" required="" />
+                <span class="danger">format file excel harus (.xls)</span>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name"> </label>
+              <div class="input-group">
+                <span><a href="{$baseUrl}temp/format_excel/format_detail_daerah.xls?={$time}">Download format excel</a></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="submit" name="submit-excel" class="btn btn-danger">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{if isset($listExport)}
+<div class="modal text-left" id="unduhDataExcel" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-download-cloud"></i> Download Excel
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row d-flex">
+          {foreach from=$listExport item=v key=k}
+          <div class="list-group col-md-3" style="margin-left: 15px; padding: 0;">
+            <a href="{$baseUrl}usersDetailPeriode/dataExcel/offset/{$v.offset_start}/search/{$search_json}/print/{time()}" class="list-group-item">
+              <i class="ft-file"></i> EXCEL {$k}
+              <p><small>(BARIS : {$v.offset_start}-{$v.offset_end})</small></p>
+            </a>
+          </div>
+          {/foreach}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}

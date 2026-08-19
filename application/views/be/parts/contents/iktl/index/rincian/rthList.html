@@ -1,0 +1,184 @@
+{if $viewDataList}
+<div class="row">
+  <div class="col-md-12">
+    <a href="{$baseUrl}{$url_excel}" target="_blank" class="btn btn-blcok btn-sm btn-success">Download Excel {$paginationStart + 1} s/d {$paginationEnd+1} Data</a>
+  </div>
+</div>
+{/if}
+<div class="row">
+  <div class="col-md-12">
+    <form id="form-rth">
+      <div class="table-responsive" style="max-height:450px !important;">
+        <table class="table table-border">
+          <thead class="bg-info white">
+            <tr>
+              {if !$viewDataList}
+              {if $me.role_user > 1}
+              <th>#</th>
+              {/if}
+              {/if}
+              <th>NO</th>
+              {if $viewDataList}
+              <th>Verifikasi</th>
+              {/if}
+              <th>JENIS RTH</th>
+              <th>LUAS</th>
+              <th>NAMA RTH</th>
+              <th>NAMA DESA</th>
+              <th>NAMA KECAMATAN</th>
+              <th>LATITUDE</th>
+              <th>LONGITUDE</th>
+              <th>SUMBER DANA</th>
+              <th>NOMOR SK</th>
+              <th>KETERANGAN</th>
+              {if $viewDataList}
+              <th>Catatan</th>
+              {/if}
+            </tr>
+          </thead>
+          <tbody>
+            {foreach from=$dataExcel item=v key=k}
+            <tr id="rth-{$k}">
+              {if !$viewDataList}
+              {if $me.role_user > 1}
+              <td>
+                <button type="button" class="badge badge-sm badge-danger rth-delete-row" data-id="{$k}"><i class="ft-trash"></i></button>
+              </td>
+              {/if}
+              {/if}
+              <td>
+                {if is_numeric($paginationStart)}
+                {$paginationStart+($k+1)}
+                {else}
+                {$k+1}
+                {/if}
+              </td>
+              {if ($me.role_user == 0 || $me.role_user == 1) && $dv > 0}
+              <td class="p-0">
+                <select class="form-control border-0 m-0 verify-rth-detail" idx-data="{$dv}" idx-rth="{$paginationStart+$k}" style="width: 100%" required="">
+                  <option value="1" {if $v.verify=='1' } selected {/if}>Verified</option>
+                  <option value="2" {if $v.verify=='2' } selected {/if}>Rejected</option>
+                </select>
+              </td>
+              {elseif $viewDataList}
+              <td class="text-center">
+                {if $v.verify == 1}
+                Verified
+                {elseif $v.verify == 2}
+                Rejected
+                {/if}
+              </td>
+              {/if}
+              <td style="vertical-align:top; padding:2px !important; ">
+                <select class="form-control border-0 m-0 select2 input-sm " id="jenis_rth" {if $viewDataList}readonly{/if} name="jenis_rth" style="!important; width:200px;">
+                  <option value="">--Pilih--</option>
+                  {foreach from=$jenisRth item=vi}
+                  <option value="{$vi.idx}" {if $vi.idx==$v.jenis_rth} selected {/if}>{$vi.name}</option>
+                  {/foreach}
+                </select>
+              </td>
+              <td style="vertical-align:top; padding:2px !important; ">
+                <input type="text" class="form-control border-0 m-0 input-sm" style="!important; width:200px;" {if $viewDataList}readonly{/if} name="luas_rth" value="{$v.luas_rth}">
+              </td>
+              <td style="vertical-align:top; padding:2px !important; ">
+                <input type="text" class="form-control border-0 m-0 input-sm" style="!important; width:200px;" {if $viewDataList}readonly{/if} name="nama_rth" value="{$v.nama_rth}">
+              </td>
+              <td style="vertical-align:top; padding:2px !important; ">
+                <input type="text" class="form-control border-0 m-0 input-sm" style="!important; width:200px;" {if $viewDataList}readonly{/if} name="nama_desa" value="{$v.nama_desa}">
+              </td>
+              <td style="vertical-align:top; padding:2px !important; ">
+                <input type="text" class="form-control border-0 m-0 input-sm" style="!important; width:200px;" {if $viewDataList}readonly{/if} name="nama_kecamatan" value="{$v.nama_kecamatan}">
+              </td>
+              <td style="vertical-align:top; padding:2px !important; ">
+                <input type="text" class="form-control border-0 m-0 input-sm" style="!important; width:200px;" {if $viewDataList}readonly{/if} name="koordinat_lintang" value="{$v.koordinat_lintang}">
+              </td>
+              <td style="vertical-align:top; padding:2px !important; ">
+                <input type="text" class="form-control border-0 m-0 input-sm" style="!important; width:200px;" {if $viewDataList}readonly{/if} name="koordinat_bujur" value="{$v.koordinat_bujur}">
+              </td>
+              <td style="vertical-align:top; padding:2px !important; ">
+                <select class="form-control border-0 m-0 select2 input-sm " id="sumber_dana" {if $viewDataList}readonly{/if} name="sumber_dana" style="!important; width:200px;">
+                  <option value="">--Pilih--</option>
+                  <option value="1" {if $v.sumber_dana=='1' } selected {/if}>APBN</option>
+                  <option value="2" {if $v.sumber_dana=='2' } selected {/if}>APBD</option>
+                  <option value="3" {if $v.sumber_dana=='3' } selected {/if}>SWASTA</option>
+                </select>
+              </td>
+              <td style="vertical-align:top; padding:2px !important; ">
+                <input type="text" class="form-control border-0 m-0 input-sm" style="!important; width:200px;" {if $viewDataList}readonly{/if} name="nomor_sk" value="{$v.nomor_sk}">
+              </td>
+              <td style="vertical-align:top; padding:2px !important; ">
+                <textarea class="form-control border-0 m-0 input-sm" style="!important; width:200px; {if $viewDataList}height:28px !important;{/if}" {if $viewDataList}readonly{/if} name="keterangan" rows="1">{$v.keterangan}</textarea>
+                {if !$viewDataList}
+                <input type="hidden" name="verify" value="{$v.verify}">
+                {/if}
+              </td>
+              {if ($me.role_user == 0 || $me.role_user == 1) && $dv > 0}
+              <td class="p-0" style="vertical-align:top; padding:2px !important; ">
+                <textarea class="form-control border-0 m-0 catatan-verify-rth-detail" idx-data="{$dv}" idx-rth="{$paginationStart+$k}" style="width:200px; height:28px !important;" name="catatan" rows="1">{$v.catatan}</textarea>
+              </td>
+              {elseif $viewDataList}
+              <td class="p-0" style="vertical-align:top; padding:2px !important; ">
+                <textarea class="form-control border-0 m-0 catatan-verify-rth-detail" idx-data="{$dv}" idx-rth="{$paginationStart+$k}" style="width:200px; height:28px !important;" readonly name="catatan" rows="1">{$v.catatan}</textarea>
+              </td>
+              {/if}
+            </tr>
+            {/foreach}
+          </tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+</div>
+{if ($me.role_user == 0 || $me.role_user == 1) && $dv > 0}
+<script type="text/javascript">
+  $(".verify-rth-detail").on("change", function() {
+    var idxData = $(this).attr("idx-data");
+    var idxRth = $(this).attr("idx-rth");
+    var value = $(this).val();
+    $.ajax({
+      url: baseUrl + ctrl + "/verifyRth/x/" + idxData + "/xr/" + idxRth + "/vr/" + value,
+      method: "GET",
+      success: function(response) {
+        var res = JSON.parse(response);
+        if (res.statusCode == 200) {
+          toastr.success(res.message, 'Success!');
+        } else {
+          toastr.danger(res.message, 'Error');
+        }
+
+      }
+    });
+  });
+  $(".catatan-verify-rth-detail").on("focusout", function() {
+    var idxData = $(this).attr("idx-data");
+    var idxRth = $(this).attr("idx-rth");
+    var value = $(this).val();
+    var formSubmit = new FormData();
+    formSubmit.append('catatan', value);
+    $.ajax({
+      url: baseUrl + ctrl + "/catatanVerifyRth/x/" + idxData + "/xr/" + idxRth,
+      type: 'POST',
+      data: formSubmit,
+      contentType: false,
+      processData: false,
+      async: true,
+      success: function(response) {
+        var res = JSON.parse(response);
+        if (res.statusCode == 200) {
+          toastr.success(res.message, 'Success!');
+        } else {
+          toastr.danger(res.message, 'Error');
+        }
+
+      }
+    });
+  });
+</script>
+{else}
+<script type="text/javascript">
+  $(".rth-delete-row").on("click", function() {
+    var dataId = $(this).attr("data-id");
+    $("#rth-" + dataId).remove();
+  });
+</script>
+{/if}

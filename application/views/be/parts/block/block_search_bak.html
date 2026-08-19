@@ -1,0 +1,62 @@
+<div class="row">
+  <div class="col-xl-12 col-lg-12 col-md-12">
+    <form class="form form-horizontal" method="post">
+      <div class="form-group row mb-0">
+        <div class="col-md-12">
+          <div class="form-group row mb-0">
+            {if $ctrl == "lokasiPemantauan"}
+            <div class="col-md-6">
+            {else}
+            <div class="col-md-7">
+            {/if}
+              <input
+                type="text"
+                class="form-control"
+                id="kataKunci"
+                placeholder="Masukan Kata Kunci"
+                value="{$search.keyword}"
+                name="form[keyword]"
+              />
+            </div>
+            {if $ctrl != "users" && $ctrl != "lokasiPemantauan"}
+            <div class="col-md-2">
+              <select class="form-control select2" name="form[tahun]" required="required">
+              		<option value=""> --PILIH TAHUN-- </option>
+              		{for $foo=2015 to ($thisYear+5)}
+              			<option value="{$foo}" {if $foo == $search.tahun}selected{/if}> {$foo} </option>
+              		{/for}
+              </select>
+            </div>
+            {/if}
+            {if $ctrl == "lokasiPemantauan"}
+            <div class="col-md-3">
+              <select class="form-control select2" name="form[uid_rf_component]">
+              		<option value=""> --PILIH KOMPONEN PELAPORAN-- </option>
+              		{foreach from=$komponen item=i}
+              			<option value="{$i.uid_rf_component}" {if $i.uid_rf_component == $search.uid_rf_component}selected{/if}> {$i.name} </option>
+              		{/foreach}
+              </select>
+            </div>
+            {/if}
+            <div class="{if $ctrl != 'users'}col-md-3{else}col-md-5{/if}">
+              <div class="btn-group btn-block" role="group" aria-label="Basic example">
+                <button
+                  type="submit"
+                  name="search"
+                  value="1"
+                  class="btn btn-info"
+                >
+                  <i class="ft-search"></i> CARI
+                </button>
+                <a href="{$baseUrl}{$ctrl}/{$act}" class="btn btn-secondary"
+                  ><i class="ft-refresh-cw"></i> RESET</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr />
+    </form>
+  </div>
+</div>

@@ -1,0 +1,203 @@
+{if $me.role_user != 3}
+<div class="row">
+	{if $me.role_user != 3 && $me.role_user != 2 && $me.role_user != 4 && $me.role_user != 6 && $lockAction == 0 && $lockActionYear == 0}
+		<div class="col-sm-8">
+			<input type="text" class="form-control mb-1" id="seachFieldKabkota" onkeyup="searchData('dataTableKabkota','seachFieldKabkota')" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+		</div>
+		<div class="col-sm-4 float-md-right">
+			<form method="POST" class="form_with_load float-md-right" action="" enctype="multipart/form-data">
+				<input type="hidden" name="form[uid_indeks_kabkota_all]" value="{$viewk_idx}" />
+				<div class="btn-group" role="group" aria-label="Basic example">
+					<button type="submit" name="submitAllKabkota" class="btn btn-warning float-md-right"><i class="ft-book"></i> HITUNG SEMUA</button>
+					<a href="{$baseUrl}{$ctrl}/exportData/ex/kabkota/y/{$search.tahun}" target="_blank" class="btn btn-success float-md-right"><i class="ft-download"></i> EXPORT EXCEL</a>
+				</div
+			</form>
+		</div>
+	{else}
+		<div class="col-sm-10">
+			<input type="text" class="form-control mb-1" id="seachFieldKabkota" onkeyup="searchData('dataTableKabkota','seachFieldKabkota')" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+		</div>
+		<div class="col-sm-2 float-md-right">
+			<a href="{$baseUrl}{$ctrl}/exportData/ex/kabkota/y/{$search.tahun}" target="_blank" class="btn btn-success float-md-right"><i class="ft-download"></i> EXPORT EXCEL</a>
+		</div>
+	{/if}
+</div>
+{/if}
+<div class="table-responsive table-border freeze-table">
+	{if $view}
+	<table class="table" id="dataTableKabkota">
+		<thead class="bg-info bg-darken-2 white">
+			<tr>
+				<th rowspan="3" class="v-middle text-center">No</th>
+				<th rowspan="3" class="v-middle text-center">Kabupaten/Kota</th>
+				<th colspan="7" class="text-center">Perhitungan Indeks</th>
+				{if $search.tahun <= 2024}
+					<th rowspan="3" class="v-middle text-center">IKU</th>
+				{/if}
+				{if $search.tahun >= 2025}
+					<th rowspan="3" class="v-middle text-center">IKU INA</th>
+					<th rowspan="3" class="v-middle text-center">IKU INA MUTU</th>
+				{/if}
+				<th rowspan="3" class="v-middle text-center">TARGET IKU</th>
+				<th rowspan="3" class="v-middle text-center">Hitung Terakhir</th>
+				{if $me.role_user != 3 && $me.role_user != 2 && $me.role_user != 4}
+				<th rowspan="3" class="v-middle text-center" style="width: 200px;">Action</th>
+				{/if}
+				{if $raportShow}
+				<th rowspan="3" class="v-middle text-center">Rekomendasi</th>
+				{/if}
+				<th rowspan="3" class="v-middle text-center">Peta Sebaran</th>
+				<th rowspan="3" class="v-middle text-center">Raport</th>
+			</tr>
+			<tr>
+				<th colspan="3" class="v-middle text-center">Rataan Per Parameter</th>
+				{if $search.tahun <= 2024}
+          <th colspan="3" class="v-middle text-center">Indeks Dibagi Bakumutu</th>
+        {/if}
+        {if $search.tahun >= 2025}
+          <th colspan="3" class="v-middle text-center">Indeks Parameter</th>
+        {/if}
+				<th class="v-middle text-center">Rataan</th>
+			</tr>
+			<tr>
+				<th class="v-middle text-center">
+					NO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+					<sup>(Nitrogen Dioksida)</sup>
+				</th>
+				<th class="v-middle text-center">
+					SO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+					<sup>(Sulfur Dioksida)</sup>
+				</th>
+				<th class="v-middle text-center">
+          PM2.5<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+          <sup>(Partikulat)</sup>
+        </th>
+				<th class="v-middle text-center">
+					NO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+					<sup>(Nitrogen Dioksida)</sup>
+				</th>
+				<th class="v-middle text-center">
+					SO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+					<sup>(Sulfur Dioksida)</sup>
+				</th>
+				<th class="v-middle text-center">
+          PM2.5<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+          <sup>(Partikulat)</sup>
+        </th>
+				<th class="v-middle text-center">INDEKS</th>
+			</tr>
+		</thead>
+		<tbody>
+			{$cnKabkota = 1}
+			{foreach from=$view item=v}
+			{$v.json_data = $v.json_data|@json_decode:true}
+			{$v.json_data_ina = $v.json_data_ina|@json_decode:true}
+			{if $v.jenis_indeks == 0}
+			<tr>
+				<td>{$cnKabkota}</td>
+				<td>
+					<!-- <b>{$v.kode_lokasi}</b><br> -->
+					<b>{$v.nama_kabkota}</b><br>
+					Provinsi {$v.nama_provinsi}
+				</td>
+				<!-- <td><b>{$v.nama_kabkota}</b></td> -->
+				{if $search.tahun <= 2024}
+					<td class="text-center">{number_format($v.json_data.rpp.no2,2,".","")}</td>
+					<td class="text-center">{number_format($v.json_data.rpp.so2,2,".","")}</td>
+					<td class="text-center">-</td>
+
+					<td class="text-center">{number_format($v.json_data.idbm.no2,2,".","")}</td>
+					<td class="text-center">{number_format($v.json_data.idbm.so2,2,".","")}</td>
+					<td class="text-center">-</td>
+
+					<td class="text-center">{if $v.json_data.rataanIndeks > 100}100{else}{number_format($v.json_data.rataanIndeks,2,".","")}{/if}</td>
+				{/if}
+
+				{if $search.tahun >= 2025}
+
+				<td class="text-center">{number_format($v.json_data_ina.detail.no2.rataan_konsentrasi,2,".","")}</td>
+				<td class="text-center">{number_format($v.json_data_ina.detail.so2.rataan_konsentrasi,2,".","")}</td>
+				<td class="text-center">{number_format($v.json_data_ina.detail.pm25.rataan_konsentrasi,2,".","")}</td>
+				<td class="text-center">{number_format($v.json_data_ina.detail.no2.indeks_konsentrasi,2,".","")}</td>
+				<td class="text-center">{number_format($v.json_data_ina.detail.so2.indeks_konsentrasi,2,".","")}</td>
+				<td class="text-center">{number_format($v.json_data_ina.detail.pm25.indeks_konsentrasi,2,".","")}</td>
+
+				<td class="text-center">{if $v.json_data_ina.detail.indeks_rataan > 100}100{else}{number_format($v.json_data_ina.detail.indeks_rataan,2,".","")}{/if}</td>
+				{/if}
+
+				{if $search.tahun <= 2024}
+					<td class="text-center">
+						{if $v.json_data.rataanIndeks && $v.json_data.idbm.so2 && $v.json_data.idbm.no2 && $v.json_data.rpp.so2 && $v.json_data.rpp.no2}
+						{if $v.nilai_indeks > 100} 100 {else} {number_format($v.nilai_indeks,2,".","")} {/if}
+						{else}
+						-
+						{/if}
+					</td>
+				{/if}
+
+				{if $search.tahun >= 2025}
+					<td class="text-center">{if $v.json_data_ina}{number_format($v.nilai_indeks_ina,2,".","")}{else}-{/if}</td>
+					<td class="text-center">{if $v.json_data_ina}{$v.nilai_indeks_ina_mutu}{else}-{/if}</td>
+				{/if}
+
+				<td class="text-center">{number_format($v.target,2,".","")}</td>
+				<td class="text-center">
+					{if $v.nilai_indeks > 0}
+					{date("Y-m-d H:i:s", $v.chdate)}
+					{/if}
+				</td>
+				{if $me.role_user != 3 && $me.role_user != 2 && $me.role_user != 4 && $me.role_user != 6}
+				<td class="text-center">
+					{if $lockAction == 0 && $lockActionYear == 0}
+					<form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
+						<input type="hidden" name="form[uid_indeks_iku]" value="{$v.uid_indeks_iku}" />
+						<input type="hidden" name="scrollTo" class="scrollTobtn" />
+						<button type="submit" name="submit" class="btn btn-sm {if $activeBtn == $v.uid_indeks_iku || $v.status_hitung == 1} btn-success {else} btn-warning {/if}">
+							<small class="white">Hitung</small>
+						</button>
+					</form>
+					{else}
+					--
+					{/if}
+				</td>
+				{/if}
+				{if $raportShow}
+					<td>
+						{if $v.nilai_indeks > 0}
+						<a href="javascript:();" data-toggle="modal" data-target="#catatanRekomendasi" tahun="{$v.tahun}" provinsi="{$v.uid_provinsi}" kabkota="{$v.uid_kabkota}" aspek="iku" data-uid="{$v.$primaryKey}" class="badge badge-primary catatan-rekomendasi"> <i class="ft-edit"></i>Rekomendasi</a>
+						<br>
+						{/if}
+						<span id="catatan-{$v.tahun}-{$v.uid_provinsi}-{$v.uid_kabkota}-iku-short">{$v.rekomendasi|truncate:40:'...':true:true}</span>
+					</td>
+				{/if}
+				<td>
+					{if $v.nilai_indeks > 0 && $raportShow}
+						<form method="POST" enctype=" multipart/form-data">
+							<input type="file" class="default file-maps" id="file-{$v.tahun}-{$v.uid_provinsi}-{$v.uid_kabkota}-iku" tahun="{$v.tahun}" provinsi="{$v.uid_provinsi}" kabkota="{$v.uid_kabkota}" aspek="iku">
+							<span class="text-danger"><small>*Format file yang diunggah adalah jpg,jpeg,png dengan dimensi 319 x 225 </small></span>
+						</form>
+					{/if}
+						<div id="div-url-{$v.tahun}-{$v.uid_provinsi}-{$v.uid_kabkota}-iku">
+							{if $v.peta_sebaran}
+								<br>
+								<a href="{$baseUrl}uploads/peta_sebaran/{$v.peta_sebaran}" target="_blank" class="badge badge-info">Lihat</a>
+							{/if}
+						</div>
+				</td>
+				<td>
+					{if $v.nilai_indeks > 0}
+					<a href="{$baseUrl}raport/index/x/iku/k/{$v.uid_kabkota}/p/{$v.uid_provinsi}/t/{$v.tahun}" target="_blank" class="btn btn-outline-info btn-sm"> <i class="ft-book"></i> Lihat Raport</a>
+					{/if}
+				</td>
+			</tr>
+			{$cnKabkota = $cnKabkota + 1}
+			{/if}
+			{/foreach}
+		</tbody>
+	</table>
+	{else}
+	<div class="alert alert-danger text-center">
+		<strong>Tidak Ada Data</strong>
+	</div>
+	{/if}
+</div>

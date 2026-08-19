@@ -1,0 +1,112 @@
+{if $me.role_user != 2}
+<div class="row">
+	<div class="col-sm-10">
+		<input type="text" class="form-control mb-1" id="seachFieldProvinsi" onkeyup="searchData('dataTableProvinsi','seachFieldProvinsi')" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+	</div>
+	<div class="col-sm-2 ">
+		<a href="{$baseUrl}{$ctrl}/exportData/ex/provinsi/y/{$search.tahun}" target="_blank" class="btn btn-success float-md-right"> <i class="ft-download"></i> EXPORT EXCEL</a>
+	</div>
+</div>
+{/if}
+<div class="table-responsive table-border freeze-table">
+	{if $viewp}
+	<table class="table" id="dataTableProvinsi">
+		<thead class="bg-info bg-darken-2 white">
+			<tr>
+				<th rowspan="2" class="">No</th>
+				<th rowspan="2" class="">Provinsi</th>
+				<th colspan="2" class="text-center">IKA</th>
+				<th colspan="2" class="text-center">IKU</th>
+				<th colspan="2" class="text-center">IKL</th>
+				<th colspan="2" class="text-center">IKAL</th>
+				<th colspan="2" class="text-center">IKLH</th>
+				<th rowspan="2" class="text-center">Rating</th>
+				{if $raportShow}
+				<th rowspan="2" class="v-middle text-center">Peta Sebaran</th>
+				{/if}
+				<th rowspan="2" class="v-middle text-center">Raport</th>
+			</tr>
+			<tr>
+				<th class="text-center">TARGET</th>
+				<th class="text-center">CAPAIAN</th>
+				<th class="text-center">TARGET</th>
+				<th class="text-center">CAPAIAN</th>
+				<th class="text-center">TARGET</th>
+				<th class="text-center">CAPAIAN</th>
+				<th class="text-center">TARGET</th>
+				<th class="text-center">CAPAIAN</th>
+				<th class="text-center">TARGET</th>
+				<th class="text-center">CAPAIAN</th>
+			</tr>
+		</thead>
+		<tbody>
+			{$cnProvinsi = 1}
+			{foreach from=$viewp item=v}
+			{if $v.iklh > 0}
+			{$ratings = $functions->rating($rating,number_format($v.iklh,2,".",""))}
+			<tr>
+				<td>{$cnProvinsi}</td>
+				<td><b>{$v.nama_provinsi}</b></td>
+				<td class="text-center">{number_format($v.target_ika,2,".","")}</td>
+				<td class="text-center">{number_format($v.ika,2,".","")}</td>
+				<td class="text-center">{number_format($v.target_iku,2,".","")}</td>
+				<td class="text-center">{number_format($v.iku,2,".","")}</td>
+				<td class="text-center">{number_format($v.target_ikl,2,".","")}</td>
+				<td class="text-center">{number_format($v.ikl,2,".","")}</td>
+				<td class="text-center">{number_format($v.target_ikal,2,".","")}</td>
+				<td class="text-center">{number_format($v.ikal,2,".","")}</td>
+				<td class="text-center">{number_format($v.target,2,".","")}</td>
+				<td class="text-center">
+					{if $v.ika > 0 || $v.iku > 0 || $v.ikl > 0 || $v.ikal > 0}
+						{number_format($v.iklh,2,".","")}
+					{else}
+						<b>-</b>
+					{/if}
+				</td>
+				<td class="text-center">
+
+					{if $v.ika > 0 || $v.iku > 0 || $v.ikl > 0 || $v.ikal > 0}
+					<label class="badge badge-{$ratings.color}">{$ratings.rating}</label>
+					{else}
+					<b>-</b>
+					{/if}
+				</td>
+				{if $raportShow}
+					<!-- <td>
+
+						{if $v.ika > 0 || $v.iku > 0 || $v.ikl > 0 || $v.ikal > 0}
+						<a href="javascript:();" data-toggle="modal" data-target="#catatanRekomendasi" tahun="{$v.tahun}" provinsi="{$v.uid_provinsi}" kabkota="{$v.uid_kabkota}" aspek="iklh" data-uid="{$v.$primaryKey}" class="badge badge-primary catatan-rekomendasi"> <i class="ft-edit"></i>Rekomendasi</a>
+						<br>
+						{/if}
+						<span id="catatan-{$v.tahun}-{$v.uid_provinsi}-{$v.uid_kabkota}-iklh-short">{$v.rekomendasi_iklh|truncate:40:'...':true:true}</span>
+
+					</td> -->
+					<td>
+
+						{if $v.ika > 0 || $v.iku > 0 || $v.ikl > 0 || $v.ikal > 0}
+							<form method="POST" enctype=" multipart/form-data">
+								<input type="file" class="default file-maps" id="file-{$v.tahun}-{$v.uid_provinsi}-{$v.uid_kabkota}-iklh" tahun="{$v.tahun}" provinsi="{$v.uid_provinsi}" kabkota="{$v.uid_kabkota}" aspek="iklh">
+								<span class="text-danger"><small>*Format file yang diunggah adalah jpg,jpeg,png dengan dimensi 319 x 225 </small></span>
+							</form>
+						{/if}
+							<div id="div-url-{$v.tahun}-{$v.uid_provinsi}-{$v.uid_kabkota}-iklh">
+								{if $v.peta_sebaran_iklh}
+									<br>
+									<a href="{$baseUrl}uploads/peta_sebaran/{$v.peta_sebaran_iklh}" target="_blank" class="badge badge-info">Lihat</a>
+								{/if}
+							</div>
+					</td>
+				{/if}
+				<td>
+					{if $v.ika > 0 || $v.iku > 0 || $v.ikl > 0 || $v.ikal > 0}
+					<a href="{$baseUrl}raport/index/x/iklhk/k/{$v.uid_kabkota}/p/{$v.uid_provinsi}/t/{$v.tahun}" target="_blank" class="btn btn-outline-info btn-sm"> <i class="ft-book"></i> Lihat Raport</a>
+					{/if}
+				</td>
+			</tr>
+			<p style="display: none">{$cnProvinsi++}</p>
+			{/if}
+			{/foreach}
+		</tbody>
+	</table>
+	{/if}
+</div>

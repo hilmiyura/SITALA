@@ -1,0 +1,317 @@
+<!-- Modal -->
+<div class="modal text-left" id="tambahData" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data IKTL
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+        <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
+        <div class="modal-body">
+          <h4 class="form-section"><i class="ft-calendar"></i>Tanggal</h4>
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1">
+              <label for="name">Tanggal Pemantauan</label>
+              <input type="text" class="form-control pickadate-limits" id="tanggal" name="form[tanggal]" />
+            </div>
+          </div>
+          {if $me.role_user != 3}
+          <h4 class="form-section">
+            <i class="la la-map-marker"></i>Lokasi Pemantauan
+          </h4>
+          {/if}
+          <div class="form-row mb-1">
+            {if $me.role_user !=2 && $me.role_user !=3}
+            <div class="col-md-12 mb-1">
+              <label for="name">Provinsi</label>
+              <select class="select2 form-control position-relative provinsi_select" to="uid_kabkota" id="uid_provinsi" name="form[uid_provinsi]" style="width: 100%" required="">
+                <option value="">--PILIH PROVINSI--</option>
+                {foreach from=$provinsi item=v}
+                <option value="{$v.kd_propinsi}">{$v.nama_propinsi}</option>
+                {/foreach}
+              </select>
+            </div>
+            {/if}
+            {if $me.role_user !=3}
+            <div class="col-md-12 mb-1">
+              <label for="name">Kab/kota</label>
+              <select class="select2 form-control position-relative" id="uid_kabkota" name="form[uid_kabkota]" style="width: 100%" required="">
+                <option value="">--PILIH KAB/KOTA--</option>
+                {foreach from=$kabkota item=v}
+                <option value="{$v.kd_kota}">{$v.nama_kabkot}</option>
+                {/foreach}
+              </select>
+            </div>
+            {/if}
+          </div>
+          <h4 class="form-section"><i class="ft-edit"></i>Pemantauan</h4>
+          <h5 class="form-section text-uppercase text-center">Diisi oleh pusat</h5>
+          <div class="form-row mb-1">
+            <div class="col-md-6">
+              <label for="name">Luas Wilayah (LW)</label>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Nilai" id="luas_wilayah" name="form[luas_wilayah]" {if $me.role_user !=1} readonly {/if} />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Luas Hutan (LH)</label>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Nilai" id="luas_hutan" name="form[luas_hutan]" {if $me.role_user !=1} readonly {/if} />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Luas Belukar Dalam Kawasan</label>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Nilai" id="luas_belukar_dalam_kawasan" name="form[luas_belukar_dalam_kawasan]" {if $me.role_user !=1} readonly {/if} />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Luas Belukar pada Fungsi Lindung</label>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Nilai" id="luas_belukar_pada_fungsi_lindung" name="form[luas_belukar_pada_fungsi_lindung]" {if $me.role_user !=1} readonly {/if} />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Faktor Koreksi Gambut</label>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Nilai" id="dkk" name="form[dkk]" {if $me.role_user !=1} readonly {/if} />
+                <div class="input-group-append">
+                  <span class="input-group-text">0-1</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">RHL <sub>(Rehabilitasi Hutan dan Lahan dari APBN)</sub></label>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Nilai" id="rhl" name="form[rhl]" {if $me.role_user !=1} readonly {/if} />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <h5 class="form-section text-uppercase text-center">Diisi oleh kabupaten/kota</h5>
+          <div class="form-row mb-1">
+            <div class="col-md-6 mb-1">
+              <label for="name">Kebun Raya (Data LIPI)</label>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Nilai" id="kebun_raya_data_lipi" name="form[kebun_raya_data_lipi]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">RTH</label>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Nilai" id="rth" name="form[rth]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Taman Kehati</label>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Nilai" id="taman_kehati" name="form[taman_kehati]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">HA</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">Lampiran Peta (PDF)</label>
+              <input type="file" class="form-control mb-1" id="lampiran" name="lampiran" />
+              <span class="help-block lampiran-download" style="display:none"></span>
+            </div>
+            <!-- <div class="col-md-6 mb-1">
+              <label for="name">Lampiran Tabel RTH</label>
+              <input type="file" class="form-control mb-1" id="lampiran_dtp" name="lampiran_dtp" />
+              <span class="help-block lampiran-download-dtp" style="display:none"></span>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name white">Download</label><br>
+              <a title="Download Format Tabel RTH" class="btn btn-success" href="{$baseUrl}uploads/Format_Tabel_RTH.xlsx"><i class="fa fa-file-excel-o"></i> Format Tabel RTH</a>
+            </div> -->
+          </div>
+          <h6 class="form-section">Rincian Data RTH</h6>
+          <div class="repeater-data_rth">
+            <div data-repeater-list="data_rth">
+              <div class="form-row mb-1" data-repeater-item style="border:1px solid #cacfe7; padding:5px;">
+                <div class="col-md-12 mb-1 text-right">
+                  <button type="button" class="btn btn-danger btn-sm rem-file" data-repeater-delete>
+                    <i class="ft-x"></i> HAPUS RINCIAN RTH
+                  </button>
+                </div>
+                <div class="col-md-4 mb-1">
+                  <label for="name">Jenis RTH</label>
+                  <select class="custom-select form-control position-relative jenis_rth" name="jenis_rth" style="width: 100%" required="">
+                    <option value="">-- PILIH JENIS RTH --</option>
+                    <option value="1">Kebun Raya</option>
+                    <option value="2">Taman Kehati</option>
+                    <option value="3">Hutan Kota</option>
+                    <option value="4">Taman Kota</option>
+                    <option value="5">Sempadan Jalan</option>
+                    <option value="6">Sempadan Sungai</option>
+                    <option value="7">Lainnya</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mb-1">
+                  <label for="name">Nama RTH</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control nama_rth" placeholder="Nama RTH" name="nama_rth" />
+                  </div>
+                </div>
+                <div class="col-md-4 mb-1">
+                  <label for="name">Luas</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control luas_rth" placeholder="Luas" name="luas_rth" />
+                    <div class="input-group-append">
+                      <span class="input-group-text">HA</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-1">
+                  <label for="name">Nama Desa</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control nama_desa" placeholder="Nama Desa" name="nama_desa" />
+                  </div>
+                </div>
+                <div class="col-md-6 mb-1">
+                  <label for="name">Nama Kecamatan</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control nama_kecamatan" placeholder="Nama Kecamatan" name="nama_kecamatan" />
+                  </div>
+                </div>
+                <div class="col-md-6 mb-1">
+                  <label for="name">Latitude <sub>(Derajat Desimal)</sub></label>
+                  <div class="input-group">
+                    <input type="text" class="form-control koordinat_lintang" placeholder="Koordinat Lintang" name="koordinat_lintang" />
+                  </div>
+                </div>
+                <div class="col-md-6 mb-1">
+                  <label for="name">Longitude <sub>(Derajat Desimal)</sub></label>
+                  <div class="input-group">
+                    <input type="text" class="form-control koordinat_bujur" placeholder="Koordinat Bujur" name="koordinat_bujur" />
+                  </div>
+                </div>
+                <div class="col-md-6 mb-1">
+                  <label for="name">Sumber Dana</label>
+                  <select class="custom-select form-control position-relative sumber_dana" name="sumber_dana" style="width: 100%" required="">
+                    <option value="">-- PILIH SUMBER DANA --</option>
+                    <option value="1">APBN</option>
+                    <option value="2">APBD</option>
+                    <option value="3">SWASTA</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-1">
+                  <label for="name">Nomor SK</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control nomor_sk" placeholder="Nomor SK" name="nomor_sk" />
+                  </div>
+                </div>
+                <div class="col-md-12 mb-1">
+                  <label for="name">Keterangan</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control keterangan" placeholder="Keterangan" name="keterangan" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr />
+            <div class="text-center">
+              <button data-repeater-create type="button" class="btn btn-primary btn-sm"><i class="ft ft-plus"></i> TAMBAH RINCIAN RTH</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+            <button type="submit" name="submit" class="btn btn-danger">
+              Simpan
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{if isset($listExport)}
+<div class="modal text-left" id="unduhDataExcel" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-download-cloud"></i> Download Excel
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          {foreach from=$listExport item=v key=k}
+          <div class="list-group col-md-3" style="margin-left: 15px; margin-bottom: 15px; padding: 0;">
+            <a href="{$baseUrl}iktl/dataExcel/offset/{$v.offset_start}/search/{$search_json}/print/{time()}" class="list-group-item">
+              <i class="ft-file"></i> EXCEL {$k}
+              <p><small>(BARIS : {$v.offset_start}-{$v.offset_end})</small></p>
+            </a>
+          </div>
+          {/foreach}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}
+<!-- modal catatan -->
+<div class="modal text-left" id="catatanVerifikator" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Catatan pelaporan
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
+        <div class="modal-body">
+          <!-- <h4 class="form-section">
+            <i class="la la-map-marker"></i>Catatan pelaporan
+          </h4> -->
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1">
+              <label for="name">Isi Catatan *</label>
+              <input type="hidden" id="id-pelaporan" name="" value="">
+              <textarea name="catatan_verifikator" id="catatan-verifikator-txt" class="form-control" rows="8" cols="80"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <a href="javascript:();" data-toggle="modal" data-target="#catatanVerifikator" name="submit" class="btn btn-danger simpan-catatan-verifikator">Simpan</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

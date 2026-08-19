@@ -1,0 +1,86 @@
+{if $me.role_user == 0 || $me.role_user == 1 && $me.komponen == NULL}
+<div class="row mb-1">
+  <div class="col-md-3">
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData">
+      <i class="ft-plus-circle"></i> Tambah Data
+    </button>
+  </div>
+</div>
+{/if}
+{include file="parts/block/block_search_daftar_pengguna.html"}
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th colspan="2" class="text-center" style="width: 70px">#</th>
+        <th rowspan="2" class="v-middle">Nama</th>
+        <th rowspan="2" class="v-middle">Username</th>
+        <th rowspan="2" class="v-middle">Role User</th>
+        <th rowspan="2" class="v-middle">Status</th>
+        <th rowspan="2" class="v-middle">Wilayah</th>
+      </tr>
+      <tr>
+        <th width="50" class="text-center">Action</th>
+        <th width="10" class="text-center">No</th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v}
+      <tr>
+        <th class="text-center">
+          {if $v.role_user == 0}
+          <div class="badge badge-dark">No Action</div>
+          {else}
+            {if $aksesAdmin}
+              <button class="btn border-secondary badge badge-danger round delete-dialog" data-uid="{$v.$primaryKey}" data-ajax="{$ctrl}/deletedData">
+                <a href="javascript:void(0);" title="Delete">
+                  <i class="ft-trash-2"></i>
+                </a>
+              </button>
+              <button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.$primaryKey}" title="Edit">
+                <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+              </button>
+            {/if}
+          <a href="{$baseUrl}users/loginAs/x/{$v.$primaryKey|base64_encode}" class="btn border-secondary badge badge-dark round" title="Login As"><i class="ft-log-in"></i></a>
+          {/if}
+        </th>
+
+        <th class="text-center">{counter}</th>
+        <td>{$v.name}</td>
+        <td>{$v.username}</td>
+        <td>
+          {$roleUser = $functions->roleUser($v.role_user)}
+          <div class="badge badge-{$roleUser.color}">{$roleUser.name}</div>
+        </td>
+        <td>
+          {if $v.active}
+          <div class="badge border-success success badge-border">Aktif</div>
+          {else}
+          <div class="badge border-danger danger badge-border">Non-Aktif</div>
+          {/if}
+        </td>
+        <td>
+          {if $v.nama_kabkota}
+          {$v.nama_kabkota}<br>
+          Provinsi {$v.nama_provinsi}
+          {else if $v.nama_provinsi}
+          {$v.nama_provinsi}
+          {else if $v.ur_regional}
+          {$v.ur_regional}
+          {else} - {/if}
+        </td>
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="7" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+  {include file="parts/block/block_pagination.html"}
+</div>

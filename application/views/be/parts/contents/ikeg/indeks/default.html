@@ -1,0 +1,26 @@
+<div class="card-content">
+    <div class="card-body">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="base-tab1" data-toggle="tab" aria-controls="tab1" href="#tab1" aria-expanded="true">Kabupaten/Kota</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="base-tab2" data-toggle="tab" aria-controls="tab2" href="#tab2" aria-expanded="false">Provinsi</a>
+            </li>
+            <li style="margin-left: auto">
+               {include file="parts/block/block_search_indeks.html"}
+            </li>
+        </ul>
+        <div class="tab-content px-1 pt-1">
+            <div role="tabpanel" class="tab-pane active" id="tab1" aria-expanded="true" aria-labelledby="base-tab1">
+                {include file="parts/contents/$ctrl/indeks/indeksKabkota.html"}
+            </div>
+            <div class="tab-pane" id="tab2" aria-labelledby="base-tab2">
+                {include file="parts/contents/$ctrl/indeks/indeksProvinsi.html"}
+            </div>
+            <!-- <div class="tab-pane" id="tab3" aria-labelledby="base-tab3">
+                
+            </div> -->
+        </div>
+    </div>
+</div>

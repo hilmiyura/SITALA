@@ -1,0 +1,99 @@
+<div class="row mb-1">
+  <div class="col-md-12">
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData">
+      <i class="ft-plus-circle"></i> Tambah Data
+    </button>
+  </div>
+</div>
+{include file="parts/contents/$ctrl/$act/search.html"}
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table table-striped">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th colspan="2" class="text-center" style="width: 70px">#</th>
+        <th class="v-middle">STATU VERIFIKASI</th>
+        <th class="v-middle">CATATAN</th>
+        <th class="v-middle">KODE LAB</th>
+        <th class="v-middle">NAMA LAB</th>
+        <th class="v-middle">ALAMAT</th>
+        <th class="v-middle">PROVINSI</th>
+        <th class="v-middle">KABUPATEN/KOTA</th>
+        <!-- <th class="v-middle">NO TELEPON</th> -->
+        <!-- <th class="v-middle">EMAIL</th> -->
+        <th class="v-middle">NO AKREDITASI</th>
+        <th class="v-middle">SERTIFIKAT</th>
+        <th class="v-middle">STATUS</th>
+        <th class="v-middle">MASA BERLAKU</th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v}
+      <tr>
+        <td class="text-center nowrap">
+          {if $aksesAdmin}
+            <button class="btn border-secondary badge badge-danger round delete-dialog" data-uid="{$v.$primaryKey}" data-ajax="{$ctrl}/deletedData">
+              <a href="javascript:void(0);" title="Delete">
+                <i class="ft-trash-2"></i>
+              </a>
+            </button>
+            <button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.$primaryKey}" title="Edit">
+              <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+            </button>
+          {else if $v.cruser == $me.uid_users}
+            <button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.$primaryKey}" title="Edit">
+              <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+            </button>
+          {/if}
+        </td>
+
+        <td class="text-center">{counter}</td>
+        <td>
+          {if $aksesAdmin}
+            <select class="form-control verifikasi-lab" name="" lab="{$v.uid}">
+              <option value="">--PILIH--</option>
+              <option value="1" {if $v.verifikasi =="1"} selected {/if}>VALID</option>
+              <option value="2" {if $v.verifikasi =="2"} selected {/if}>INVALID</option>
+            </select>
+          {else}
+            {if $v.verifikasi == 2}
+             <span class="badge badge-danger">Tidak Valid</span>
+            {elseif $v.verifikasi == 1}
+              <span class="badge badge-success">Valid</span>
+            {else}
+              <span class="badge badge-light">Belum divalidasi</span>
+            {/if}
+          {/if}
+        </td>
+        <td>{$v.catatan}</td>
+        <td>{$v.kode}</td>
+        <td>{$v.nama}</td>
+        <td>{$v.alamat}</td>
+        <td class="nowrap">{$v.nama_provinsi}</td>
+        <td class="nowrap">{$v.nama_kabkota}</td>
+        <!-- <td class="nowrap">{$v.no_telepon}</td> -->
+        <!-- <td class="nowrap">{$v.email}</td> -->
+        <td>{$v.no_akreditasi}</td>
+        <td class="text-center">
+          {if $v.sertifikat_akreditasi_kan}
+            <a href="{$baseUrl}uploads/sertifikat_akreditasi_kan/{$v.sertifikat_akreditasi_kan}" target="_blank" class="btn btn-sm btn-primary">LIHAT</a>
+          {else}
+            -
+          {/if}
+        </td>
+        <td class="nowrap">{$v.hirarki_lab_nama}</td>
+        <td class="text-center nowrap {if $v.masa_berlaku < 0} bg-danger {elseif $v.masa_berlaku < 183} bg-warning {else} {/if}">{$v.tanggal_berlaku_awal} <b>s/d</b> {$v.tanggal_berlaku_akhir}</td>
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="12" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+  {include file="parts/block/block_pagination.html"}
+</div>

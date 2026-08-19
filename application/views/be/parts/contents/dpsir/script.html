@@ -1,0 +1,353 @@
+<script type="text/javascript">
+  let merole = "{$me.role_user}";
+  let meprov = "{$me.uid_provinsi}";
+  let mekab = "{$me.uid_kabkota}";
+  let _kategori_isian = ["DRIVER","PRESSURE","STATE","IMPACT"];
+  let src_tahun = $("#src_tahun").val();
+  let src_komponen = $("#src_komponen").val();
+  let src_kabkota = $("#src_kabkota").val();
+
+  $(document).ready(function(){
+    _kategori_isian.forEach((item, i) => {
+      getContentDPSIR(item, 0);
+      getContentDPSIR(item, 1);
+    });
+  });
+
+  $("#src_tahun").on("change", function(){
+    clearCoontent();
+    src_tahun = $(this).val();
+    _kategori_isian.forEach((item, i) => {
+      getContentDPSIR(item, 0);
+      getContentDPSIR(item, 1);
+    });
+  });
+  $("#src_komponen").on("change", function(){
+    clearCoontent();
+    src_komponen = $(this).val();
+    _kategori_isian.forEach((item, i) => {
+      getContentDPSIR(item, 0);
+      getContentDPSIR(item, 1);
+    });
+  });
+  $("#src_kabkota").on("change", function(){
+    clearCoontent();
+    src_kabkota = $(this).val();
+    _kategori_isian.forEach((item, i) => {
+      getContentDPSIR(item, 0);
+      getContentDPSIR(item, 1);
+    });
+  });
+
+  function getContentDPSIR(kategori, datarespon = 0){
+    let urlexcel = baseUrl+ctrl+"/export/t/"+src_tahun+"/d/"+src_kabkota;
+    $("#btn-download").attr("href",urlexcel);
+
+    try {
+      $.ajax({
+        url: baseUrl+ctrl+"/component/t/"+src_tahun+"/k/"+src_komponen+"/c/"+kategori+"/r/"+datarespon+"/d/"+src_kabkota,
+        method: "GET",
+        success:function(response){
+          let res = JSON.parse(response);
+          if(res.statusCode == 200){
+            if(datarespon == 1){
+              if(res["html"]){
+                $(".title-response-"+kategori).show();
+                $(".content-response-"+kategori).addClass("box-content-parent");
+              }
+              $(".response-isian-"+kategori).html(res["html"]);
+            }else{
+              $(".content-isian-"+kategori).html(res["html"]);
+            }
+          }
+        }
+      })
+    } catch (e) {
+    }
+  }
+
+  $(".add-content").on("click", function(){
+
+    let kategori = $(this).attr("kategori");
+    if(blockAdd(kategori)){
+      return;
+    }
+    closeAllForm();
+    if($(".content-input-"+kategori).html() == ""){
+      try {
+        $.ajax({
+          url: baseUrl+ctrl+"/form/c/"+kategori,
+          method: "GET",
+          success:function(response){
+            let res = JSON.parse(response);
+            if(res.statusCode == 200){
+              $(".content-input-"+kategori).html(res["html"]);
+            }
+          }
+        })
+      } catch (e) {
+      }
+    }
+  });
+  let contentHide = "";
+  $(".content-isian").on("click", ".add-content", function(){
+    let kategori = $(this).attr("kategori");
+    if(blockAdd(kategori)){
+      return;
+    }
+    let uid = $(this).attr("uid");
+    let parent = $(this).attr("parent");
+
+    closeAllForm();
+    if($(".content-input-"+kategori).html() == ""){
+      if(uid){
+        $(".box-content-dpsir-"+uid).hide();
+        contentHide = "box-content-dpsir-"+uid;
+      }
+      try {
+        $.ajax({
+          url: baseUrl+ctrl+"/form/c/"+kategori+"/x/"+uid+"/p/"+parent,
+          method: "GET",
+          success:function(response){
+            let res = JSON.parse(response);
+            if(res.statusCode == 200){
+              if(parent > 0){
+                $(".response-input-"+kategori).html(res["html"]);
+              }else{
+                $(".content-input-"+kategori).html(res["html"]);
+              }
+            }
+          }
+        })
+      } catch (e) {
+      }
+    }
+  });
+  $(".content-isian").on("click", ".delete-content", function(){
+    let kategori = $(this).attr("kategori");
+    let uid = $(this).attr("uid");
+    let parent = $(this).attr("parent");
+    try {
+      swal({
+        title: 'Hapus data ini?',
+        text: 'Data yang dihapus tidak bisa dikembalikan lagi!',
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+      }).then(function(result) {
+        if (result.value) {
+          $.ajax({
+            url: baseUrl+ctrl+"/deleted/x/"+uid,
+            method: "GET",
+            success:function(response){
+              let res = JSON.parse(response);
+              if(res.statusCode == 200){
+                if(parent > 0){
+                  getContentDPSIR(kategori,1);
+                }else{
+                  getContentDPSIR(kategori,0);
+                }
+              }
+            }
+          })
+        }
+      }).catch(swal.noop);
+
+    } catch (e) {
+    }
+  });
+  $(".content-isian").on("click", ".respon-content", function(){
+    let kategori = $(this).attr("kategori");
+    let uid = $(this).attr("uid");
+    let parent = $(this).attr("parent");
+
+    closeAllForm();
+
+    if($(".response-input-"+kategori).html() == ""){
+      if(uid){
+        $(".box-content-dpsir-"+uid).hide();
+      }
+      try {
+        $.ajax({
+          url: baseUrl+ctrl+"/form/c/"+kategori+"/p/"+parent,
+          method: "GET",
+          success:function(response){
+            let res = JSON.parse(response);
+            if(res.statusCode == 200){
+              $(".response-input-"+kategori).html(res["html"]);
+            }
+          }
+        })
+      } catch (e) {
+      }
+    }
+    $(".title-response-"+kategori).show();
+    document.getElementById("title-response-"+kategori).scrollIntoView(true);
+    $(".content-response-"+kategori).addClass("box-content-parent");
+  });
+
+  $(".content-isian").on("click", ".close-form", function(){
+    let kategori = $(this).attr("kategori");
+    let uid = $(this).attr("uid");
+    let parent = $(this).attr("parent");
+    if(uid){
+      $(".box-content-dpsir-"+uid).show();
+    }
+    if(parent){
+      closeFormRespon(kategori);
+    }else{
+      $(".content-input-"+kategori).html("");
+    }
+  });
+  $(".content-isian").on("change", ".file_uploads", function(){
+    let kategori = $(this).attr("kategori");
+    let uid = $(this).attr("uid");
+
+    let lampiran = document.getElementById("file_uploads_"+kategori).files[0];
+    console.log(lampiran);
+    let formData = new FormData();
+    formData.append("lampiran", lampiran);
+
+    $.ajax({
+      url: baseUrl + ctrl +'/uploadFile',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      async: true,
+      success: function(response) {
+        let res = JSON.parse(response);
+        if(res.statusCode == 200){
+          $(".content-input-lampiran-"+kategori).val(res.lampiran);
+        }else{
+          swal("Informasi","Lampiran gagal diupload","warning");
+        }
+      }
+    });
+
+  });
+  $(".content-isian").on("click", ".save-form", function(){
+    let kategori = $(this).attr("kategori");
+    let uid = $(this).attr("uid");
+    let parent = $(this).attr("parent");
+    let text = $(".content-input-text-"+kategori).val();
+    let lampiran = $(".content-input-lampiran-"+kategori).val();
+    let select = $(".content-input-select-"+kategori).val();
+    if(text){
+      try {
+        let dataBody = JSON.stringify({
+          uid_dpsir_isian_pemda:uid,
+          parent:parent,
+          isian:text,
+          isian_lampiran:lampiran,
+          kategori_respon:select,
+          kategori_isian:kategori,
+          uid_komponen:src_komponen,
+          tahun:src_tahun,
+          src_kabkota: src_kabkota,
+        });
+        $.ajax({
+          url: baseUrl+ctrl+"/submit",
+          method: "POST",
+          data: dataBody,
+          success:function(response){
+            let res = JSON.parse(response);
+            if(res.statusCode == 200){
+              closeAllForm();
+              if(parent > 0){
+                getContentDPSIR(kategori, 1);
+              }else{
+                getContentDPSIR(kategori,0);
+              }
+            }
+          }
+        })
+      } catch (e) {
+      }
+    }else{
+      swal("Informasi","Tidak boleh kosong !","warning");
+    }
+  });
+
+  function closeFormRespon(kategori){
+    $(".response-input-"+kategori).html("");
+    if($(".response-isian-"+kategori).html() == ""){
+      $(".title-response-"+kategori).hide();
+    }
+  }
+  function closeAllForm(){
+    _kategori_isian.forEach((item, i) => {
+      $(".content-input-"+item).html("");
+
+      $(".response-input-"+item).html("");
+      if(!$(".response-isian-"+item).html()){
+        $(".title-response-"+item).hide();
+      }
+
+    });
+
+    if(contentHide){
+      $("."+contentHide).show();
+      contentHide = "";
+    }
+  }
+  function clearCoontent(){
+    _kategori_isian.forEach((item, i) => {
+      $(".content-input-"+item).html("");
+      $(".content-isian-"+item).html("");
+      $(".response-input-"+item).html("");
+      $(".response-isian-"+item).html("");
+      $(".title-response-"+item).hide();
+      $(".content-response-"+item).removeClass("box-content-parent");
+    });
+
+    setTimeout(()=>{
+      let add_status = src_kabkota.split("-");
+      if(parseInt(add_status[1]) == meprov && parseInt(add_status[2]) == mekab){
+        $(".btn-add-title").show();
+      }else{
+        $(".btn-add-title").hide();
+      }
+      if(merole <= 1){
+        $(".btn-add-title-STATE").show();
+      }
+    },200);
+  }
+
+  function blockAdd(kategori){
+    let add_status = src_kabkota.split("-");
+    if(parseInt(add_status[1]) == meprov && parseInt(add_status[2]) == mekab){
+      return 0;
+    }else{
+      if(merole <= 1 && kategori == "STATE"){
+        return 0;
+      }else{
+        return 1;
+      }
+    }
+  }
+
+  $(".content-isian").on("click", ".detail-content", function(){
+    $(".modal-body-push").html("");
+    let uid = $(this).attr("uid");
+    try {
+      $.ajax({
+        url: baseUrl+ctrl+"/detailOnModal/x/"+uid+"/d/"+src_kabkota,
+        method: "POST",
+        success:function(response){
+          let res = JSON.parse(response);
+          if(res.statusCode == 200){
+            $(".modal-body-push").html(res.htmls);
+
+            $("#dpsirModal").modal("show");
+          }
+        }
+      })
+    } catch (e) {
+    }
+  });
+
+</script>

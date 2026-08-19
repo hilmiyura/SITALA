@@ -1,0 +1,189 @@
+{if $me.role_user == 5 || $me.role_user == 6}
+{else}
+{if $lockAction == 0 || ($me.role_user == 1 && $me.komponen == NULL)}
+<div class="row mb-1">
+  <div class="col-md-12">
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData">
+      <i class="ft-plus-circle"></i> Form Data
+    </button>
+    <button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahDataExcel">
+      <i class="ft-upload-cloud"></i> Upload Excel
+    </button>
+  </div>
+</div>
+{else}
+{/if}
+{/if}
+{include file="parts/block/block_search.html"}
+<div class="table-responsive table-border freeze-table">
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th colspan="2" class="text-center" style="width: 70px">#</th>
+        <th rowspan="2" class="v-middle">Level</th>
+        <th rowspan="2" class="v-middle">Pemantauan</th>
+        <th rowspan="2" class="text-center v-middle">Periode <br> Pemantauan</th>
+        <!-- <th rowspan="2" class="v-middle">Metode Pemantauan</th> -->
+        <th rowspan="2" class="v-middle">Peruntukan</th>
+        <th rowspan="2" class="v-middle">Kab/Kota</th>
+        <th rowspan="2" class="v-middle">Provinsi</th>
+        <th colspan="3" class="text-center">Nilai Pemantauan NO<sub class="white">2</sub></th>
+        <th colspan="3" class="text-center">Nilai Pemantauan SO<sub class="white">2</sub></th>
+        <th colspan="3" class="text-center">Nilai Pemantauan PM<sub class="white">2.5</sub></th>
+      </tr>
+      <tr>
+        <th width="50" class="text-center">Action</th>
+        <th width="10" class="text-center">No</th>
+        <th class="v-middle text-center">
+          NO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+          <sup>(Nitrogen Dioksida)</sup>
+        </th>
+        <th class="v-middle text-center">
+          Metode <br> Pemantauan
+        </th>
+        <th class="v-middle text-center">
+          Durasi <br> Pemantauan
+        </th>
+        <!-- <th class="v-middle text-center">
+          Faktor Koreksi <br>
+          NO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+          <sup>(Nitrogen Dioksida)</sup>
+        </th> -->
+        <th class="v-middle text-center">
+          SO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+          <sup>(Sulfur Dioksida)</sup>
+        </th>
+        <th class="v-middle text-center">
+          Metode <br> Pemantauan
+        </th>
+        <th class="v-middle text-center">
+          Durasi <br> Pemantauan
+        </th>
+        <!-- <th class="v-middle text-center">
+          Faktor Koreksi <br>
+          SO<sub class="white">2</sub> <sup>(µg/m3)</sup><br>
+          <sup>(Sulfur Dioksida)</sup>
+        </th> -->
+        <th class="v-middle text-center">
+  				PM<sub class="white">2.5</sub> <sup>(µg/m3)</sup><br>
+  				<sup>(Partikulat)</sup>
+  			</th>
+        <th class="v-middle text-center">
+          Metode <br> Pemantauan
+        </th>
+        <th class="v-middle text-center">
+          Durasi <br> Pemantauan
+        </th>
+        <!-- <th class="v-middle text-center">
+          Faktor Koreksi <br>
+  				PM<sub class="white">2.5</sub> <sup>(µg/m3)</sup><br>
+  				<sup>(Partikulat)</sup>
+  			</th> -->
+        <!-- <th rowspan="2" class="v-middle">PM<sub class="white">2.5</sub> (µg/m3)</th> -->
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v}
+      <tr>
+        <th class="text-center">
+          {if $me.role_user == 5 || $me.role_user == 6}
+          --
+          {else}
+          {if $lockActionYear == 0}
+          {if ($v.v_provinsi == 0 && $v.v_regional == 0 && $v.v_pusat == 0 || $v.verify_status_reject == 1) && $me.uid_users == $v.cruser && $lockAction == 0}
+          <button class=" btn border-secondary badge badge-danger round delete-dialog" data-uid="{$v.$primaryKey}" data-ajax="{$ctrl}/deletedData">
+            <a href="javascript:void(0);" title="Delete">
+              <i class="ft-trash-2"></i>
+            </a>
+          </button>
+          <button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.$primaryKey}" title="Edit">
+            <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+          </button>
+          {else}
+          {if ($v.v_provinsi == 0 && $v.v_regional == 0 && $v.v_pusat == 0 || $v.verify_status_reject == 1) && $lockAction == 1 && ( $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL))}
+          <button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.$primaryKey}" title="Edit">
+            <a href="javascript:void(0);"><i class="ft-edit"></i></a>
+          </button>
+          {else}
+          --
+          {/if}
+          {/if}
+          {else}
+          <span class="badge badge-dark">pelaporan {$lockActionYear} ditutup</span>
+          {/if}
+          {/if}
+        </th>
+        <td class="text-center">
+          {counter}
+        </td>
+        <td class="text-center">
+          {$roleUser = $functions->roleUser($v.role_user)}
+          <div class="badge badge-{$roleUser.color}">{$roleUser.name}</div>
+        </td>
+        <td>
+          {$v.kode_lokasi} {if $v.kurang_jumlah_lapor}<span class="badge badge-danger">1</span>{/if}<br>
+          {$v.alamat}<br />
+          {$v.alamat_detail}<br />
+          <div class="badge badge-success">
+            {$format->dateFormat($v.tanggal)}
+          </div><br>
+          <!-- <div class="badge badge-warning">
+            Durasi pemantauan {$v.durasi_pemantauan} Hari
+          </div><br> -->
+          {if $v.shu}
+          <a title="Download File" class="border-secondary badge badge-warning" href="{$baseUrl}uploads/monitoring/{$v.shu}" target="_blank">DOWNLOAD SHU</a>
+          {else}
+          <label class="border-secondary badge badge-danger">TIDAK ADA SHU</label>
+          {/if}
+        </td>
+        <td class="text-center">{$v.periode_pemantauan}</td>
+        <!-- <td>{$v.metode}</td> -->
+        <td>{$v.peruntukan}</td>
+        <td>{$v.nama_kabkota}</td>
+        <td>{$v.nama_provinsi}</td>
+        <td class="text-center">{$v.no2}</td>
+        <td class="text-center">{$v.no2_metode}</td>
+        <td class="text-center">
+          {if $v.no2_uid_metode_pemantauan == 1}
+          {$v.no2_durasi_pemantauan}
+          {else}
+          {$v.no2_durasi_pemantauan_pasif}
+          {/if}
+        </td>
+        <!-- <td class="text-center">{$v.no2_faktor_koreksi}</td> -->
+        <td class="text-center">{$v.so2}</td>
+        <td class="text-center">{$v.so2_metode}</td>
+        <td class="text-center">
+          {if $v.so2_uid_metode_pemantauan == 1}
+          {$v.so2_durasi_pemantauan}
+          {else}
+          {$v.so2_durasi_pemantauan_pasif}
+          {/if}
+        </td>
+        <!-- <td class="text-center">{$v.so2_faktor_koreksi}</td> -->
+        <td class="text-center">{$v.pm25}</td>
+        <td class="text-center">{$v.pm25_metode}</td>
+        <td class="text-center">
+          {if $v.pm25_uid_metode_pemantauan == 1}
+          {$v.pm25_durasi_pemantauan}
+          {else}
+          {$v.pm25_durasi_pemantauan_pasif}
+          {/if}
+        </td>
+        <!-- <td class="text-center">{$v.pm25_faktor_koreksi}</td> -->
+        <!-- <td class="text-center">{$v.pm25}</td> -->
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="12" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+</div>
+{include file="parts/block/block_pagination.html"}

@@ -1,0 +1,63 @@
+<!-- <style>
+	table thead tr th {
+		border: 1px solid black;
+	}
+
+	table tbody tr td {
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style> -->
+<table>
+  <thead>
+    <tr style="color: white;">
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">No</th>
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">Tahun</th>
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">Kabupaten/Kota</th>
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">Provinsi</th>
+      <th colspan="5" bgcolor="#1E9FC4" style="border: 1px solid black;">(%) Pengisian</th>
+    </tr>
+    <tr style="color: white;">
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Pantai Lestari</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Langit Biru</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Kali Bersih</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Indonesia Hijau</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">Gambut Lestari</th>
+    </tr>
+  </thead>
+  <tbody>
+    {foreach from=$viewExcel.data item=data}
+    <tr>
+      <td style="border: 1px solid black;vertical-align:top;">{counter}</td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.tahun}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $data.nama_kabkot}{$data.nama_kabkot}{else}-{/if}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        <b>{$data.nama_propinsi}</b>
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $data.isian[2].persen_mengisi}{$data.isian[2].persen_mengisi}%{else}-{/if}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $data.isian[1].persen_mengisi}{$data.isian[1].persen_mengisi}%{else}-{/if}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $data.isian[3].persen_mengisi}{$data.isian[3].persen_mengisi}%{else}-{/if}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $data.isian[4].persen_mengisi}{$data.isian[4].persen_mengisi}%{else}-{/if}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $data.isian[5].persen_mengisi}{$data.isian[5].persen_mengisi}%{else}-{/if}
+      </td>
+    </tr>
+    {foreachelse}
+    <tr style="color: white;">
+      <td colspan="9" align="center" bgcolor="#FA535D" style="border: 1px solid black;vertical-align:top;">BELUM ADA DATA</td>
+    </tr>
+    {/foreach}
+  </tbody>
+</table>

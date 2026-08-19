@@ -1,0 +1,157 @@
+<div class="form-row">
+  <div class="col-md-12">
+    <div class="alert alert-warning">
+      <b>Silahkan Lengkapi data dibawah setiap tahunnya</b>
+      <br>
+      <span>Data akan otomatis tersimpan ketika selesai mengetik</span>
+    </div>
+  </div>
+  <div class="col-md-12">
+    <div class="table-responsive">
+      <table class="table table-bordered" style="width:300%;">
+        <thead class="bg-info bg-darken-2 white">
+          <tr>
+            <th rowspan="2" style="width:3.5%">*Periode</th>
+            <th rowspan="2" style="width:10%">*Kepala Daerah</th>
+            <th rowspan="2" style="width:10%">*Ketua DPRD</th>
+            <th rowspan="2" style="width:8%">*Luas Wilayah</th>
+            <th rowspan="2">*Populasi</th>
+            <th rowspan="2">Pendapatan Perkapita</th>
+            {if $me.role_user == 3}
+              <th rowspan="2">*Kategori Daerah</th>
+            {/if}
+            <th rowspan="2">SK Pelaksana</th>
+            <th rowspan="2">Luas Mangrove</th>
+            <th colspan="5">Status Kerusakan Ekosistem Gambut</th>
+            <th colspan="2">Fungsi Ekosistem Gambut</th>
+          </tr>
+          <tr>
+            <th >Rusak Berat</th>
+            <th >Rusak Ringan</th>
+            <th >Rusak Sangat Berat</th>
+            <th >Rusak Sedang</th>
+            <th >Tidak Rusak</th>
+            <th >Budaya</th>
+            <th >Lindung</th>
+          </tr>
+        </thead>
+        <tbody>
+          {for $foo=2020 to $thisYear}
+          <tr>
+            <td>
+              <input type="text" class="form-control" fd="periode" tahun="{$foo}" value="{$foo}" placeholder="Periode" style="width:100%;" readonly>
+            </td>
+            <td>
+              <input type="text" class="form-control onset-type" fd="kepala_daerah" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['kepala_daerah']}" placeholder="Kepala Daerah" style="width:100%;">
+            </td>
+            <td>
+              <input type="text" class="form-control onset-type" fd="kepala_dprd" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['kepala_dprd']}" placeholder="Ketua DPRD" style="width:100%;">
+            </td>
+            <td>
+              {if !$dataDetailPeriode[$foo]['luas_wilayah'] || $dataDetailPeriode[$foo]['luas_wilayah'] == ''}
+                <span>Sebelumnya: <br><b>{$me.luas_wilayah}</b></span>
+                <br>
+                silahkan input ulang sesuai dengan periode/tahun
+                <hr>
+              {/if}
+              <div class="input-group">
+                <input type="text" types="number" class="form-control numberFormat onset-type" fd="luas_wilayah" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['luas_wilayah']}" placeholder="Luas Wilayah">
+                <div class="input-group-append">
+                  <span class="input-group-text">Km<sup>2</sup></span>
+                </div>
+              </div>
+              <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+            </td>
+            <td>
+              {if !$dataDetailPeriode[$foo]['populasi'] || $dataDetailPeriode[$foo]['populasi'] == ''}
+                <span>Sebelumnya: <br><b>{$me.populasi}</b></span>
+                <br>
+                silahkan input ulang sesuai dengan periode/tahun
+                <hr>
+              {/if}
+              <div class="input-group">
+                <input type="text" types="number" class="form-control numberFormat onset-type" fd="populasi" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['populasi']}" placeholder="Populasi">
+                <div class="input-group-append">
+                  <span class="input-group-text">Jiwa</span>
+                </div>
+              </div>
+              <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+            </td>
+            <td>
+              {if !$dataDetailPeriode[$foo]['gdp'] || $dataDetailPeriode[$foo]['gdp'] == ''}
+                <span>Sebelumnya: <br><b>{$me.gdp}</b></span>
+                <br>
+                silahkan input ulang sesuai dengan periode/tahun
+                <hr>
+              {/if}
+              <div class="input-group">
+                <div class="input-group-append">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" types="number" class="form-control numberFormat onset-type" fd="gdp" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['gdp']}" placeholder="Pendapatan Perkapita">
+              </div>
+              <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+            </td>
+            {if $me.role_user == 3}
+              <td>
+                <select class="select2 form-control onset-change" fd="kategori_daerah" tahun="{$foo}" style="width:100%;">
+                  <option value="">-- PILIH --</option>
+                  <option value="TERTINGGAL" {if $dataDetailPeriode[$foo]['kategori_daerah'] == 'TERTINGGAL'} selected {/if}>TERTINGGAL</option>
+                  <option value="TIDAK TERTINGGAL" {if $dataDetailPeriode[$foo]['kategori_daerah'] == 'TIDAK TERTINGGAL'} selected {/if}>TIDAK TERTINGGAL</option>
+                </select>
+              </td>
+            {/if}
+            <td>
+              <div class="input-group">
+                <input type="file" class="form-control onset-file" fd="sk_pelaksana" tahun="{$foo}">
+                  <div class="input-group-append" id="sk_pelaksana_{$foo}">
+                    {if $dataDetailPeriode[$foo]['sk_pelaksana']}
+                    <a class="btn btn-sm btn-success" target="_blank" href="{$baseUrl}uploads/sk_pelaksana/{$dataDetailPeriode[$foo]['sk_pelaksana']}"><i class="fa fa-download"></i>Download</a>
+                    {/if}
+                  </div>
+              </div>
+            </td>
+            <td>
+              <div class="input-group">
+                <input type="text" types="number" class="form-control numberFormat" disabled fd="luas_mangrove" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['luas_mangrove']}" placeholder="Luas Mangrove">
+                <div class="input-group-append">
+                  <span class="input-group-text">ha</span>
+                </div>
+              </div>
+              <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+            </td>
+            <td>
+              <input type="text" types="number" class="form-control numberFormat " disabled fd="eg_rusak_berat" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['eg_rusak_berat']}" placeholder="Rusak Berat" style="width:100%;">
+              <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+            </td>
+            <td>
+              <input type="text" types="number" class="form-control numberFormat " disabled fd="eg_rusak_ringan" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['eg_rusak_ringan']}" placeholder="Rusak Ringan"  style="width:100%;">
+              <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+            </td>
+            <td>
+              <input type="text" types="number" class="form-control numberFormat " disabled fd="eg_rusak_sangat_berat" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['eg_rusak_sangat_berat']}" placeholder="Rusak Sangat Berat" style="width:100%;">
+              <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+            </td>
+            <td>
+              <input type="text" types="number" class="form-control numberFormat " disabled fd="eg_rusak_sedang" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['eg_rusak_sedang']}" placeholder="Rusak Sedang" style="width:100%;">
+              <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+            </td>
+            <td>
+              <input type="text" types="number" class="form-control numberFormat " disabled fd="eg_tidak_rusak" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['eg_tidak_rusak']}" placeholder="Tidak Rusak" style="width:100%;">
+              <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+            </td>
+            <td>
+              <input type="text" types="number" class="form-control numberFormat " disabled fd="eg_fungsi_budaya" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['eg_fungsi_budaya']}" placeholder="Fungsi Budaya" style="width:100%;">
+              <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+            </td>
+            <td>
+              <input type="text" types="number" class="form-control numberFormat " disabled fd="eg_fungsi_lindung" tahun="{$foo}" value="{$dataDetailPeriode[$foo]['eg_fungsi_lindung']}" placeholder="Fungsi Lindung" style="width:100%;">
+              <small><span class="text-danger">*masukan angka <br> format decimal menggunakan titik ( . )</span></small>
+            </td>
+          </tr>
+          {/for}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

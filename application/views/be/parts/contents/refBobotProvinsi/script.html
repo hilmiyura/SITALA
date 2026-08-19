@@ -1,0 +1,29 @@
+{literal}
+	<script type="text/javascript">
+
+    $(".src_tahun").on("change", function(){
+      var value = $(this).val();
+      location.href =baseUrl+ctrl+"/"+act+"/y/"+value;
+    });
+
+    $(".onUpdate").on("focusout", function(){
+      var value = $(this).val();
+      var tahun = $(this).attr("tahun");
+      var field = $(this).attr("field");
+      var provinsi = $(this).attr("provinsi");
+      var provinsiNama = $(this).attr("provinsi-nama");
+      console.log(value,tahun,field,provinsi)
+      $.ajax({
+        url		: baseUrl+ctrl+"/onUpdate/x/"+provinsi+"/tahun/"+tahun+"/field/"+field+"/v/"+value,
+        method	: "POST",
+        success	: function(response){
+          if(response == 1){
+            toastr.success('Bobot provinsi '+provinsiNama+' ('+value+') tahun '+tahun+' berhasil disimpan', 'Success');
+          }else{
+            toastr.danger('Bobot provinsi '+provinsiNama+' ('+value+') tahun '+tahun+' gagal disimpan', 'Error');
+          }
+        }
+      });
+    })
+	</script>
+{/literal}

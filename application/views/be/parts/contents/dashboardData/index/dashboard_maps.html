@@ -1,0 +1,96 @@
+<div class="row">
+  <div class="col-xl-12 col-12">
+    <div class="card">
+      {if $pengumuman}
+        <div class="card-header pb-0">
+          <a href="{$baseUrl}{$ctrl}#info">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="marquee">
+                    {foreach from=$pengumuman item=v key=k}
+                    <span>{$v.judul} | {$v.tanggal} | {$v.isi} </span>
+                    {/foreach}
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      {/if}
+      <div class="card-content p-1">
+
+        <button style="display: none;position:absolute;bottom: 20px;left:20px;z-index: 999;" id="reset-map-kabkota" class="btn btn-sm btn-danger"><i class="fa fa-chevron-left"></i> KEMBALI</button>
+        <button style="display: none;position:absolute;bottom: 20px;left:20px;z-index: 999;" id="reset-map-titik" class="btn btn-sm btn-danger"><i class="fa fa-chevron-left"></i> KEMBALI</button>
+        <button style="display: none;position:absolute;bottom: 20px;left:115px;z-index: 999;" id="reset-map" class="btn btn-sm btn-success"><i class="fa fa-refresh"></i> REFRESH</button>
+
+        <div style="border-radius: 10px;
+                    box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+                    background: #ffffffa3;
+                    position: absolute;
+                    bottom: 20px;
+                    left: 35%;
+                    z-index: 999;
+                    " id="legenda-titik">
+          <table>
+            <tr>
+              <td> <img src="https://labs.google.com/ridefinder/images/mm_20_red.png" width="15" style="margin-top:-17px;"> <b>PUSAT</b> &emsp;</td>
+              <td> <img src="https://labs.google.com/ridefinder/images/mm_20_green.png" width="15" style="margin-top:-17px;"> <b>P3E</b> &emsp;</td>
+              <td> <img src="https://labs.google.com/ridefinder/images/mm_20_blue.png" width="15" style="margin-top:-17px;"> <b>PROVINSI</b> &emsp;</td>
+              <td> <img src="https://labs.google.com/ridefinder/images/mm_20_orange.png" width="15" style="margin-top:-17px;"> <b>KABKOTA</b> &emsp;</td>
+            </tr>
+          </table>
+        </div>
+
+        <div id="map-dashboard" style="width: 100% !important; height: 500px !important;"></div>
+        <input type="hidden" class="tahun_aktif" value="{$tahunAktif}">
+
+        <div id="table-content-wilayah" style="display: none;">
+          <table class="infowindow table table-bordered">
+            <tbody>
+              <tr class="nama-kabkota">
+                <th class="col-left">Kabupaten/Kota</th>
+                <th class="col-right col-right-val-1">&nbsp;</th>
+              </tr>
+              <tr>
+                <th class="col-left">Provinsi</th>
+                <th class="col-right col-right-val-2">&nbsp;</th>
+              </tr>
+              <tr>
+                <th class="col-left">Jumlah Titik</th>
+                <th class="col-right col-right-val-3">&nbsp;</th>
+              </tr>
+              <tr>
+                <th colspan="2" class="col-right col-right-val-4 text-center">&nbsp;</th>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="table-content-titik" style="display: none;">
+          <table class="infowindow">
+            <tbody>
+              <tr>
+                <td class="col-left">Kode Titik</td>
+                <td class="col-right col-right-val-1">&nbsp;</td>
+              </tr>
+              <tr>
+                <td class="col-left">Nama Titik</td>
+                <td class="col-right col-right-val-2">&nbsp;</td>
+              </tr>
+              <tr>
+                <td class="col-left">Alamat</td>
+                <td class="col-right col-right-val-3">&nbsp;</td>
+              </tr>
+              <tr>
+                <td class="col-left">Komponen</td>
+                <td class="col-right col-right-val-4">&nbsp;</td>
+              </tr>
+              <tr>
+                <td class="col-left">Pelaksana</td>
+                <td class="col-right col-right-val-5">&nbsp;</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

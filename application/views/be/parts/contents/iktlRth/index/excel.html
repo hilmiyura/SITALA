@@ -1,0 +1,69 @@
+<table>
+	<thead>
+		<tr style="color: white;">
+			<th bgcolor="#1E9FC4" style="border: 1px solid black;">NO</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">DATA</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">VERIVIKASI</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">JENIS RTH</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">LUAS RTH</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">NAMA RTH</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">NAMA DESA</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">NAMA KECAMATAN</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">LATITUDE</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">LONGITUDE</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">SUMBER DATA</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">NOMOR SK</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">KETERANGAN</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">CATATAN</th>
+	</thead>
+	<tbody>
+		{foreach from=$viewExcel.data item=v key=k}
+		<tr>
+      <td style="border: 1px solid black;vertical-align:top;">{$page+$k}</td>
+			<td style="border: 1px solid black;vertical-align:top;">
+				{if $v.from_data > 0}
+					copy
+				{else}
+					excel
+				{/if}
+			</td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $v.verify == 1}
+          VERIFIED
+        {elseif $v.verify == 2}
+          REJECTED
+        {/if}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {foreach from=$jenisRth item=vi}
+          {if $vi.idx==$v.jenis_rth}
+            {$vi.name}
+          {/if}
+        {/foreach}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.luas_rth}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.nama_rth}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.nama_desa}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.nama_kecamatan}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.koordinat_lintang}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$v.koordinat_bujur}</td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {if $v.sumber_dana == 1}
+          APBN
+        {elseif $v.sumber_dana == 2}
+          APDB
+        {elseif $v.sumber_dana == 3}
+          SWASTA
+        {/if}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.nomor_sk}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.keterangan}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$v.catatan}</td>
+		</tr>
+		{foreachelse}
+		<tr style="color: white;">
+			<td colspan="13" align="center" bgcolor="#FA535D" style="border: 1px solid black;vertical-align:top;">BELUM ADA DATA</td>
+		</tr>
+		{/foreach}
+	</tbody>
+</table>

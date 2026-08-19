@@ -1,0 +1,113 @@
+{literal}
+<script type="text/javascript">
+	reset = () => {
+		$("#uid_pengumuman").val('');
+		$("#judul").val('');
+		$("#isi").val('');
+		$("#jawaban").val('');
+		$("#btn-lampiran").html('');
+		$("#topik").select2('val', '');
+		$("#status").select2('val', '');
+		$("#uid_topik").val('');
+		$("#nama_topik").val('');
+	}
+
+	$("#role_user").on("change", function() {
+		var attTo = $('option:selected', this).attr('for');
+		$(".regionalDiv").hide();
+		$(".provinsiDiv").hide();
+		$(".kabkotaDiv").hide();
+		if (attTo == 2) {
+			$(".provinsiDiv").show();
+		} else if (attTo == 3) {
+			$(".provinsiDiv").show();
+			$(".kabkotaDiv").show();
+		} else if (attTo == 4) {
+			$(".provinsiDiv").hide();
+			$(".kabkotaDiv").hide();
+			$(".regionalDiv").show();
+		}
+
+	});
+	$('#tambahData').on('show.bs.modal', function(event) {
+		reset();
+
+		var button = $(event.relatedTarget) // Button that triggered the modal
+		var userBy = button.data('uid');
+		var tbl = 'pengumuman';
+		var pK = 'uid_pengumuman';
+		if (userBy) {
+			$.ajax({
+				url: baseUrl + ctrl + "/editData/x/" + userBy + '/tbl/' + tbl + '/pk/' + pK,
+				method: "GET",
+				success: function(req) {
+					if (req.uid_pengumuman) {
+						$("#uid_pengumuman").val(req.uid_pengumuman);
+						$("#judul").val(req.judul);
+						$("#isi").val(req.isi);
+						$("#status").val(req.status);
+						if (req.lampiran) {
+							$("#btn-lampiran").html('<a href="' + req.lampiran + '" class="btn btn-primary" target="_blank"><i class="ft ft-download"></i></a>');
+						}
+					}
+				}
+			})
+		}
+
+	});
+	$('#tambahData2').on('show.bs.modal', function(event) {
+		reset();
+
+		var button = $(event.relatedTarget) // Button that triggered the modal
+		var userBy = button.data('uid');
+		var tbl = 'faq';
+		var pK = 'uid_faq';
+		if (userBy) {
+			console.log(baseUrl + ctrl + "/editData/x/" + userBy + '/tbl/' + tbl + '/pk/' + pK);
+			$.ajax({
+				url: baseUrl + ctrl + "/editData/x/" + userBy + '/tbl/' + tbl + '/pk/' + pK,
+				method: "GET",
+				success: function(req) {
+					if (req.uid_faq) {
+						$("#uid_faq").val(req.uid_faq);
+						$("#judul").val(req.judul);
+						setTimeout(function() {
+							$("#topik").select2('val', req.topik);
+							$("#status").select2('val', req.status);
+						}, 1000);
+						$("#isi").val(req.isi);
+						$("#jawaban").val(req.jawaban);
+						if (req.lampiran) {
+							$("#btn-lampiran").html('<a href="' + req.lampiran + '" class="btn btn-primary" target="_blank"><i class="ft ft-download"></i></a>');
+						}
+					}
+				}
+			})
+		}
+
+	});
+
+	$('#tambahData3').on('show.bs.modal', function(event) {
+		reset();
+
+		var button = $(event.relatedTarget) // Button that triggered the modal
+		var userBy = button.data('uid');
+		var tbl = 'rf_topik';
+		var pK = 'uid_topik';
+		if (userBy) {
+			console.log(baseUrl + ctrl + "/editData/x/" + userBy + '/tbl/' + tbl + '/pk/' + pK);
+			$.ajax({
+				url: baseUrl + ctrl + "/editData/x/" + userBy + '/tbl/' + tbl + '/pk/' + pK,
+				method: "GET",
+				success: function(req) {
+					if (req.uid_topik) {
+						$("#uid_topik").val(req.uid_topik);
+						$("#nama_topik").val(req.nama_topik);
+					}
+				}
+			})
+		}
+
+	});
+</script>
+{/literal}

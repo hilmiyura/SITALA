@@ -1,0 +1,108 @@
+{literal}
+	<script type="text/javascript">
+		reset = ()=>{
+			$("#uid").val("");
+			$("#nama").val("");
+			$("#alamat").val("");
+			$("#uid_provinsi").val("");
+			$("#uid_kabkota").val("").trigger("change");
+			$("#no_telepon").val("");
+			$("#email").val("");
+
+			$("#teregistrasi").attr("checked",false);
+			$("#teregistrasi_no_akreditasi").val("");
+			$("#teregistrasi_tanggal_berlaku_awal").val("");
+			$("#teregistrasi_tanggal_berlaku_akhir").val("");
+
+			$("#terakreditasi").attr("checked",false);
+			$("#terakreditasi_no_akreditasi").val("");
+			$("#terakreditasi_tanggal_berlaku_awal").val("");
+			$("#terakreditasi_tanggal_berlaku_akhir").val("");
+
+			$("#lainnya").attr("checked",false);
+			$("#lainnya_no_akreditasi").val("");
+			$("#lainnya_tanggal_berlaku_awal").val("");
+			$("#lainnya_tanggal_berlaku_akhir").val("");
+
+			$("#catatan").val("");
+		}
+
+		$('#tambahData').on('show.bs.modal', function (event) {
+			reset();
+			var button = $(event.relatedTarget) // Button that triggered the modal
+			var userBy = button.data('uid');
+			if(userBy){
+				$.ajax({
+					url		: baseUrl+ctrl+"/editData/x/"+userBy,
+					method	: "GET",
+					success	: function(req){
+						if(req.uid){
+							$("#uid").val(req.uid);
+							$("#nama").val(req.nama);
+							$("#alamat").val(req.alamat);
+							$("#uid_provinsi").val(req.uid_provinsi);
+							$("#uid_kabkota").val(req.uid_kabkota).trigger("change");
+							$("#no_telepon").val(req.no_telepon);
+							$("#email").val(req.email);
+
+							if(req.teregistrasi == 1){
+								$("#teregistrasi").attr("checked",true);
+							}
+							$("#teregistrasi_no_akreditasi").val(req.teregistrasi_no_akreditasi);
+							$("#teregistrasi_tanggal_berlaku_awal").val(req.teregistrasi_tanggal_berlaku_awal);
+							$("#teregistrasi_tanggal_berlaku_akhir").val(req.teregistrasi_tanggal_berlaku_akhir);
+
+							if(req.terakreditasi == 1){
+								$("#terakreditasi").attr("checked",true);
+							}
+							$("#terakreditasi_no_akreditasi").val(req.terakreditasi_no_akreditasi);
+							$("#terakreditasi_tanggal_berlaku_awal").val(req.terakreditasi_tanggal_berlaku_awal);
+							$("#terakreditasi_tanggal_berlaku_akhir").val(req.terakreditasi_tanggal_berlaku_akhir);
+
+							if(req.lainnya == 1){
+								$("#lainnya").attr("checked",true);
+							}
+							$("#lainnya_no_akreditasi").val(req.lainnya_no_akreditasi);
+							$("#lainnya_tanggal_berlaku_awal").val(req.lainnya_tanggal_berlaku_awal);
+							$("#lainnya_tanggal_berlaku_akhir").val(req.lainnya_tanggal_berlaku_akhir);
+
+							$("#catatan").val(req.catatan);
+						}
+					}
+				});
+			}
+		});
+		$("#uid_kabkota").on("change", function(){
+			var provinsi = $('option:selected', this).attr('provinsi');
+			$("#uid_provinsi").val(provinsi);
+		});
+
+		$(".verifikasi-lab").on("change", function(){
+			// var lab = $('option:selected', this).attr('lab');
+			var lab = $(this).attr('lab');
+			var val = $(this).val();
+			val  = (val ? val : 0);
+			if(lab){
+				var fd = new FormData();
+				fd.append('uid', lab);
+				fd.append('verifikasi', val);
+				$.ajax({
+					url: baseUrl + "refLab/verifikasi",
+					type: 'POST',
+					data: fd,
+					contentType: false,
+					processData: false,
+					success: function(response) {
+						var res = (JSON.parse(response));
+						if (res.statusCode == 200) {
+							swal("success", "Berhasil Verifikasi", "success");
+						}else{
+							swal("success", "Gagal Verifikasi", "error");
+						}
+					}
+				});
+			}
+		});
+
+	</script>
+{/literal}

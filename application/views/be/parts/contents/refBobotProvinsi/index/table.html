@@ -1,0 +1,64 @@
+<div class="row">
+  <div class="col-xl-12 col-lg-12 col-md-12">
+    <div class="form-group row mb-0">
+      <div class="col-md-12">
+        <div class="form-group row mb-2">
+          <div class="col-md-2">
+            <select class="form-control select2 src_tahun" name="form[tahun]" required="required">
+              <option value=""> --PILIH TAHUN-- </option>
+              {for $foo=2015 to ($thisYear+5)}
+              <option value="{$foo}" {if $foo==$src_tahun}selected{/if}> {$foo} </option>
+              {/for}
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="table-responsive freeze-table" style="padding: 8px; border: 1px solid #f4f5fa">
+  <table class="table">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th class="v-middle">NO</th>
+        <th class="v-middle">PROVINSI</th>
+        <th class="v-middle">TAHUN</th>
+        <th class="v-middle">BOBOT</th>
+        <th class="v-middle">BOBOT IKAL</th>
+      </tr>
+    </thead>
+    <tbody>
+      {counter start=$page print=false}
+      {foreach from=$view item=v key=k}
+      <tr >
+        <td class="text-center">{$k+1}</td>
+        <td>{$v.nama_propinsi}</td>
+        <td>{$v.tahun}</td>
+        <td>
+          {if $me.role_user == 0}
+            <input type="number" type="any" style="width:180px;" class="form-control onUpdate" provinsi-nama="{$v.nama_propinsi}" provinsi="{$v.kd_propinsi}" tahun="{$v.tahun}" field="bobot" value="{$v.bobot}">
+          {else}
+              <span>{$v.bobot}</span>
+          {/if}
+        </td>
+        <td>
+          {if $me.role_user == 0}
+            <input type="number" type="any" style="width:180px;" class="form-control onUpdate" provinsi-nama="{$v.nama_propinsi}" provinsi="{$v.kd_propinsi}" tahun="{$v.tahun}" field="bobot_ikal" value="{$v.bobot_ikal}">
+          {else}
+              <span>{$v.bobot_ikal}</span>
+          {/if}
+        </td>
+      </tr>
+      {foreachelse}
+      <tr>
+        <td colspan="4" class="p-0">
+          <div class="alert alert-danger text-center">
+            <strong>Tidak Ada Data</strong>
+          </div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+  </table>
+  {include file="parts/block/block_pagination.html"}
+</div>

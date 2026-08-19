@@ -1,0 +1,293 @@
+{if $me.role_user == 0 || $me.role_user == 1}
+<div class="row">
+	<div class="col-xl-12 col-lg-12 col-md-12">
+		<div class="row">
+			<div class="col-md-10">
+				<ul class="nav nav-tabs">
+					{if ($me.role_user == 3 || $me.role_user == 2 || $me.role_user == 1 || $me.role_user == 0) && $tipe == 1}
+					<li class="nav-item">
+						<a class="nav-link active" id="base-tab1" data-toggle="tab" aria-controls="tab1" href="#tab1" aria-expanded="true">Langit Biru</a>
+					</li>
+					{/if}
+					{if ($me.role_user == 2 || $me.role_user == 1 || $me.role_user == 0) && $tipe == 1}
+					<li class="nav-item">
+						<a class="nav-link" id="base-tab2" data-toggle="tab" aria-controls="tab2" href="#tab2" aria-expanded="true">Pantai Bersih</a>
+					</li>
+					{/if}
+					{if ($me.role_user == 3 || $me.role_user == 2 || $me.role_user == 1 || $me.role_user == 0) && $tipe == 1}
+					<li class="nav-item">
+						<a class="nav-link" id="base-tab3" data-toggle="tab" aria-controls="tab3" href="#tab3" aria-expanded="true">Program Kali Bersih</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="base-tab4" data-toggle="tab" aria-controls="tab4" href="#tab4" aria-expanded="true">Indonesia Hijau</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="base-tab5" data-toggle="tab" aria-controls="tab5" href="#tab5" aria-expanded="true">Gambut Lestari</a>
+					</li>
+					{/if}
+				</ul>
+			</div>
+			<div class="col-md-2">
+				<ul class="nav justify-content-end">
+					<li class="nav-item">
+						<a class="nav-link btn btn-info" href="{$baseUrl}{$ctrl}"><i class="ft-arrow-left"></i> Back</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="tab-content px-0 pt-1">
+			<div role="tabpanel" class="tab-pane active" id="tab1" aria-expanded="true" aria-labelledby="base-tab1">
+				<h5 class="my-2 bold">{str_replace("%20"," ",trim($nama_kabkot))} | Provinsi {str_replace("%20"," ",trim($nama_propinsi))}</h5>
+				<h5 class="my-2">Tahun : {$tahun} | Download Excel : <button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-excel1"><i class="ft-download"></i></button></h5>
+				{if $parent != ""}
+				<div class="form-wrapper1">
+					{include file="parts/contents/$ctrl/$act/admin_tab1.html"}
+				</div>
+				{/if}
+			</div>
+			<div role="tabpanel" class="tab-pane" id="tab2" aria-expanded="true" aria-labelledby="base-tab2">
+				<h5 class="my-2">Provinsi {str_replace("%20"," ",trim($nama_propinsi))}</h5>
+				<h5 class="my-2">Tahun : {$tahun} | Download Excel : <button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-excel2"><i class="ft-download"></i></button></h5>
+				{if $parent != ""}
+				<div class="form-wrapper2">
+					{include file="parts/contents/$ctrl/$act/admin_tab2.html"}
+				</div>
+				{/if}
+			</div>
+			<div role="tabpanel" class="tab-pane" id="tab3" aria-expanded="true" aria-labelledby="base-tab3">
+				<h5 class="my-2 bold">{str_replace("%20"," ",trim($nama_kabkot))} | Provinsi {str_replace("%20"," ",trim($nama_propinsi))}</h5>
+				<h5 class="my-2">Tahun : {$tahun} | Download Excel : <button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-excel3"><i class="ft-download"></i></button></h5>
+				{if $parent2 != ""}
+				<div class="form-wrapper3">
+					{include file="parts/contents/$ctrl/$act/admin_tab3.html"}
+				</div>
+				{/if}
+			</div>
+			<div role="tabpanel" class="tab-pane" id="tab4" aria-expanded="true" aria-labelledby="base-tab4">
+				<h5 class="my-2 bold">{str_replace("%20"," ",trim($nama_kabkot))} | Provinsi {str_replace("%20"," ",trim($nama_propinsi))}</h5>
+				<h5 class="my-2">Tahun : {$tahun} | Download Excel : <button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-excel4"><i class="ft-download"></i></button></h5>
+				{if $parent3 != ""}
+				<div class="form-wrapper4">
+					{include file="parts/contents/$ctrl/$act/admin_tab4.html"}
+				</div>
+				{/if}
+			</div>
+			<div role="tabpanel" class="tab-pane" id="tab5" aria-expanded="true" aria-labelledby="base-tab5">
+				<h5 class="my-2 bold">{str_replace("%20"," ",trim($nama_kabkot))} | Provinsi {str_replace("%20"," ",trim($nama_propinsi))}</h5>
+				<h5 class="my-2">Tahun : {$tahun} | Download Excel : <button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-excel5"><i class="ft-download"></i></button></h5>
+				{if $parent4 != ""}
+				<div class="form-wrapper5">
+					{include file="parts/contents/$ctrl/$act/admin_tab5.html"}
+				</div>
+				{/if}
+			</div>
+		</div>
+	</div>
+</div>
+{else}
+<div class="row">
+	<div class="col-xl-12 col-lg-12 col-md-12">
+		<div class="row">
+			<div class="col-md-10">
+				<ul class="nav nav-tabs">
+					{if $me.role_user == 3 || $me.role_user == 2 || $me.role_user == 1 || $me.role_user == 0}
+					<li class="nav-item">
+						<a class="nav-link {if $tipe == 1 || $tipe == ''}active{/if}" id="base-tab1" data-toggle="tab" aria-controls="tab1" href="#tab1" aria-expanded="true">Langit Biru</a>
+					</li>
+					{/if}
+					{if $me.role_user == 2 || $me.role_user == 1 || $me.role_user == 0}
+					<li class="nav-item">
+						<a class="nav-link 	{if $tipe == 2} active{/if}" id="base-tab2" data-toggle="tab" aria-controls="tab2" href="#tab2" aria-expanded="true">Pantai Bersih</a>
+					</li>
+					{/if}
+					{if $me.role_user == 3 || $me.role_user == 2 || $me.role_user == 1 || $me.role_user == 0}
+					<li class="nav-item">
+						<a class="nav-link {if $tipe == 3}active{/if}" id="base-tab3" data-toggle="tab" aria-controls="tab3" href="#tab3" aria-expanded="true">Program Kali Bersih</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link {if $tipe == 4}active{/if}" id="base-tab4" data-toggle="tab" aria-controls="tab4" href="#tab4" aria-expanded="true">Indonesia Hijau</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link {if $tipe == 5}active{/if}" id="base-tab5" data-toggle="tab" aria-controls="tab5" href="#tab5" aria-expanded="true">Gambut Lestari</a>
+					</li>
+					{/if}
+				</ul>
+			</div>
+			<div class="col-md-2">
+				<ul class="nav justify-content-end">
+					<li class="nav-item">
+						<a class="nav-link btn btn-info" href="{$baseUrl}{$ctrl}"><i class="ft-arrow-left"></i> Back</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="tab-content px-0 pt-1">
+			<div role="tabpanel" class="tab-pane {if $tipe == 1 || $tipe == ''}active{/if}" id="tab1" aria-expanded="true" aria-labelledby="base-tab1">
+				{if $me.role_user == 0 || $me.role_user == 1}
+				<h5 class="my-2">Tahun : {$tahun}</h5>
+				{else}
+				<form class="" action="" method="POST" enctype="multipart/form-data">
+					<input type="hidden" name="form[tipe]" value="1">
+					<div class="row mt-2">
+						<div class="col-md-1">
+							<label for="">
+								<h5>Tahun</h5>
+							</label>
+						</div>
+						<div class="col-md-3">
+							<select class="form-control select2" name="form[tahun]" id="tahun1" style="width:100%;" required>
+								<option value="">-Pilih-</option>
+								{for $foo=2015 to ($thisYear)}
+								<option value="{$foo}" {if $foo==$tahun}selected{/if}> {$foo} </option>
+								{/for}
+							</select>
+						</div>
+						<div class="col-md-2">
+							<button type="submit" class="btn btn-primary" name="submit">Selanjutnya</button>
+						</div>
+					</div>
+				</form>
+				{/if}
+				{if $parent != "" && $tipe == 1}
+				<div class="form-wrapper1">
+					<h5 class="my-2">Langit Biru :</h5>
+					{include file="parts/contents/$ctrl/$act/tab1.html"}
+				</div>
+				{/if}
+			</div>
+			<div role="tabpanel" class="tab-pane {if $tipe == 2}active{/if}" id="tab2" aria-expanded="true" aria-labelledby="base-tab2">
+				{if $me.role_user == 0 || $me.role_user == 1}
+				<h5 class="my-2">Tahun : {$tahun}</h5>
+				{else}
+				<form class="" action="" method="POST" enctype="multipart/form-data">
+					<input type="hidden" name="form[tipe]" value="2">
+					<div class="row mt-2">
+						<div class="col-md-1">
+							<label for="">
+								<h5>Tahun</h5>
+							</label>
+						</div>
+						<div class="col-md-3">
+							<select class="form-control select2" name="form[tahun]" id="tahun2" style="width:100%;" required>
+								<option value="">-Pilih-</option>
+								{for $foo=2015 to ($thisYear)}
+								<option value="{$foo}" {if $foo==$tahun}selected{/if}> {$foo} </option>
+								{/for}
+							</select>
+						</div>
+						<div class="col-md-2">
+							<button type="submit" class="btn btn-primary" name="submit" id="next2">Selanjutnya</button>
+						</div>
+					</div>
+				</form>
+				{/if}
+				{if $parent != "" && $tipe == 2}
+				<div class="form-wrapper2">
+					<h5 class="my-2">Pantai Bersih :</h5>
+					{include file="parts/contents/$ctrl/$act/tab2.html"}
+				</div>
+				{/if}
+			</div>
+			<div role="tabpanel" class="tab-pane {if $tipe == 3}active{/if}" id="tab3" aria-expanded="true" aria-labelledby="base-tab3">
+				{if $me.role_user == 0 || $me.role_user == 1}
+				<h5 class="my-2">Tahun : {$tahun}</h5>
+				{else}
+				<form class="" action="" method="POST" enctype="multipart/form-data">
+					<input type="hidden" name="form[tipe]" value="3">
+					<div class="row mt-2">
+						<div class="col-md-1">
+							<label for="">
+								<h5>Tahun</h5>
+							</label>
+						</div>
+						<div class="col-md-3">
+							<select class="form-control select2" name="form[tahun]" id="tahun3" style="width:100%;" required>
+								<option value="">-Pilih-</option>
+								{for $foo=2015 to ($thisYear)}
+								<option value="{$foo}" {if $foo==$tahun}selected{/if}> {$foo} </option>
+								{/for}
+							</select>
+						</div>
+						<div class="col-md-2">
+							<button type="submit" class="btn btn-primary" name="submit" id="next3">Selanjutnya</button>
+						</div>
+					</div>
+				</form>
+				{/if}
+				{if $parent != "" && $tipe == 3}
+				<div class="form-wrapper3">
+					<h5 class="my-2">Program Kali Bersih :</h5>
+					{include file="parts/contents/$ctrl/$act/tab3.html"}
+				</div>
+				{/if}
+			</div>
+			<div role="tabpanel" class="tab-pane {if $tipe == 4}active{/if}" id="tab4" aria-expanded="true" aria-labelledby="base-tab4">
+				{if $me.role_user == 0 || $me.role_user == 1}
+				<h5 class="my-2">Tahun : {$tahun}</h5>
+				{else}
+				<form class="" action="" method="POST" enctype="multipart/form-data">
+					<input type="hidden" name="form[tipe]" value="4">
+					<div class="row mt-2">
+						<div class="col-md-1">
+							<label for="">
+								<h5>Tahun</h5>
+							</label>
+						</div>
+						<div class="col-md-3">
+							<select class="form-control select2" name="form[tahun]" id="tahun4" style="width:100%;" required>
+								<option value="">-Pilih-</option>
+								{for $foo=2015 to ($thisYear)}
+								<option value="{$foo}" {if $foo==$tahun}selected{/if}> {$foo} </option>
+								{/for}
+							</select>
+						</div>
+						<div class="col-md-2">
+							<button type="submit" class="btn btn-primary" name="submit" id="next4">Selanjutnya</button>
+						</div>
+					</div>
+				</form>
+				{/if}
+				{if $parent != "" && $tipe == 4}
+				<div class="form-wrapper4">
+					<h5 class="my-2">Indonesia Hijau :</h5>
+					{include file="parts/contents/$ctrl/$act/tab4.html"}
+				</div>
+				{/if}
+			</div>
+			<div role="tabpanel" class="tab-pane {if $tipe == 5}active{/if}" id="tab5" aria-expanded="true" aria-labelledby="base-tab5">
+				{if $me.role_user == 0 || $me.role_user == 1}
+				<h5 class="my-2">Tahun : {$tahun}</h5>
+				{else}
+				<form class="" action="" method="POST" enctype="multipart/form-data">
+					<input type="hidden" name="form[tipe]" value="5">
+					<div class="row mt-2">
+						<div class="col-md-1">
+							<label for="">
+								<h5>Tahun</h5>
+							</label>
+						</div>
+						<div class="col-md-3">
+							<select class="form-control select2" name="form[tahun]" id="tahun5" style="width:100%;" required>
+								<option value="">-Pilih-</option>
+								{for $foo=2015 to ($thisYear)}
+								<option value="{$foo}" {if $foo==$tahun}selected{/if}> {$foo} </option>
+								{/for}
+							</select>
+						</div>
+						<div class="col-md-2">
+							<button type="submit" class="btn btn-primary" name="submit" id="next5">Selanjutnya</button>
+						</div>
+					</div>
+				</form>
+				{/if}
+				{if $parent != "" && $tipe == 5}
+				<div class="form-wrapper5">
+					<h5 class="my-2">Gambut Lestari :</h5>
+					{include file="parts/contents/$ctrl/$act/tab5.html"}
+				</div>
+				{/if}
+			</div>
+		</div>
+	</div>
+</div>
+{/if}

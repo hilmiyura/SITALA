@@ -1,0 +1,85 @@
+<div class="row mb-1">
+	<div class="col-md-3">
+		<button type="button" class="mr-1 mb-1 btn btn-outline-primary btn-min-width btn-glow" data-toggle="modal" data-target="#tambahData"><i class="ft-plus-circle"></i> Tambah Data</button>
+	</div>
+</div>
+{include file="parts/block/block_search.html"} 
+<div class="table-responsive table-border">
+	<table class="table">
+        <thead class="bg-info bg-darken-2 white">
+            <tr>
+                <th colspan="2"class="text-center" style="width: 70px;">#</th>
+                <th rowspan="2" class="v-middle">Pemantauan</th>
+                <th rowspan="2" class="v-middle">Provinsi</th>
+                <th rowspan="2" class="v-middle">Kab/Kota</th>
+                <th rowspan="2" class="v-middle">KRITERIA</th>
+                <th colspan="2" class="text-center">LUAS (HA)</th>
+            </tr>
+            <tr>
+            		<th width="50" class="text-center">Action</th>
+            		<th width="10" class="text-center">No</th>
+            		<th class="text-center">FLEG<br><sub>FUNGSI LINDUNG EKOSISTEM GAMBUT</sub></th>
+            		<th class="text-center">FBEG<br><sub>FUNGSI BUDIDAYA EKOSISTEM GAMBUT</sub></th>
+            </tr>
+        </thead>
+        <tbody>
+        		{foreach from=$view item=v}
+            		<tr>
+	                <th rowspan="6" class="text-center">
+                			<button class="btn border-secondary badge badge-danger round delete-dialog" data-uid="{$v.$primaryKey}" data-ajax="{$ctrl}/deletedData">
+                				<a href="javascript:void(0);" title="Delete">
+                					<i class="ft-trash-2"></i>
+                				</a>
+                			</button>
+                			<button class="btn border-secondary badge badge-warning round" data-toggle="modal" data-target="#tambahData" data-uid="{$v.$primaryKey}" title="Edit">
+                				<a href="javascript:void(0);"><i class="ft-edit"></i></a>
+                			</button>
+	                </th>
+	                <td rowspan="6" class="text-center">{counter}</td>
+	                <td rowspan="6">
+	                		{$v.alamat}<br>
+	                		<div class="badge badge-success">{$format->dateFormat($v.tanggal)}</div> 
+	                	</td>
+	                <td rowspan="6">{$v.nama_provinsi}</td>
+	                <td rowspan="6">{$v.nama_kabkota}</td>
+	                <th class="border-bottom-none">AREAL TERBAKAR</th>
+	                <td class="text-center border-bottom-none">{number_format($v.areal_terbakar_fleg,2,".",",")}</td>
+	                <td class="text-center border-bottom-none">{number_format($v.areal_terbakar_fbeg,2,".",",")}</td>
+	            </tr>
+	            <tr>
+	            		<th class="border-bottom-none">NON TERBAKAR</th>
+	                <td class="text-center border-bottom-none">{number_format($v.non_terbakar_fleg,2,".",",")}</td> 
+	                <td class="text-center border-bottom-none">{number_format($v.non_terbakar_fbeg,2,".",",")}</td>
+	            </tr>
+	            <tr class="amber darken-3">
+	            		<th>JUMLAH BURN</th>
+	                <th class="text-center">{number_format($v.jumlah_burn_fleg,2,".",",")}</th>
+	                <th class="text-center">{number_format($v.jumlah_burn_fbeg,2,".",",")}</th>
+	            </tr>
+	            <tr>
+	            		<th class="border-bottom-none">KANAL</th>
+	                <td class="text-center border-bottom-none">{number_format($v.kanal_fleg,2,".",",")}</td>
+	                <td class="text-center border-bottom-none">{number_format($v.kanal_fbeg,2,".",",")}</td>
+	            </tr>
+	            <tr>
+	            		<th class="border-bottom-none">NON KANAL</th>
+	                <td class="text-center border-bottom-none">{number_format($v.non_kanal_fleg,2,".",",")}</td>
+	                <td class="text-center border-bottom-none">{number_format($v.non_kanal_fbeg,2,".",",")}</td>
+	            </tr>
+	            <tr class="amber darken-3">
+	            		<th>JUMLAH KANAL</th> 
+	                	<th class="text-center">{number_format($v.jumlah_kanal_fleg,2,".",",")}</th>
+	                	<th class="text-center">{number_format($v.jumlah_kanal_fbeg,2,".",",")}</th>
+	            </tr>
+	        {foreachelse} 
+	        		<tr>
+	        			<td colspan="12">
+	        				<div class="alert alert-danger text-center">
+	        					<strong>Tidak Ada Data</strong>
+	        				</div>
+	        			</td>
+	        		</tr>
+            {/foreach}
+        </tbody>
+    </table>
+</div>

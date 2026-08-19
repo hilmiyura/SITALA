@@ -1,0 +1,59 @@
+{if $viewn}
+<div class="col-12 d-flex align-items-center justify-content-center m-2">
+  <div class="col-lg-4 col-md-6 col-10 box-shadow-2 p-0">
+    <div class="card border-grey border-lighten-3 px-1 py-1 box-shadow-3 m-0">
+      <div class="card-header border-0">
+        <div class="text-center">
+          <img style="width:10%;" src="assets/app-assets/images/logo/kw.png" alt="branding logo">
+        <!-- <i class="la la-map" style="font-size:30px !important;"></i> -->
+        </div>
+        <div class="font-medium-5  text-center mb-2">
+          Indeks Kualitas Lingkungan Hidup
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3"><b>IKA</b></div>
+            <div class="col-md-4"><b>{number_format($viewn.ika,2,".","")}</b></div>
+            {$ratings = $functions->rating($rating,number_format($viewn.ika,2,".",""))}
+            <div class="col-md-5">
+              <label class="badge badge-{$ratings.color}">{$ratings.rating}</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3"><b>IKU</b></div>
+            <div class="col-md-4"><b>{number_format($viewn.iku,2,".","")}</b></div>
+            {$ratings = $functions->rating($rating,number_format($viewn.iku,2,".",""))}
+            <div class="col-md-5">
+              <label class="badge badge-{$ratings.color}">{$ratings.rating}</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3"><b>IKL</b></div>
+            <div class="col-md-4"><b>{number_format($viewn.ikl,2,".","")}</b></div>
+            {$ratings = $functions->rating($rating,number_format($viewn.ikl,2,".",""))}
+            <div class="col-md-5">
+              <label class="badge badge-{$ratings.color}">{$ratings.rating}</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3"><b>IKAL</b></div>
+            <div class="col-md-4"><b>{number_format($viewn.ikal,2,".","")}</b></div>
+            {$ratings = $functions->rating($rating,number_format($viewn.ikal,2,".",""))}
+            <div class="col-md-5">
+              <label class="badge badge-{$ratings.color}">{$ratings.rating}</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3"><b>IKLH</b></div>
+            <div class="col-md-4"><b>{number_format($viewn.iklh,2,".","")}</b></div>
+            {$ratings = $functions->rating($rating,number_format($viewn.iklh,2,".",""))}
+            <div class="col-md-5">
+              <label class="badge badge-{$ratings.color}">{$ratings.rating}</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}

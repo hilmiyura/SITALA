@@ -1,0 +1,28 @@
+<div class="row box-content-dpsir">
+  {if $parent}
+  <div class="col-md-12 pt-1">
+    <select class="content-input-select-{$kategori}" kategori="{$kategori}" uid="{$uid}" parent="{if $parent}{$parent}{/if}">
+      <option value="DLH" {if $data.kategori_respon=='DLH' }selected{/if}>DLH</option>
+      <option value="LAINNYA" {if $data.kategori_respon=='LAINNYA' }selected{/if}>LAINNYA</option>
+    </select>
+  </div>
+  {/if}
+  <div class="col-md-12 pt-1 pb-1">
+    <textarea name="name" rows="5" class="form-control pl-1 pr-1 content-input-text-{$kategori}" kategori="{$kategori}" uid="{$uid}" parent="{if $parent}{$parent}{/if}">{if isset($data)}{$data.isian}{/if}</textarea>
+  </div>
+  {if $me.role_user <= 1} <div class="col-md-12 pt-1 pb-1">
+    <input type="file" id="file_uploads_{$kategori}" class="file_uploads" kategori="{$kategori}" uid="{$uid}" parent="">
+    <!-- <textarea name="name" rows="5" class="form-control pl-1 pr-1 content-input-text-{$kategori}" kategori="{$kategori}" uid="{$uid}" parent="{if $parent}{$parent}{/if}">{if isset($data)}{$data.isian}{/if}</textarea> -->
+</div>
+{/if}
+
+<input type="hidden" class="form-control pl-1 pr-1 content-input-lampiran-{$kategori}" kategori="{$kategori}" uid="{$uid}" parent="" value="{if isset($data)}{$data.isian_lampiran}{/if}">
+{if $lockAction == 0}
+<div class="col-md-12 pb-1">
+  <div class="pull-right">
+    <span title="tutup" class="pointer badge badge-warning close-form" kategori="{$kategori}" uid="{$uid}" parent="{if $parent}{$parent}{/if}"><i class="ft-x"></i></span>
+    <span title="simpan" class="pointer badge badge-info save-form" kategori="{$kategori}" uid="{$uid}" parent="{if $parent}{$parent}{/if}"><i class="ft-save"></i></span>
+  </div>
+</div>
+{/if}
+</div>

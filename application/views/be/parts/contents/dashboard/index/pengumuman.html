@@ -1,0 +1,68 @@
+<div class="modal fade text-left" id="default" tabindex="-1" role="dialog" aria-labelledby="basicModalLabel1" aria-hidden="false">
+  <div class="modal-dialog" style="max-width:800px;" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="basicModalLabel1">Pengumuman</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <section id="timeline" class="timeline-center timeline-wrapper">
+          <ul class="timeline">
+            {if !$pengumuman}
+            <h3 class="text-center" id="modal-popup">Tidak Ada Pengumuman</h3>
+            {else}
+            <li class="timeline-line"></li>
+            {foreach from=$pengumuman item=v key=k}
+            <li class="timeline-item {if $k==1}mt-3{/if}">
+              <div class="timeline-badge">
+                <span class="bg-danger bg-glow bg-darken-1" data-toggle="tooltip" data-placement="left" title="Company Profile">
+                  <i class="la la-smile-o"></i>
+                </span>
+              </div>
+              <div class="timeline-card card border-grey border-lighten-2">
+                <div class="card-header" style="width:220px;">
+                  <h4 class="card-title">
+                    <a>{$v.judul}</a>
+                  </h4>
+                  <div class="heading-elements">
+                    <ul class="list-inline d-block mb-0">
+                      <li>
+                        <a class="btn btn-sm btn-info box-shadow-3 round btn-min-width pull-right" style="background-color:#24C6DC;color:white;">{$v.tanggal}</a>
+                      </li>
+                    </ul>
+                  </div>
+                  <!-- <p class="card-subtitle text-muted mb-0 pt-1">
+                    <span class="font-small-3">{$v.tanggal}</span>
+                  </p> -->
+                </div>
+                <hr>
+                <div class="card-content">
+                  <div class="card-body pt-0">
+                    <blockquote class="card-bodyquote" id="module">
+                      {if $v.lampiran}
+                      <footer class="pb-1 mb-1 border-bottom-blue-grey border-bottom-lighten-5">Lampiran
+                        <cite title="Download"> - <a href="{$baseUrl}uploads/pengumuman/{$v.lampiran}" class="btn btn-primary btn-sm" target="_blank"><i class="ft ft-download"></i></a></cite>
+                      </footer>
+                      {/if}
+                      <div class="box-content">
+                        <p class="card-text">{$v.isi}</p>
+                        <!-- <a href="javascript:void();" class="btn btn-primary readmore-btn">Read More</a> -->
+                      </div>
+                    </blockquote>
+                  </div>
+                </div>
+              </div>
+            </li>
+            {/foreach}
+            {/if}
+          </ul>
+        </section>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn grey btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

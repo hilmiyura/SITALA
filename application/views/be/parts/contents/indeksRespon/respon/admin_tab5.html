@@ -1,0 +1,76 @@
+<table class="table table-bordered" id="table-gl" data-cols-width="50,50,20,30">
+  <tr class="bg-info text-white">
+    <th data-b-a-s="thin" data-f-bold="true" data-fill-color="f6f8fa" data-a-h="center" class="text-center">INDIKATOR</th>
+    <th data-b-a-s="thin" data-f-bold="true" data-fill-color="f6f8fa" data-a-h="center" class="text-center">KETERANGAN</th>
+    <th data-b-a-s="thin" data-f-bold="true" data-fill-color="f6f8fa" data-a-h="center" class="text-center">ISIAN</th>
+    <th data-b-a-s="thin" data-f-bold="true" data-fill-color="f6f8fa" data-a-h="center" class="text-center">BUKTI</th>
+  </tr>
+  {assign var="data_ir" value=$data_ir_5}
+  {foreach from=$irf_gambut item=v key=k}
+  <form method="POST" enctype="multipart/form-data">
+    <tr class="cursor-pointer" data-toggle="collapse" href=".collapse5-{$v.id}" role="button" aria-expanded="false" aria-controls=".collapse5-{$v.id}">
+      <td data-a-wrap="true" data-a-v="top" colspan="4" class="bg-light"><b>{$v.indikator}</b></td>
+    </tr>
+    {foreach from=$v.child1 item=v1}
+    {if $v1.indikator != '-'}
+    <tr class="collapse collapse5-{$v.id} show">
+      <td data-a-wrap="true" data-a-v="top" colspan="4"><b>{$v1.indikator}<b></td>
+    </tr>
+    {/if}
+    {foreach from=$v1.child2 item=v2}
+    <tr class="collapse collapse5-{$v.id} show">
+      <td data-a-wrap="true" data-a-v="top" rowspan="{$v2.tchild3}" width="25%">{$v2.indikator}</td>
+    </tr>
+    {foreach from=$v2.child3 item=v3}
+    <tr class="collapse collapse5-{$v.id} show">
+      <td data-a-wrap="true" data-a-v="top" width="25%">{$v3.indikator}</td>
+      <td data-a-wrap="true" data-a-v="top">
+        <input type="hidden" name="fromTab" value="1">
+        <input type="hidden" name="fromScroll" class="scrollTobtn">
+        <input type="hidden" name="form[parent_uid][]" value="{$parent}">
+        <input type="hidden" name="form[ref_uid][]" value="{$v3.id}">
+        <input type="hidden" name="form[tipe][]" value="{$tipe}">
+        <input type="hidden" name="form[indeks_uid][]" value="{$data_ir[$v3.id].indeks_uid}">
+        {if $v3.input_type == 1}
+        {if $data_ir[$v3.id].isian[0]}
+        {$data_ir[$v3.id].isian[0]}
+        {else}
+        -
+        {/if}
+        {else if $v3.input_type == 2}
+        {if $data_ir[$v3.id].isian[0] != ""}{$data_ir[$v3.id].isian[0]}{else}-{/if} / {if $data_ir[$v3.id].isian[1] != ""}{$data_ir[$v3.id].isian[1]}{else}-{/if}
+        {else if $v3.input_type == 4}
+        <p class="mb-0">Revegetasi:</p>
+        {if $data_ir[$v3.id].isian[0] != ""}{$data_ir[$v3.id].isian[0]}{else}-{/if} / {if $data_ir[$v3.id].isian[1] != ""}{$data_ir[$v3.id].isian[1]}{else}-{/if} ha
+        <p class="mb-0 mt-1">Restorasi Hidrologis/Re-wetting:</p>
+        {if $data_ir[$v3.id].isian[2] != ""}{$data_ir[$v3.id].isian[2]}{else}-{/if} / {if $data_ir[$v3.id].isian[3] != ""}{$data_ir[$v3.id].isian[3]}{else}-{/if} ha
+        <p class="mb-0 mt-1">Revitalisasi:</p>
+        {if $data_ir[$v3.id].isian[4] != ""}{$data_ir[$v3.id].isian[4]}{else}-{/if} / {if $data_ir[$v3.id].isian[5] != ""}{$data_ir[$v3.id].isian[5]}{else}-{/if} ha
+        <!-- {if $data_ir[$v3.id].isian[6]}{$data_ir[$v3.id].isian[6]}{else}-{/if} / {if $data_ir[$v3.id].isian[7]}{$data_ir[$v3.id].isian[7]}{else}-{/if} -->
+        {else}
+        {foreach from=$pilihan item=c}
+        {if $data_ir[$v3.id].isian[0]==$c}{$c}{/if}
+        {/foreach}
+        {/if}
+      </td>
+      <td data-a-wrap="true" data-a-v="top" width="10%">
+        {if $v3.bukti}
+        {foreach from=$v3.bukti item=b key=k2}
+        {$b}
+        {if $data_ir[$v3.id].bukti[$k2]}
+        <a title="Download File" class="btn btn-primary btn-sm" href="{$baseUrl}uploads/respon/{$data_ir[$v3.id].bukti[$k2]}" target="_blank">LAMPIRAN</a>
+        {else}
+        <br>
+        <span class="badge badge-danger badge-sm">Tidak Ada Lampiran</span>
+        {/if}
+        <hr>
+        {/foreach}
+        {/if}
+      </td>
+    </tr>
+    {/foreach}
+    {/foreach}
+    {/foreach}
+  </form>
+  {/foreach}
+</table>

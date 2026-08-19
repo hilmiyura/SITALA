@@ -1,0 +1,35 @@
+<script type="text/javascript">
+  $(".onset-type").on("focusout", function(){
+    var field = $(this).attr("fd");
+    var value = $(this).val();
+    var tahun   = $(this).attr("tahun");
+    var type   = $(this).attr("types");
+    var prov   = $(this).attr("prov");
+    var kab   = $(this).attr("kab");
+		setValueDetailProfil(tahun,value,field,type,prov,kab);
+  });
+
+	function setValueDetailProfil(tahun,value,field,type,prov,kab){
+		var formSubmit = {
+      field:field,
+      value:value,
+			tahun:tahun,
+      type:type,
+      prov:prov,
+      kab:kab,
+    }
+    $.ajax({
+      url: baseUrl + ctrl + '/setValueDetail',
+      type: 'POST',
+      data: formSubmit,
+      success: function(response) {
+        var res = JSON.parse(response);
+        if(res.statusCode == 200){
+          toastr.success(res.message, 'Success');
+        }else{
+          toastr.error(res.message, 'Warning');
+        }
+      }
+    });
+	}
+</script>

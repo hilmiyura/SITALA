@@ -1,0 +1,63 @@
+<!-- <style>
+	table thead tr th {
+		border: 1px solid black;
+	}
+
+	table tbody tr td {
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style> -->
+<table>
+  <thead>
+    <tr style="color: white;">
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">NO</th>
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">KODE LOKASI</th>
+      <!-- <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">PELAKSANA PEMANTAUAN</th> -->
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">TAHUN</th>
+      <!-- <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">KOMPONEN PELAPORAN</th> -->
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">NAMA LOKASI</th>
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">ALAMAT</th>
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">KAB/KOTA</th>
+      <th rowspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">PROVINSI</th>
+      <th colspan="2" bgcolor="#1E9FC4" style="border: 1px solid black;">KOORDINAT</th>
+    </tr>
+    <tr style="color: white;">
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">LATITUDE</th>
+      <th bgcolor="#1E9FC4" style="border: 1px solid black;">LONGITUDE</th>
+    </tr>
+  </thead>
+  <tbody>
+    {foreach from=$viewExcel.data item=data}
+    <tr>
+      <td style="border: 1px solid black;vertical-align:top;">{counter}</td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.kode_lokasi}
+      </td>
+      <!-- <td style="border: 1px solid black;vertical-align:top;">
+        {$data.name_pelaksana}
+      </td> -->
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.tahun}
+      </td>
+      <!-- <td style="border: 1px solid black;vertical-align:top;">
+        {$data.name}
+      </td> -->
+      <td style="border: 1px solid black;vertical-align:top;">
+        <b>{$data.alamat}</b>
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">
+        {$data.alamat_detail}
+      </td>
+      <td style="border: 1px solid black;vertical-align:top;">{if $data.nama_kabkota}{$data.nama_kabkota}{else}-{/if}</td>
+      <td style="border: 1px solid black;vertical-align:top;">{$data.nama_provinsi}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$data.latitude}</td>
+      <td style="border: 1px solid black;vertical-align:top;">'{$data.longitude}</td>
+    </tr>
+    {foreachelse}
+    <tr style="color: white;">
+      <td colspan="7" align="center" bgcolor="#FA535D" style="border: 1px solid black;vertical-align:top;">BELUM ADA DATA</td>
+    </tr>
+    {/foreach}
+  </tbody>
+</table>

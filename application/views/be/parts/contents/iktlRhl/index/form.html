@@ -1,0 +1,99 @@
+<!-- modal catatan -->
+<div class="modal text-left" id="tambahData" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data RHL
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
+        <div class="modal-body">
+          <input type="hidden" name="pelaporan_iktl_uid" value="{$uid_pelaporan_iktl}">
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1">
+              <label for="name">Data Excel *</label>
+              <input type="file" name="file" class="form-control">
+              <small>
+                <p class="text-danger mb-0">*Upload file max 10 Mb.</p>
+                <p><a href="{$baseUrl}temp/format_excel/template_rhl_upload_v1.xls?v{$time}" target="_blank">Download template upload</a></p>
+              </small>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="submit" name="submit" value="submit" class="btn btn-danger simpan-catatan-verifikator">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal text-left" id="copyData" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Copy Data RHL
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
+        <div class="modal-body">
+          <input type="hidden" name="pelaporan_iktl_uid" value="{$uid_pelaporan_iktl}">
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1">
+              <label for="periode">Copy Dari periode pelaporan *</label>
+              <br>
+              <select class="form-control select2" name="periode" style="width:60%" required>
+                {foreach from=$data_history['data'] item=vs}
+                  <option value="{$vs['uid_pelaporan_iktl']}">{$vs['tanggal']}</option>
+                {/foreach}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="submit" name="copy" value="copy" class="btn btn-danger simpan-catatan-verifikator">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{if isset($listExport)}
+<div class="modal text-left" id="unduhDataExcel" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-download-cloud"></i> Download Excel
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row d-flex">
+          {foreach from=$listExport item=v key=k}
+          <div class="list-group col-md-3" style="margin-left: 15px; padding: 0;">
+            <a href="{$baseUrl}iktlRhl/index/x/{$uid_pelaporan_iktl|base64_encode}/export/1/offset/{$v.offset_start}/search/{$search_json}/print/{time()}" class="list-group-item">
+              <i class="ft-file"></i> EXCEL {$k}
+              <p><small>(BARIS : {$v.offset_start}-{$v.offset_end})</small></p>
+            </a>
+          </div>
+          {/foreach}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}

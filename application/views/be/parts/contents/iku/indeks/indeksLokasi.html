@@ -1,0 +1,241 @@
+<form method="post" class="mb-1">
+	<div class="row">
+		<div class="col-md-9 mb-1">
+			<input type="hidden" class="form-control" name="form[lokasi_show]" value="1">
+			<input type="text" class="form-control" name="form[keyword]" placeholder="Masukan kata kunci" value="{$search.keyword}">
+		</div>
+		{if $me.role_user==2}
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2" disabled name="form[src_reg]" style="width:100%">
+				{foreach from=$regional item=i}
+				<option value="{$i.kd_regional}" selected> {$i.ur_regional} </option>
+				{/foreach}
+			</select>
+		</div>
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2 provinsi_select2" disabled id="src-provinsi2" to="src-kabkota2" name="form[src_prop]" style="width:100%">
+				<option value="">{$me.name}</option>
+			</select>
+		</div>
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2" id="src-kabkota2" name="form[src_kabkota2]" style="width:100%">
+				<option value="">--PILIH KAB/KOTA--</option>
+				{if $search.src_kabkota2}
+				{foreach from=$kabkotaSelect2 item=i}
+				<option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota2}selected{/if}> {$i.nama_kabkot}
+				</option>
+				{/foreach}
+				{/if}
+			</select>
+		</div>
+		{elseif $me.role_user==3}
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2" disabled name="form[src_reg]" style="width:100%">
+				{foreach from=$regional item=i}
+				<option value="{$i.kd_regional}" selected> {$i.ur_regional} </option>
+				{/foreach}
+			</select>
+		</div>
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2" disabled name="form[src_prop]" style="width:100%">
+				{foreach from=$provinsi item=i}
+				<option value="{$i.kd_propinsi}" selected> {$i.nama_propinsi} </option>
+				{/foreach}
+			</select>
+		</div>
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2" disabled id="src-kabkota2" name="form[src_kabkota2]" style="width:100%">
+				<option value="">{$me.name}</option>
+			</select>
+		</div>
+		{elseif $me.role_user==4}
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2 regional_select2" disabled to="src-provinsi2" name="form[src_reg]" style="width:100%">
+				<option value=""> {$me.name} </option>
+			</select>
+		</div>
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2 provinsi_select2" id="src-provinsi2" to="src-kabkota2" name="form[src_prop]" style="width:100%">
+				<option value=""> --PILIH PROVINSI-- </option>
+				{if $search.src_prop}
+				{foreach from=$provinsiSelect2 item=i}
+				<option value="{$i.kd_propinsi}" {if $i.kd_propinsi==$search.src_prop}selected{/if}> {$i.nama_propinsi}
+				</option>
+				{/foreach}
+				{/if}
+			</select>
+		</div>
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2" id="src-kabkota2" name="form[src_kabkota2]" style="width:100%">
+				<option value="">--PILIH KAB/KOTA--</option>
+				{if $search.src_kabkota2}
+				{foreach from=$kabkotaSelect2 item=i}
+				<option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota2}selected{/if}> {$i.nama_kabkot}
+				</option>
+				{/foreach}
+				{/if}
+			</select>
+		</div>
+		{else}
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2 regional_select2" to="src-provinsi2" name="form[src_reg]" style="width:100%">
+				<option value=""> --SEMUA REGIONAL-- </option>
+				{foreach from=$regSelect item=i}
+				<option value="{$i.kd_regional}" {if $i.kd_regional==$search.src_reg}selected{/if}> {$i.ur_regional}</option>
+				{/foreach}
+			</select>
+		</div>
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2 provinsi_select2" id="src-provinsi2" to="src-kabkota2" name="form[src_prop]" style="width:100%">
+				<option value=""> --PILIH PROVINSI-- </option>
+				{if $search.src_prop}
+				{foreach from=$provinsiSelect2 item=i}
+				<option value="{$i.kd_propinsi}" {if $i.kd_propinsi==$search.src_prop}selected{/if}> {$i.nama_propinsi}
+				</option>
+				{/foreach}
+				{/if}
+			</select>
+		</div>
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2" id="src-kabkota2" name="form[src_kabkota2]" style="width:100%">
+				<option value="">--PILIH KAB/KOTA--</option>
+				{if $search.src_kabkota2}
+				{foreach from=$kabkotaSelect2 item=i}
+				<option value="{$i.kd_kota}" {if $i.kd_kota==$search.src_kabkota2}selected{/if}> {$i.nama_kabkot}
+				</option>
+				{/foreach}
+				{/if}
+			</select>
+		</div>
+		{/if}
+		<!-- <div class="col-md-3 mb-1">
+			<select class="form-control select2" name="form[src_level]" style="width:100%">
+				<option value=""> --PILIH PELAKSANA PEMANTAUAN-- </option>
+				<option value="1" {if 1==$search.src_level}selected{/if}>PUSAT</option>
+				<option value="2" {if 2==$search.src_level}selected{/if}>PROVINSI</option>
+				<option value="3" {if 3==$search.src_level}selected{/if}>KABUPATEN/KOTA</option>
+				<option value="4" {if 4==$search.src_level}selected{/if}>REGIONAL</option>
+			</select>
+		</div> -->
+		<div class="col-md-3 mb-1">
+			<select class="form-control select2 tahun-global-src-2" name="form[tahun]" required="required" style="width:100%">
+				<option value=""> --PILIH TAHUN-- </option>
+				{for $foo=2015 to $thisYear}
+				<option value="{$foo}" {if $foo==$search.tahun}selected{/if}> {$foo} </option>
+				{/for}
+			</select>
+		</div>
+		<div class="col-md-3 mb-1">
+			<div class="btn-group btn-block" role="group" aria-label="Basic example">
+				<button type="submit" name="search" value="1" class="btn btn-info">
+					<i class="ft-search"></i> CARI
+				</button>
+				<a href="{$baseUrl}{$ctrl}/{$act}" class="btn btn-secondary"><i class="ft-refresh-cw"></i> RESET</a>
+				<!-- <a href="{$baseUrl}{$ctrl}/exportLokasiExcel/search/{$search_json}"
+				   class="btn btn-success">
+				   <i class="ft-download"></i> EXCEL
+				</a> -->
+				<!-- <a href="javascript:;" class="btn btn-warning" data-toggle="modal" data-target="#modalRekap"><i class="ft-book"></i> REKAP DATA </a> -->
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalUnduhDataExcel" style="padding: 10px;">
+					<i class="ft-download"></i> EXCEL
+				</button>
+				<!-- <a href="{$baseUrl}{$ctrl}/exportData/ex/kabkota/y/{$search.tahun}" target="_blank" class="btn btn-success float-md-right"><i class="ft-download"></i> EXPORT EXCEL</a> -->
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="table-responsive table-border freeze-table-2">
+	{if $viewLokasi[0]}
+	<table class="table">
+		<thead class="bg-info bg-darken-2 white">
+			<tr>
+				<th rowspan="2" class="v-middle" style="width: 50px">#</th>
+				<th rowspan="2" class="v-middle" style="width: 70px">Kode Lokasi</th>
+				<th rowspan="2" class="v-middle" style="width: 200px">Alamat</th>
+				<th rowspan="2" class="v-middle" style="width: 200px">Peruntukan</th>
+				<th rowspan="2" class="v-middle" style="width: 70px">Kab/Kota</th>
+				<th rowspan="2" class="v-middle" style="width: 70px">Provinsi</th>
+        <th colspan="2" class="text-center" style="width: 70px">Titik Koordinat</th>
+        <th colspan="5" class="text-center" style="width: 70px">NILAI</th>
+			</tr>
+      <tr>
+        <th class="v-middle">Latitude</th>
+        <th class="v-middle">Longitude</th>
+        <th class="text-center">IKU</th>
+        <th class="text-center">KATEGORI</th>
+        <th class="text-center">SO2</th>
+        <th class="text-center">NO2</th>
+				<th class="text-center">PM25</th>
+      </tr>
+
+		</thead>
+		<tbody>
+			{foreach from=$viewLokasi item=v}
+			<tr>
+        <td class="text-center">{counter}</td>
+        <td class="">{$v.kode_lokasi}</td>
+				<td class="">{$v.alamat_detail}</td>
+        <td class="">{$v.alamat}</td>
+        <td class="">{$v.nama_kabkot}</td>
+        <td class="">{$v.nama_propinsi}</td>
+        <td class="">{$v.latitude}</td>
+        <td class="">{$v.longitude}</td>
+        <td class="text-center">{$v.iku}</td>
+        <td class="text-center">{$v.iku_kategori}</td>
+        <td class="text-center">{$v.indeks_so2}</td>
+        <td class="text-center">{$v.indeks_no2}</td>
+        <td class="text-center">{$v.indeks_pm25}</td>
+
+			</tr>
+			{foreachelse}
+			<tr>
+				<td {if $search.tampil_data !=3}colspan="11" {else}colspan="6" {/if} class="p-0">
+					<div class="alert alert-danger text-center">
+						<strong>Tidak Ada Data</strong>
+					</div>
+				</td>
+			</tr>
+			{/foreach}
+		</tbody>
+	</table>
+	{else}
+	<div class="alert alert-danger text-center">
+		<strong>Tidak Ada Data</strong>
+	</div>
+	{/if}
+</div>
+<br>
+{include file="parts/block/block_pagination.html"}
+
+{if isset($listExport)}
+<div class="modal text-left" id="modalUnduhDataExcel" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-download-cloud"></i> Download Excel
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row d-flex">
+          {foreach from=$listExport item=v key=k}
+          <div class="list-group col-md-3" style="margin-left: 15px;margin-bottom 15px; padding: 0;">
+            <a href="{$baseUrl}iku/dataExcelLokasi/offset/{$v.offset_start}/search/{$search_json}/print/{time()}" class="list-group-item">
+              <i class="ft-file"></i> EXCEL {$k}
+              <p><small>(BARIS : {$v.offset_start}-{$v.offset_end})</small></p>
+            </a>
+          </div>
+          {/foreach}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}

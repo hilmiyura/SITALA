@@ -1,0 +1,168 @@
+<!-- Modal -->
+<div class="modal text-left" id="tambahData" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data Laboratorium
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+        <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="col-md-12 mb-1">
+              <label for="name">Nama Laboratorium <span class="text-danger">*</span></label>
+              <input class="form-control" type="text" name="form[nama]" id="nama" value="" required placeholder="Nama Laboratorium">
+            </div>
+            <div class="col-md-4 mb-1">
+              <label for="name">Alamat <span class="text-danger">*</span></label>
+              <textarea class="form-control" name="form[alamat]" id="alamat" required rows="1" placeholder="Alamat"></textarea>
+            </div>
+            <div class="col-md-4 mb-1">
+              <label for="">Kabupaten/Kota <span class="text-danger">*</span></label>
+              <input type="hidden" name="form[uid_provinsi]" id="uid_provinsi">
+              <select class="form-control select2 position-relative" name="form[uid_kabkota]" id="uid_kabkota" required style="width:100%;">
+                <option value="">--PILIH--</option>
+                {foreach from=$provinsi item=v}
+                  <optgroup label="{$v.nama}">
+                    {foreach from=$v.kabkota item=vi}
+                      <option value="{$vi.id}" provinsi="{$v.id}">{$v.nama} - {$vi.nama}</option>
+                    {/foreach}
+                  </optgroup>
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-2 mb-1">
+              <label for="name">No Telepon</label>
+              <input class="form-control" type="text" name="form[no_telepon]" id="no_telepon" value="" placeholder="No Telepon">
+            </div>
+            <div class="col-md-2 mb-1">
+              <label for="name">Email</label>
+              <input class="form-control" name="form[email]" id="email" value="" placeholder="Email">
+            </div>
+            <div class="col-md-12 mb-1">
+              <hr>
+              <input type="checkbox" name="form[teregistrasi]" id="teregistrasi" style="transform: scale(2);margin-left:5px;">
+              <label for="switcherySize" class="font-medium-1 ml-1">Teregistrasi di KLH (*sudah terakreditasi)</label>
+            </div>
+            <div class="col-md-4 mb-1">
+              <label for="name">No Dokumen</label>
+              <input class="form-control" type="text" name="form[teregistrasi_no_akreditasi]" id="teregistrasi_no_akreditasi" value="" placeholder="No Dokumen">
+            </div>
+            <div class="col-md-4 mb-1">
+              <label for="name">Sertifikat/Bukti Teregistrasi</label>
+              <input class="form-control" type="file" name="teregistrasi_sertifikat_akreditasi_kan" id="teregistrasi_sertifikat_akreditasi_kan" value="" placeholder="Sertifikat">
+            </div>
+            <div class="col-md-4 mb-1">
+              <label for="name">Masa berlaku</label>
+              <div class="input-group">
+                <input type="date" class="form-control" name="form[teregistrasi_tanggal_berlaku_awal]" id="teregistrasi_tanggal_berlaku_awal" />
+                <div class="input-group-append">
+                  <span class="input-group-text"><b>s/d</b></span>
+                </div>
+                <input type="date" class="form-control" name="form[teregistrasi_tanggal_berlaku_akhir]" id="teregistrasi_tanggal_berlaku_akhir" />
+              </div>
+            </div>
+
+            <div class="col-md-12 mb-1">
+              <hr>
+              <input type="checkbox" name="form[terakreditasi]" id="terakreditasi" style="transform: scale(2);margin-left:5px;">
+              <label for="switcherySize" class="font-medium-1 ml-1">Terakreditasi</label>
+            </div>
+            <div class="col-md-4 mb-1">
+              <label for="name">No Dokumen</label>
+              <input class="form-control" type="text" name="form[terakreditasi_no_akreditasi]" id="terakreditasi_no_akreditasi" value="" placeholder="No Dokumen">
+            </div>
+            <div class="col-md-4 mb-1">
+              <label for="name">Sertifikat/Bukti Akreditasi</label>
+              <input class="form-control" type="file" name="terakreditasi_sertifikat_akreditasi_kan" id="terakreditasi_sertifikat_akreditasi_kan" value="" placeholder="Sertifikat">
+            </div>
+            <div class="col-md-4 mb-1">
+              <label for="name">Masa berlaku</label>
+              <div class="input-group">
+                <input type="date" class="form-control" name="form[terakreditasi_tanggal_berlaku_awal]" id="terakreditasi_tanggal_berlaku_awal" />
+                <div class="input-group-append">
+                  <span class="input-group-text"><b>s/d</b></span>
+                </div>
+                <input type="date" class="form-control" name="form[terakreditasi_tanggal_berlaku_akhir]" id="terakreditasi_tanggal_berlaku_akhir" />
+              </div>
+            </div>
+
+            <div class="col-md-12 mb-1">
+              <input type="checkbox" name="form[lainnya]" id="lainnya" style="transform: scale(2);margin-left:5px;">
+              <label for="switcherySize" class="font-medium-1 ml-1">Lainnya</label>
+              <br>
+              <span>*Laboratorium telah menerapkan jaminan mutu dan uji profisiensi dengan hasil memenuhi persyaratan keberterimaan</span>
+            </div>
+            <div class="col-md-4 mb-1">
+              <label for="name">No Dokumen</label>
+              <input class="form-control" type="text" name="form[lainnya_no_akreditasi]" id="lainnya_no_akreditasi" value="" placeholder="No Dokumen">
+            </div>
+            <div class="col-md-4 mb-1">
+              <label for="name">Sertifikat/Bukti Jaminan Mutu</label>
+              <input class="form-control" type="file" name="lainnya_sertifikat_akreditasi_kan" id="lainnya_sertifikat_akreditasi_kan" value="" placeholder="Sertifikat/Bukti Jaminan Mutu">
+            </div>
+            <div class="col-md-4 mb-1">
+              <label for="name">Masa berlaku</label>
+              <div class="input-group">
+                <input type="date" class="form-control" name="form[lainnya_tanggal_berlaku_awal]" id="lainnya_tanggal_berlaku_awal" />
+                <div class="input-group-append">
+                  <span class="input-group-text"><b>s/d</b></span>
+                </div>
+                <input type="date" class="form-control" name="form[lainnya_tanggal_berlaku_akhir]" id="lainnya_tanggal_berlaku_akhir" />
+              </div>
+            </div>
+
+            <div class="col-md-12 mb-1">
+              <hr>
+              <label for="name">Catatan</label>
+              <textarea class="form-control" name="form[catatan]" id="catatan" rows="1" placeholder="Catatan"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="submit" name="submit" class="btn btn-danger">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{if isset($listExport)}
+<div class="modal text-left" id="unduhDataExcel" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-download-cloud"></i> Download Excel
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row d-flex">
+          {foreach from=$listExport item=v key=k}
+          <div class="list-group col-md-3" style="margin-left: 15px; padding: 0;">
+            <a href="{$baseUrl}refLab/dataExcel/offset/{$v.offset_start}/search/{$search_json}/print/{time()}" class="list-group-item">
+              <i class="ft-file"></i> EXCEL {$k}
+              <p><small>(BARIS : {$v.offset_start}-{$v.offset_end})</small></p>
+            </a>
+          </div>
+          {/foreach}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}

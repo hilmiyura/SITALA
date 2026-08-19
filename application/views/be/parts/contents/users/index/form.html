@@ -1,0 +1,103 @@
+<!-- Modal -->
+<div class="modal text-left" id="tambahData" role="dialog" aria-labelledby="myModalLabel6" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info bg-darken-2 white">
+        <h4 class="modal-title white" id="myModalLabel6">
+          <i class="ft-plus-circle"></i> Tambah Data User
+        </h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+        <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="col-md-12 mb-3">
+              <label for="name">Nama</label>
+              <input type="text" class="form-control position-relative" name="form[name]" id="name" placeholder="Nama" value="" required="" />
+              <!-- <div class="valid-tooltip"></div> -->
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-6 mb-3">
+              <label for="name">Username</label>
+              <input type="text" class="form-control position-relative" name="form[username]" id="username" placeholder="Username" value="" required="" />
+              <!-- <div class="valid-tooltip"></div> -->
+            </div>
+            <!-- </div>
+                    <div class="form-row"> -->
+            <div class="col-md-6 mb-3">
+              <label for="name">Password</label>
+              <input type="text" class="form-control position-relative" name="form[password]" id="password" placeholder="Password" value="" required="" />
+              <!-- <div class="valid-tooltip"></div> -->
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-6 mb-3">
+              <label for="name">Role User / Akses</label>
+              <select class="select2 form-control position-relative" id="role_user" name="form[role_user]" style="width: 100%">
+                {if $me.role_user == 0}
+                <option value="1" for="1">PUSAT</option>
+                {/if}
+                <option value="4" for="4">REGIONAL</option>
+                <option value="2" for="2">PROVINSI</option>
+                <option value="3" for="3">KABUPATEN/KOTA</option>
+                <option value="5" for="5">PSLH/PPLH</option>
+                <option value="6" for="6">INSPEKTORAT</option>
+              </select>
+            </div>
+            <!-- </div>
+                    <div class="form-row"> -->
+            <div class="col-md-6 mb-3">
+              <label for="name">Status User</label>
+              <select class="select2 form-control position-relative" id="active" name="form[active]" style="width: 100%">
+                <option value="1">Aktif</option>
+                <option value="0">Non-Aktif</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-6 mb-3 regionalDiv" style="display: none">
+              <label for="name">Regional</label>
+              <select class="select2 form-control position-relative" id="regional_user" name="form[uid_regional]" style="width: 100%">
+                <option value="">--PILIH REGIONAL--</option>
+                {foreach from=$regional item=v}
+                <option value="{$v.kd_regional}" >{$v.ur_regional}</option>
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-6 mb-3 provinsilainnyaDiv" style="display: none">
+              <label for="name">Provinsi</label>
+              <select class="select2 form-control position-relative provinsi_lainnya_select" multiple id="provinsi_lainnya_user" name="form[uid_provinsi_lainnya][]" style="width: 100%">
+
+              </select>
+            </div>
+            <div class="col-md-6 mb-3 provinsiDiv" style="display: none">
+              <label for="name">Provinsi</label>
+              <select class="select2 form-control position-relative provinsi_select" to="kabkota_user" id="provinsi_user" name="form[uid_provinsi]" style="width: 100%">
+                <option value="">--PILIH PROVINSI--</option>
+                {foreach from=$provinsi item=v}
+                <option value="{$v.kd_propinsi}">{$v.nama_propinsi}</option>
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-6 mb-3 kabkotaDiv" style="display: none">
+              <label for="name">Kab/kota</label>
+              <select class="select2 form-control position-relative" id="kabkota_user" name="form[uid_kabkota]" style="width: 100%">
+                <option value="">--PILIH KAB/KOTA--</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" data-dismiss="modal">Close</a>
+          <button type="submit" name="submit" class="btn btn-danger">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

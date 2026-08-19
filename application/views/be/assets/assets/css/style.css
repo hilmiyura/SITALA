@@ -1,0 +1,340 @@
+/* ================================================================================================
+// 	File Name: style.scss
+// 	Description: Style for customization.
+// 	----------------------------------------------------------------------------------------------
+// 	Item Name: Chameleon Admin - Modern Bootstrap 4 WebApp & Dashboard HTML Template + UI Kit
+// 	Version: 1.0
+// 	Author: ThemeSelection
+// 	Author URL: https://themeselection.com/
+// ================================================================================================
+
+NOTE:
+------
+PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
+WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
+.modal {
+  overflow: auto !important;
+}
+
+#map {
+  height: 500px;
+}
+.pointer{
+  cursor: pointer;
+}
+.header-navbar.navbar-brand-center .navbar-header {
+  width: 300px;
+  margin-top: -10px;
+}
+
+.v-middle {
+  vertical-align: middle !important;
+}
+
+.border-right-td {
+  border-right: 1px solid #e2ecf3 !important;
+}
+
+.border-bottom-none {
+  border-bottom-color: transparent !important;
+}
+
+.table-border {
+  border-radius: 5px;
+  padding: 8px;
+  border: 1px solid #f4f5fa;
+}
+
+.table {
+  font-size: small;
+}
+
+.ptd{
+  padding: 5px !important;
+  height: 50px !important;
+  align-content: center;
+}
+
+thead {
+  line-height: normal;
+}
+
+.modal {
+  z-index: 1051;
+}
+
+/* scroll */
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 3px #514A9D;
+  background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb {
+  /* background-color: #514A9D; */
+  background-color: #1d9fc3;
+}
+
+/* .horizontal-menu .navbar-horizontal .nav-item a span {
+    font-size: 12px;
+}
+.header-navbar .navbar-container ul.nav li > a.nav-link {
+    padding: 0rem;
+    font-size: 0rem;
+  } */
+.border-wajib {
+  border: 1px solid red;
+  border-radius: 5px;
+}
+
+.border-danau {
+  border: 1px solid red;
+  border-radius: 5px;
+}
+
+.fs-12 {
+  font-size: 12px !important;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+/* .box-content .card-text {
+  height: 75px;
+  overflow: hidden;
+}
+
+.showContent .card-text {
+  height: auto;
+}
+
+.showContent a .readmore-btn {
+  background-color: red;
+} */
+/* #module {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+#module #collapseExample.collapse:not(.show) {
+  display: block;
+  height: 3rem;
+  overflow: hidden;
+}
+
+#module #collapseExample.collapsing {
+  height: 3rem;
+}
+
+#module #buttonCollapse.collapsed::after {
+  content: '+ Show More';
+}
+
+#module #buttonCollapse:not(.collapsed)::after {
+  content: '- Show Less';
+} */
+.table-index-respon .table th, .table-index-respon .table td {
+  padding: 7px;
+  font-size: 11px;
+  min-width: 300px;
+}
+
+.table-index-respon-ev .table th, .table-index-respon-ev .table td {
+  padding: 7px;
+  font-size: 11px;
+  min-width: 200px;
+}
+
+.bg-transparent{
+  background: transparent !important;
+}
+.bg-transparent-1{
+  background: #ffffff4d;
+}
+
+.hr-horizontal {
+    background: rgba(0, 0, 0, 0);
+    border: 0;
+    height: 1px;
+    margin: 0.5rem 0;
+    background-image: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.4), transparent);
+}
+
+
+
+/*MAP*/
+#map-dashboard {
+  width: 100%;
+  height: 500px;
+  clear: both;
+  background: #75CFF0;
+}
+
+.infowindow {
+  width: 400px;
+  margin-bottom: 10px;
+}
+
+.infowindow thead {
+  background: #996F4E;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+}
+
+.infowindow th {
+  padding: 2px 5px;
+  /* border: 1px solid #fff; */
+  width: 50%;
+}
+
+.infowindow td {
+  padding: 2px 5px;
+  /* border: 1px solid #ccc; */
+}
+
+.infowindow td.col-left {
+  background: #222D32;
+  color: #fff;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.infowindow td.col-right {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.leaflet-popup {
+  width: 460px;
+}
+
+.select-prop {
+  width: 48%;
+  float: left;
+}
+
+/*MAP DIV ICON*/
+.leaflet-div-icon {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.map-div-icon {
+  border-radius: 50%;
+  padding: 3px;
+  width: 30px;
+  height: 30px;
+}
+
+.map-div-icon-beban {
+  width: 37px;
+  height: 37px;
+}
+
+.bg-info-green, .map-div-icon-green {
+  background: #2B8638 !important;
+}
+
+.bg-info-blue, .map-div-icon-blue {
+  background: #5959FF !important;
+}
+
+.bg-info-yellow, .map-div-icon-yellow {
+  background: #c4c419 !important;
+}
+
+.bg-info-red, .map-div-icon-red {
+  background: #FF1E00 !important;
+}
+
+.bg-info-brown, .map-div-icon-brown {
+  background: #915E3B !important;
+}
+
+.bg-info-gray, .map-div-icon-gray {
+  background: #7B7B7B !important;
+}
+
+.bg-info-black, .map-div-icon-black {
+  background: #000 !important;
+}
+
+.map-div-icon-content {
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  padding-top: 5px;
+  font-size: 10px;
+}
+
+/* running text */
+.marquee {
+    overflow: hidden;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+.marquee span {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee 100s linear infinite;
+    font-size: 15px;
+    font-weight: bold;
+    color: #000;
+}
+@keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
+
+.zoom-in-out-box {
+  animation: zoom-in-zoom-out 10s ease infinite;
+}
+
+@keyframes zoom-in-zoom-out {
+  0% {
+    transform: scale(1.13, 1.13);
+  }
+  50% {
+    transform: scale(1.19, 1.19);
+  }
+  100% {
+    transform: scale(1.13, 1.13);
+  }
+}
+
+.card-login{
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+  background: #ffffff;
+}
+
+.no-border{
+  border: none !important
+}
+
+.box-content-parent{
+  background-color: #f4f5fa;
+}
+.box-content-dpsir{
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  margin-bottom: 5px;
+  background-color: white
+}
+.box-response-dpsir{
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  margin-bottom: 5px;
+  background-color: white
+}
+.icon-add{
+  font-size: 15px;
+  font-weight: bolder;
+}
+.bg-orange{
+  background-color: #ff6900 !important;
+}

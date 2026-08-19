@@ -1,0 +1,82 @@
+{literal}
+<script type="text/javascript">
+	function tes() {
+		TableToExcel.convert(document.getElementById("table-export-dashboard"), {
+			name: "Rekapitulasi Dashboard.xlsx",
+			sheet: {
+				name: "Sheet 1"
+			}
+		});
+	}
+	$(document).ready(function() {
+		// $('.show-datakab').on("click", function() {
+		// 	var name = $(this).attr('data-nama');
+		// 	var uid = $(this).attr('data-uid');
+		// 	var year = $(this).attr('data-year');
+		// 	// alert(name);
+		// 	$('#body-data').html('<tr><td colspan="6" class="text-center">...wait a moment...</td></tr>');
+		// 	$('#data-nama').text(name);
+		//
+		// 	$.ajax({
+		// 		url: baseUrl + ctrl + "/rekapPerKab/prop/" + uid + '/tahun/' + year,
+		// 		method: "GET",
+		// 		success: function(req) {
+		// 			console.log(req);
+		// 			$('#body-data').html(req);
+		// 		}
+		// 	});
+		// });
+		// if ($('#modal-popup').text() == '') {
+		// 	$('#default').modal({
+		// 		show: true
+		// 	});
+		// }
+
+		getContent(thisYear);
+
+		function getContent(year) {
+			$.ajax({
+				// url: baseUrl + ctrl + "/getContent/x/1/tahun/" + year,
+				method: "GET",
+				success: function(req) {
+					var req = JSON.parse(req);
+					if (req.statusCode == 200) {
+						$(".push-content-dashboard").html(req.html);
+						jsContent();
+					}
+				}
+			});
+		}
+
+		function jsContent() {
+			$(".show-data-tahun").on("click", function() {
+				var tahun = $(this).attr("tahun");
+				getContent(tahun);
+			});
+			$('.show-datakab').on("click", function() {
+				var name = $(this).attr('data-nama');
+				var uid = $(this).attr('data-uid');
+				var year = $(this).attr('data-year');
+				// alert(name);
+				$('#body-data').html('<tr><td colspan="6" class="text-center">...wait a moment...</td></tr>');
+				$('#data-nama').text(name);
+
+				$.ajax({
+					// url: baseUrl + ctrl + "/rekapPerKab/prop/" + uid + '/tahun/' + year,
+					method: "GET",
+					success: function(req) {
+						$('#body-data').html(req);
+					}
+				});
+			});
+		}
+
+		if ($('#modal-popup').text() == '') {
+			$('#default').modal({
+				show: true
+			});
+		}
+
+	});
+</script>
+{/literal}

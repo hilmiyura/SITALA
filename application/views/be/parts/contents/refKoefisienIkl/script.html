@@ -1,0 +1,75 @@
+{literal}
+	<script type="text/javascript">
+		reset = ()=>{
+			$("#uid").val("");
+			$("#tahun").val("").trigger("change");
+      $("#hutan_lahan_kering_primer").val("");
+      $("#hutan_lahan_kering_sekunder").val("");
+      $("#hutan_mangrove_primer").val("");
+      $("#hutan_rawa_primer").val("");
+      $("#hutan_tanaman").val("");
+      $("#belukar").val("");
+      $("#perkebunan").val("");
+      $("#permukiman").val("");
+      $("#lahan_terbuka").val("");
+      $("#savanna").val("");
+      $("#tubuh_air").val("");
+      $("#hutan_mangrove_sekunder").val("");
+      $("#hutan_rawa_sekunder").val("");
+      $("#belukar_rawa").val("");
+      $("#pertanian_lahan_kering").val("");
+      $("#pertanian_lahan_kering_campur_semak").val("");
+      $("#sawah").val("");
+      $("#tambak").val("");
+      $("#bandara").val("");
+      $("#transmigrasi").val("");
+      $("#pertambangan").val("");
+      $("#rawa").val("");
+      $("#rth").val("");
+      $("#rtl").val("");
+		}
+
+		$('#tambahData').on('show.bs.modal', function (event) {
+			reset();
+			var button = $(event.relatedTarget) // Button that triggered the modal
+			var userBy = button.data('uid');
+			if(userBy){
+				$.ajax({
+					url		: baseUrl+ctrl+"/editData/x/"+userBy,
+					method	: "GET",
+					success	: function(req){
+						if(req.uid){
+							$("#uid").val(req.uid);
+							$("#tahun").val(req.tahun).trigger("change");
+              $("#hutan_lahan_kering_primer").val(req.hutan_lahan_kering_primer);
+              $("#hutan_lahan_kering_sekunder").val(req.hutan_lahan_kering_sekunder);
+              $("#hutan_mangrove_primer").val(req.hutan_mangrove_primer);
+              $("#hutan_rawa_primer").val(req.hutan_rawa_primer);
+              $("#hutan_tanaman").val(req.hutan_tanaman);
+              $("#belukar").val(req.belukar);
+              $("#perkebunan").val(req.perkebunan);
+              $("#permukiman").val(req.permukiman);
+              $("#lahan_terbuka").val(req.lahan_terbuka);
+              $("#savanna").val(req.savanna);
+              $("#tubuh_air").val(req.tubuh_air);
+              $("#hutan_mangrove_sekunder").val(req.hutan_mangrove_sekunder);
+              $("#hutan_rawa_sekunder").val(req.hutan_rawa_sekunder);
+              $("#belukar_rawa").val(req.belukar_rawa);
+              $("#pertanian_lahan_kering").val(req.pertanian_lahan_kering);
+              $("#pertanian_lahan_kering_campur_semak").val(req.pertanian_lahan_kering_campur_semak);
+              $("#sawah").val(req.sawah);
+              $("#tambak").val(req.tambak);
+              $("#bandara").val(req.bandara);
+              $("#transmigrasi").val(req.transmigrasi);
+              $("#pertambangan").val(req.pertambangan);
+              $("#rawa").val(req.rawa);
+              $("#rth").val(req.rth);
+              $("#rtl").val(req.rtl);
+
+						}
+					}
+				});
+			}
+		});
+	</script>
+{/literal}

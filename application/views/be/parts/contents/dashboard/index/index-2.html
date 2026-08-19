@@ -1,0 +1,338 @@
+<div class="row">
+	<div class="col-xl-12 col-lg-12 col-md-12">
+		<div class="card">
+			<div class="card-header">
+				<h4 class="card-title text-center">REKAPITULASI DATA TAHUN {$year}</h4>
+				<div class="heading-elements">
+					<div class="btn-group">
+						{if $me.role_user == 0 || $me.role_user == 1}
+						<!-- <button class="btn btn-success btn-sm mr-1" onclick="tes()">
+							<i class="ft-download"></i> EXPORT EXCEL
+						</button> -->
+						<a href="{$baseUrl}{$ctrl}/exportData/ex/provinsi/y/{$year}" target="_blank" class="btn btn-success btn-sm mr-1">
+							<i class="ft-download"></i> EXPORT EXCEL
+						</a>
+						{/if}
+						<button class="btn btn-danger btn-sm dropdown-toggle" type="button" id="dropdownMenuButton6" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							PILIH TAHUN
+						</button>
+						<div class="dropdown-menu" aria-labelledby="dropdownMenuButton6" x-placement="top-start">
+							{foreach from=$years item=Y}
+							<!-- <a class="dropdown-item" href="{$baseUrl}dashboard/index/tahun/{$Y}">TAHUN {$Y}</a> -->
+							<a class="dropdown-item show-data-tahun" tahun="{$Y}">TAHUN {$Y}</a>
+							{/foreach}
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="card-content">
+				{if $me.role_user==3}
+				<div class="row">
+					<div class="col-xl-4 col-lg-6 col-md-12">
+						<div class="card">
+							<div class="card-header bg-gradient-x-purple-blue">
+								<h4 class="card-title white">DATA IKU</h4>
+							</div>
+							<div class="card-content bg-gradient-x-purple-blue">
+								<div class="card-body pt-0 pb-1">
+									<h6 class="text-bold-600 white">Verifikasi/Total : <span>{$iku.verify}/{$iku.total}</span>
+									</h6>
+									<div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+										<div class="progress-bar bg-gradient-x-danger" role="progressbar" style="width: {$iku.persen}%" aria-valuenow="{$iku.persen}" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+									<div class="media d-flex">
+										<div class="align-self-center">
+											<h6 class="text-bold-600 mt-1 white">Last Update : <span class="white">{$iku.update}</span>
+											</h6>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-4 col-lg-6 col-md-12">
+						<div class="card">
+							<div class="card-header bg-gradient-x-purple-red">
+								<h4 class="card-title white">DATA IKA</h4>
+							</div>
+							<div class="card-content bg-gradient-x-purple-red">
+								<div class="card-body pt-0 pb-1">
+									<h6 class="text-bold-600 white">Verifikasi/Total : <span>{$ika.verify}/{$ika.total}</span>
+									</h6>
+									<div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+										<div class="progress-bar bg-gradient-x-danger" role="progressbar" style="width: {$ika.persen}%" aria-valuenow="{$ika.persen}" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+									<div class="media d-flex">
+										<div class="align-self-center">
+											<h6 class="text-bold-600 mt-1 white">Last Update : <span class="white">{$ika.update}</span>
+											</h6>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-4 col-lg-6 col-md-12">
+						<div class="card">
+							<div class="card-header bg-gradient-x-blue-green">
+								<h4 class="card-title white">DATA IKL</h4>
+							</div>
+							<div class="card-content bg-gradient-x-blue-green">
+								<div class="card-body pt-0 pb-1">
+									<h6 class="text-bold-600 white">Verifikasi/Total : <span>{$ikl.verify}/{$ikl.total}</span>
+									</h6>
+									<div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+										<div class="progress-bar bg-gradient-x-danger" role="progressbar" style="width: {$ikl.persen}%" aria-valuenow="{$ikl.persen}" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+									<div class="media d-flex">
+										<div class="align-self-center">
+											<h6 class="text-bold-600 mt-1 white">Last Update : <span class="white">{$ikl.update}</span>
+											</h6>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				{else}
+				<div class="row">
+					<div class="col-xl-3 col-lg-6 col-md-12">
+						<div class="card">
+							<div class="card-header bg-gradient-x-purple-blue">
+								<h4 class="card-title white">DATA IKU</h4>
+							</div>
+							<div class="card-content bg-gradient-x-purple-blue">
+								<div class="card-body pt-0 pb-1">
+									<h6 class="text-bold-600 white">Verifikasi/Total : <span>{$iku.verify}/{$iku.total}</span>
+									</h6>
+									<div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+										<div class="progress-bar bg-gradient-x-danger" role="progressbar" style="width: {$iku.persen}%" aria-valuenow="{$iku.persen}" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+									<div class="media d-flex">
+										<div class="align-self-center">
+											<h6 class="text-bold-600 mt-1 white">Last Update : <span class="white">{$iku.update}</span>
+											</h6>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-6 col-md-12">
+						<div class="card">
+							<div class="card-header bg-gradient-x-purple-red">
+								<h4 class="card-title white">DATA IKA</h4>
+							</div>
+							<div class="card-content bg-gradient-x-purple-red">
+								<div class="card-body pt-0 pb-1">
+									<h6 class="text-bold-600 white">Verifikasi/Total : <span>{$ika.verify}/{$ika.total}</span>
+									</h6>
+									<div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+										<div class="progress-bar bg-gradient-x-danger" role="progressbar" style="width: {$ika.persen}%" aria-valuenow="{$ika.persen}" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+									<div class="media d-flex">
+										<div class="align-self-center">
+											<h6 class="text-bold-600 mt-1 white">Last Update : <span class="white">{$ika.update}</span>
+											</h6>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-6 col-md-12">
+						<div class="card">
+							<div class="card-header bg-gradient-x-blue-green">
+								<h4 class="card-title white">DATA IKL</h4>
+							</div>
+							<div class="card-content bg-gradient-x-blue-green">
+								<div class="card-body pt-0 pb-1">
+									<h6 class="text-bold-600 white">Verifikasi/Total : <span>{$ikl.verify}/{$ikl.total}</span>
+									</h6>
+									<div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+										<div class="progress-bar bg-gradient-x-danger" role="progressbar" style="width: {$ikl.persen}%" aria-valuenow="{$ikl.persen}" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+									<div class="media d-flex">
+										<div class="align-self-center">
+											<h6 class="text-bold-600 mt-1 white">Last Update : <span class="white">{$ikl.update}</span>
+											</h6>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-6 col-md-12">
+						<div class="card">
+							<div class="card-header bg-gradient-x-orange-yellow">
+								<h4 class="card-title white">DATA IKAL</h4>
+							</div>
+							<div class="card-content bg-gradient-x-orange-yellow">
+								<div class="card-body pt-0 pb-1">
+									<h6 class="text-bold-600 white">Verifikasi/Total : <span>{$ikal.verify}/{$ikal.total}</span>
+									</h6>
+									<div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+										<div class="progress-bar bg-gradient-x-danger" role="progressbar" style="width: {$ikal.persen}%" aria-valuenow="{$ikal.persen}" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+									<div class="media d-flex">
+										<div class="align-self-center">
+											<h6 class="text-bold-600 mt-1 white">Last Update : <span class="white">{$ikal.update}</span>
+											</h6>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<hr />
+				<div class="row">
+					<div class="col-xl-12 col-lg-12 col-md-12 freeze-table">
+						<h4 class="text-center">REKAPITULASI DATA PER {if $me.role_user != 2}PROPINSI{else}KABUPATEN/KOTA{/if} TAHUN {$year}</h4>
+						<table class="table table-bordered" id="table-export-dashboard">
+							<thead class="bg-info bg-darken-2 white">
+								<tr>
+									<th class="text-center v-middle" rowspan="2">NO</th>
+									<th class="text-center v-middle" rowspan="2">
+										{if $me.role_user != 2}
+										PROPINSI
+										{else}
+										KABUPATEN/KOTA
+										{/if}
+									</th>
+									<th class="text-center v-middle" colspan="4" data-a-h="center">VERIFIKASI/TOTAL</th>
+								</tr>
+								<tr>
+									<th class="text-center v-middle" data-a-h="center">IKU</th>
+									<th class="text-center v-middle" data-a-h="center">IKA</th>
+									<th class="text-center v-middle" data-a-h="center">IKL</th>
+									{if $me.role_user != 2}
+									<th class="text-center v-middle" data-a-h="center">IKAL</th>
+									{/if}
+								</tr>
+							</thead>
+							<tbody>
+								{$tIKu = 0}
+								{$vIKu = 0}
+								{$tIKa = 0}
+								{$vIKa = 0}
+								{$tIKl = 0}
+								{$vIKl = 0}
+								{$tIKal = 0}
+								{$vIKal = 0}
+								{counter start=0 print=false}
+								{foreach from=$propRekap item=v}
+								{$vIKu = $vIKu+$v.iku.verify}
+								{$tIKu = $tIKu+$v.iku.total}
+								{$vIKa = $vIKa+$v.ika.verify}
+								{$tIKa = $tIKa+$v.ika.total}
+								{$vIKl = $vIKl+$v.ikl.verify}
+								{$tIKl = $tIKl+$v.ikl.total}
+								{$vIKal = $vIKal+$v.ikal.verify}
+								{$tIKal = $tIKal+$v.ikal.total}
+								<tr>
+									<td class="text-center">{counter}.</td>
+									<td class="text-uppercase">
+										{if $me.role_user==2}
+										<b>{$v.nama_text}</b>
+										{else}
+										<a class="show-datakab" data-year="{$year}" data-uid={$v.kd_propinsi} data-nama="{$v.nama_text}" href="javascript:void(0)" data-toggle="modal" data-target="#xlarge">
+											<b>{$v.nama_text}</b>
+										</a>
+										{/if}
+									</td>
+									<td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$v.iku.verify} / {$v.iku.total}</b></td>
+									<td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$v.ika.verify} / {$v.ika.total}</b></td>
+									<td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$v.ikl.verify} / {$v.ikl.total}</b></td>
+									{if $me.role_user != 2}
+									<td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$v.ikal.verify} / {$v.ikal.total}</b></td>
+									{/if}
+								</tr>
+								{/foreach}
+								<tr>
+									<td colspan="2" class="text-center" data-a-h="center"><b>TOTAL</b></td>
+									<td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$vIKu} / {$tIKu}</b></td>
+									<td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$vIKa} / {$tIKa}</b></td>
+									<td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$vIKl} / {$tIKl}</b></td>
+									{if $me.role_user != 2}
+									<td class="text-center" data-a-wrap="true" data-a-h="center"><b>{$vIKal} / {$tIKal}</b></td>
+									{/if}
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				{/if}
+			</div>
+		</div>
+	</div>
+</div>
+{if $me.role_user==3}
+<div class="row">
+	<div class="col-xl-12 col-lg-12 col-md-12">
+		<div class="card">
+			<div class="card-content">
+				<p>
+					<b>Indeks kualitas lingkungan hidup</b> adalah nilai yang menggambarkan kualitas lingkungan hidup dalam suatu wilayah pada waktu tertentu,
+					yang merupakan nilai komposit dari Indeks Kualitas Air, Indeks Kualitas Udara,
+					Indeks Kualitas Lahan dan Indeks Kualitas Air Laut.
+				<ul>
+					<li>
+						<b>Indeks Kualitas Air</b> yang selanjutnya disingkat IKA adalah suatu nilai yang menggambarkan kondisi kualitas air di lokasi dan waktu tertentu.
+					</li>
+					<li>
+						<b>Indeks Kualitas Udara</b> yang selanjutnya disingkat IKU adalah ukuran yang menggambarkan kualitas udara yang merupakan nilai komposit dari parameter kualitas udara yang ditetapkan peraturan perundang-undangan.
+					</li>
+					<li>
+						<b>Indeks Kualitas Air Laut</b> yang selanjutnya disingkat IKAL adalah nilai yang menggambarkan kondisi kualitas air laut di lokasi dan waktu tertentu.
+					</li>
+					<li>
+						<b>Indeks Kualitas Lahan</b> yang selanjutnya disingkat IKL adalah nilai yang menggambarkan kualitas lahan yang terdiri dari indeks kualitas tutupan lahan dan indeks kualitas ekosistem gambut.
+					</li>
+				</ul>
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
+{/if}
+
+<div class="modal fade text-left" id="xlarge" tabindex="-1" role="dialog" aria-labelledby="myModalLabel16" aria-hidden="true">
+	<div class="modal-dialog modal-xl" role="document">
+		<div class="modal-content">
+			<div class="modal-header bg-info">
+				<h4 class="modal-title white" id="data-nama"></h4>
+				<button type="button" class="close white" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<table class="table table-bordered">
+					<thead class="bg-info bg-darken-2 white">
+						<tr>
+							<th class="text-center v-middle" rowspan="2">NO</th>
+							<th class="text-center v-middle" rowspan="2">
+								KABUPATEN/KOTA
+							</th>
+							<th class="text-center v-middle" colspan="4">VERIFIKASI/TOTAL</th>
+						</tr>
+						<tr>
+							<th class="text-center v-middle">IKU</th>
+							<th class="text-center v-middle">IKA</th>
+							<th class="text-center v-middle">IKL</th>
+						</tr>
+					</thead>
+					<tbody id="body-data">
+						<tr>
+							<td colspan="6" class="text-center">...wait a moment...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn grey btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>

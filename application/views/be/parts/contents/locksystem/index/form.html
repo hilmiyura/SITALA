@@ -1,0 +1,212 @@
+<form class="form_with_load" method="POST" action="" enctype="multipart/form-data">
+  <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" value="{$form.$primaryKey}" />
+  <div class="form-body">
+    <fieldset>
+      <legend>Lock Data per Periode</legend>
+      <div class="form-row">
+        <div class="col-md-2 mb-1">
+          <label for="name">Tanggal mulai</label>
+          <input type="date" class="form-control" name="form[tanggal_mulai]" value="{$form.tanggal_mulai}">
+        </div>
+        <div class="col-md-2 mb-1">
+          <label for="name">Tanggal selesai</label>
+          <input type="date" class="form-control" name="form[tanggal_selesai]" value="{$form.tanggal_selesai}">
+        </div>
+        <div class="col-md-4 mb-1">
+          <label for="name">Menu</label>
+          <select class="select2 form-control" id="menu" name="form[menu][]" style="width: 100%" multiple placeholder="pilih menu">
+            <option value="" disabled>--PILIH MENU--</option>
+            <option value="1" {if is_numeric(array_search(1,$form.menu)) } selected {/if}>Pelaporan</option>
+            <option value="2" {if is_numeric(array_search(2,$form.menu)) } selected {/if}>Verifikasi</option>
+            <option value="3" {if is_numeric(array_search(3,$form.menu)) } selected {/if}>Perhitungan</option>
+            <option value="4" {if is_numeric(array_search(4,$form.menu)) } selected {/if}>Indeks Respon</option>
+            <option value="5" {if is_numeric(array_search(5,$form.menu)) } selected {/if}>Indeks Respon - New App</option>
+            <option value="6" {if is_numeric(array_search(6,$form.menu)) } selected {/if}>DPSIR</option>
+          </select>
+          <span class="text-danger"><small>*sistem akan mengunci berdasarkan menu dan sub menu</small></span>
+        </div>
+        <div class="col-md-4 mb-1">
+          <label for="name">Sub Menu</label>
+          <select class="select2 form-control" id="submenu" name="form[submenu][]" style="width: 100%" multiple placeholder="pilih menu">
+            <option value="" disabled>--PILIH SUB MENU--</option>
+            <option value="1.1" {if is_numeric(array_search(1.1,$form.submenu)) } selected {/if}>Pelaporan IKU</option>
+            <option value="1.2" {if is_numeric(array_search(1.2,$form.submenu)) } selected {/if}>Pelaporan IKA</option>
+            <option value="1.3" {if is_numeric(array_search(1.3,$form.submenu)) } selected {/if}>Pelaporan IKL</option>
+            <option value="1.4" {if is_numeric(array_search(1.4,$form.submenu)) } selected {/if}>Pelaporan IKAL</option>
+            <option value="2.1" {if is_numeric(array_search(2.1,$form.submenu)) } selected {/if}>Verifikasi IKU</option>
+            <option value="2.2" {if is_numeric(array_search(2.2,$form.submenu)) } selected {/if}>Verifikasi IKA</option>
+            <option value="2.3" {if is_numeric(array_search(2.3,$form.submenu)) } selected {/if}>Verifikasi IKL</option>
+            <option value="2.4" {if is_numeric(array_search(2.4,$form.submenu)) } selected {/if}>Verifikasi IKAL</option>
+            <option value="3.1" {if is_numeric(array_search(3.1,$form.submenu)) } selected {/if}>Perhitungan IKU</option>
+            <option value="3.2" {if is_numeric(array_search(3.2,$form.submenu)) } selected {/if}>Perhitungan IKA</option>
+            <option value="3.3" {if is_numeric(array_search(3.3,$form.submenu)) } selected {/if}>Perhitungan IKL</option>
+            <option value="3.4" {if is_numeric(array_search(3.4,$form.submenu)) } selected {/if}>Perhitungan IKAL</option>
+            <option value="5.1" {if is_numeric(array_search(5.1,$form.submenu)) } selected {/if}>Indeks Respon Langit Biru</option>
+            <option value="5.2" {if is_numeric(array_search(5.2,$form.submenu)) } selected {/if}>Indeks Respon Pantai Lestari</option>
+            <option value="5.3" {if is_numeric(array_search(5.3,$form.submenu)) } selected {/if}>Indeks Respon Kali Bersih</option>
+            <option value="5.4" {if is_numeric(array_search(5.4,$form.submenu)) } selected {/if}>Indeks Respon Indonesia Hijau</option>
+            <option value="5.5" {if is_numeric(array_search(5.5,$form.submenu)) } selected {/if}>Indeks Respon Gambut Lestari</option>
+            <option value="5.6" {if is_numeric(array_search(5.6,$form.submenu)) } selected {/if}>Indeks Respon Kehati</option>
+          </select>
+          <span class="text-danger"><small>*sistem akan mengunci berdasarkan sub menu</small></span>
+        </div>
+        <div class="col-md-8 mb-1">
+          <label for="name">Isi Informasi</label>
+          <textarea class="form-control" name="form[deskripsi]" rows="2">{$form.deskripsi}</textarea>
+        </div>
+        <div class="col-md-2">
+          <label for="name">Aktifkan</label>
+          <div class="form-group check-style">
+            <input type="checkbox" name="form[aktif]" {if $form.aktif}checked="true" {/if} style="transform: scale(3);margin: 18px;">
+            <!-- <label for="switcherySize" class="font-medium-1 ml-1">Akan aktif ketika centang biru</label> -->
+          </div>
+        </div>
+      </div>
+    </fieldset>
+    <hr>
+    <div class="row">
+      <div class="col-md-6">
+        <fieldset>
+          <legend>Unlock Per Wilayah (IKLH)</legend>
+          <div class="form-row">
+            <div class="col-md-12 mb-1">
+              <label for="name">Kabupaten / Kota</label>
+              <select class="select2 form-control position-relative" id="kabkota-lock" name="form[kabkota][]" style="width: 100%" multiple placeholder="pilih kabkota">
+                <option value="" disabled>--PILIH KABKOTA--</option>
+                {foreach from=$kabkota item=i}
+                <option value="{$i.uid_users}" {if is_numeric(array_search($i.uid_users,$form.kabkota)) } selected {/if}> {$i.name} </option>
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-12 mb-1">
+              <label for="name">Provinsi</label>
+              <select class="select2 form-control position-relative" id="provinsi-lock" name="form[provinsi][]" style="width: 100%" multiple placeholder="pilih provinsi">
+                <option value="" disabled>--PILIH PROVINSI--</option>
+                {foreach from=$provinsi item=i}
+                <option value="{$i.uid_users}" {if is_numeric(array_search($i.uid_users,$form.provinsi)) } selected {/if}> {$i.name} </option>
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-12 mb-1">
+              <label for="name">P3E</label>
+              <select class="select2 form-control position-relative" id="p3e-lock" name="form[p3e][]" style="width: 100%" multiple placeholder="pilih p3e">
+                <option value="" disabled>--PILIH P3E--</option>
+                {foreach from=$p3e item=i}
+                <option value="{$i.uid_users}" {if is_numeric(array_search($i.uid_users,$form.p3e)) } selected {/if}> {$i.name} </option>
+                {/foreach}
+              </select>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+      <div class="col-md-6">
+        <fieldset>
+          <legend>Unlock Per Wilayah (IRLH)</legend>
+          <div class="form-row">
+            <div class="col-md-12 mb-1">
+              <label for="name">Kabupaten / Kota</label>
+              <select class="select2 form-control position-relative" id="kabkota-irlh-lock" name="form[kabkota_irlh][]" style="width: 100%" multiple placeholder="pilih kabkota">
+                <option value="" disabled>--PILIH KABKOTA--</option>
+                {foreach from=$kabkota item=i}
+                <option value="{$i.uid_users}" {if is_numeric(array_search($i.uid_users,$form.kabkota_irlh)) } selected {/if}> {$i.name} </option>
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-12 mb-1">
+              <label for="name">Provinsi</label>
+              <select class="select2 form-control position-relative" id="provinsi-irlh-lock" name="form[provinsi_irlh][]" style="width: 100%" multiple placeholder="pilih provinsi">
+                <option value="" disabled>--PILIH PROVINSI--</option>
+                {foreach from=$provinsi item=i}
+                <option value="{$i.uid_users}" {if is_numeric(array_search($i.uid_users,$form.provinsi_irlh)) } selected {/if}> {$i.name} </option>
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-12 mb-1">
+              <label for="name">P3E</label>
+              <select class="select2 form-control position-relative" id="p3e-irlh-lock" name="form[p3e_irlh][]" style="width: 100%" multiple placeholder="pilih p3e">
+                <option value="" disabled>--PILIH P3E--</option>
+                {foreach from=$p3e item=i}
+                <option value="{$i.uid_users}" {if is_numeric(array_search($i.uid_users,$form.p3e_irlh)) } selected {/if}> {$i.name} </option>
+                {/foreach}
+              </select>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-md-6">
+        <fieldset>
+          <legend>Unlock Direktorat (IKLH)</legend>
+          <div class="form-row">
+            <div class="col-md-12 mb-1">
+              <label for="name">Direktorat</label>
+              <select class="select2 form-control position-relative" id="direktorat-lock" name="form[direktorat][]" style="width: 100%" multiple placeholder="pilih direktorat">
+                <option value="" disabled>--PILIH DIREKTORAT--</option>
+                {foreach from=$direktorat item=i}
+                <option value="{$i.uid_users}" {if is_numeric(array_search($i.uid_users,$form.direktorat)) } selected {/if}> {$i.name} </option>
+                {/foreach}
+              </select>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+      <div class="col-md-6">
+        <fieldset>
+          <legend>Unlock Direktorat (IRLH)</legend>
+          <div class="form-row">
+            <div class="col-md-12 mb-1">
+              <label for="name">Direktorat</label>
+              <select class="select2 form-control position-relative" id="direktorat-irlh-lock" name="form[direktorat_irlh][]" style="width: 100%" multiple placeholder="pilih direktorat">
+                <option value="" disabled>--PILIH DIREKTORAT--</option>
+                {foreach from=$direktorat item=i}
+                <option value="{$i.uid_users}" {if is_numeric(array_search($i.uid_users,$form.direktorat_irlh)) } selected {/if}> {$i.name} </option>
+                {/foreach}
+              </select>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+    <hr>
+    <fieldset>
+      <legend>Lock Data per Tahun (Berlaku untuk semua)</legend>
+      <div class="form-row">
+        <div class="col-md-2">
+          <label for="tahun">Tahun</label>
+          <select class="form-control select2" name="form[tahun][]" multiple required="required">
+            {for $foo=2020 to ($thisYear+5)}
+            <option value="{$foo}" {if is_numeric(array_search($foo,$form.tahun)) } selected {/if}> {$foo} </option>
+            {/for}
+          </select>
+        </div>
+        <div class="col-md-4 mb-1">
+          <label for="name">Menu</label>
+          <select class="select2 form-control position-relative" id="menu_tahunan" name="form[menu_tahunan][]" style="width: 100%" multiple placeholder="pilih menu">
+            <option value="" disabled>--PILIH MENU--</option>
+            <option value="1" {if is_numeric(array_search(1,$form.menu_tahunan)) } selected {/if}>Pelaporan</option>
+            <option value="2" {if is_numeric(array_search(2,$form.menu_tahunan)) } selected {/if}>Verifikasi</option>
+            <option value="3" {if is_numeric(array_search(3,$form.menu_tahunan)) } selected {/if}>Perhitungan</option>
+            <option value="4" {if is_numeric(array_search(4,$form.menu_tahunan)) } selected {/if}>Target Nilai IKLH</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label for="name">Aktifkan</label>
+          <div class="form-group check-style">
+            <input type="checkbox" name="form[aktif_tahunan]" {if $form.aktif_tahunan}checked="true" {/if} style="transform: scale(3);margin: 18px;">
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </div>
+  <div class="form-actions right">
+    <div class="form-row">
+      <div class="col-md-12">
+        <button type="submit" name="submit" class="btn btn-danger">
+          Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+</form>

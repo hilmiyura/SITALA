@@ -1,0 +1,66 @@
+<div class="row">
+	<div class="col-md-10">
+		<form action="" method="POST" enctype="multipart/form-data">
+			<div class="row mt-2">
+				<div class="col-md-3">
+					<select class="form-control select2" name="form[tahun]" style="width:100%;" required>
+						<option value="">-Pilih Tahun-</option>
+						{for $foo=2015 to 2023}
+						<option value="{$foo}" {if $foo==$tahunSelected}selected{/if}> {$foo} </option>
+						{/for}
+					</select>
+				</div>
+				<div class="col-md-2">
+					<button type="submit" class="btn btn-success" name="submit-tahun">Selanjutnya</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="col-md-2">
+		<ul class="nav justify-content-end">
+			<li class="nav-item">
+				<a class="nav-link btn btn-info" href="{$baseUrl}{$ctrl}"><i class="ft-arrow-left"></i> Back</a>
+			</li>
+		</ul>
+	</div>
+</div>
+<hr />
+{if $dataType}
+<ul class="nav nav-tabs">
+	{foreach from=$dataType item=v}
+	<li class="nav-item">
+		{if $fromTab}
+			<a class="nav-link {if $v.tipe==$fromTab}active{/if}" id="base-tab{$v.tipe}" data-toggle="tab" href="#tab{$v.tipe}">{$v.tipe_nama}</a>
+		{else}
+			<a class="nav-link {if $v.tipe==1}active{/if}" id="base-tab{$v.tipe}" data-toggle="tab" href="#tab{$v.tipe}">{$v.tipe_nama}</a>
+		{/if}
+	</li>
+	{/foreach}
+</ul>
+<div class="tab-content px-0 pt-1">
+	{foreach from=$dataType item=v}
+	{if $fromTab}
+		<div role="tabpanel" class="tab-pane {if $v.tipe==$fromTab}active{/if}" id="tab{$v.tipe}">
+	{else}
+		<div role="tabpanel" class="tab-pane {if $v.tipe==1}active{/if}" id="tab{$v.tipe}">
+	{/if}
+		{assign var="tipe" value=$v.tipe}
+		{if $view=='printout'}
+		<div class="row">
+			<div class="col-md-6 mb-1 mt-1">
+				<h4>Indeks Respon {if $userEntri.role_user==3} {$userEntri.nama_kabkota} {elseif $userEntri.role_user==2} Provinsi {$userEntri.nama_provinsi} {/if} Tahun {$tahunSelected}</h4>
+			</div>
+			<div class="col-md-6 mb-1 mt-1 text-right">
+				<button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-excel{$tipe}"><i class="ft-download"></i> Download Excel</button>
+				<button type="button" name="export-data" value="export" class="btn btn-success btn-sm" id="export-data-csv{$tipe}"><i class="ft-download"></i> Download CSV</button>
+			</div>
+		</div>
+		{assign var="file" value="admin_tab$tipe.html"}
+		{else}
+		{assign var="file" value="tab$tipe.html"}
+		{/if}
+		{include file="parts/contents/$ctrl/$act/$file" parent=$v.indeks_uid tipe=$v.tipe tahun=$v.tahun}
+	</div>
+	{/foreach}
+</div>
+{/if}

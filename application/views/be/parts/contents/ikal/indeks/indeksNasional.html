@@ -1,0 +1,37 @@
+{if $indeksNasional.uid_indeks_ikal}
+<div class="col-12 d-flex align-items-center justify-content-center m-2">
+  <div class="col-lg-4 col-md-6 col-10 box-shadow-2 p-0">
+    <div class="card border-grey border-lighten-3 px-1 py-1 box-shadow-3 m-0">
+      <div class="card-header border-0">
+        <div class="text-center">
+          <img style="width:10%;" src="assets/app-assets/images/logo/kw.png" alt="branding logo">
+          <!-- <i class="la la-map" style="font-size:30px !important;"></i> -->
+        </div>
+        <div class="font-medium-5  text-center mb-2">
+          Indeks Kualitas Air Laut
+        </div>
+        <div class="card-body text-center pt-0 mb-0">
+          <h2 style="font-size:2rem;">{number_format($indeksNasional.nilai_indeks,2,".","")}</h2>
+        </div>
+        <hr>
+        <div class="text-center">
+          {if $lockAction == 0 && $lockActionYear == 0}
+          <form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
+            <input type="hidden" name="form[uid_indeks_ikal]" value="{$indeksNasional.uid_indeks_ikal}" />
+            <button type="submit" name="submitNasional" class="btn btn-lg btn-block btn-warning">
+              <small class="white">Hitung</small>
+            </button>
+          </form>
+          {if $v.nilai_indeks > 0}
+          <p class="mb-0">Hitung Terakhir : </p>
+          {date("Y-m-d H:i:s", $v.chdate)}
+          {/if}
+          {else}
+          <span>--</span>
+          {/if}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}

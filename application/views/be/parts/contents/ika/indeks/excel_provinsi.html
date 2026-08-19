@@ -1,0 +1,67 @@
+
+<style>
+	table thead tr th{
+		border: 1px solid black;
+	}
+	td{
+		border: 1px solid black;
+		vertical-align: top;
+	}
+</style>
+<table>
+	<thead>
+		<tr>
+			<th rowspan="2" class="v-middle">No</th>
+			<th rowspan="2" class="v-middle text-center">Provinsi</th>
+			<!-- <th colspan="8" class="text-center">PARAMETER / BAKUMUTU (Ci/Lij)</th> -->
+			<th colspan="4" class="text-center">JUMLAH TITIK</th>
+			<th colspan="4" class="text-center">NILAI INDEKS PER MUTU</th>
+			<th rowspan="2" class="v-middle text-center">IKA</th>
+			<th rowspan="2" class="v-middle text-center">IKA INA</th>
+			<th rowspan="2" class="v-middle text-center">IKA INA MUTU</th>
+		</tr>
+		<tr>
+			<th>Memenuhi</th>
+			<th>Ringan</th>
+			<th>Sedang</th>
+			<th>Berat</th>
+			<th>Memenuhi</th>
+			<th>Ringan</th>
+			<th>Sedang</th>
+			<th>Berat</th>
+			<!-- <th class="v-middle">PH</th>
+                <th class="v-middle">BOD</th>
+                <th class="v-middle">COD</th>
+                <th class="v-middle">TSS</th>
+                <th class="v-middle">DO</th>
+                <th class="v-middle">NO<sub class="white">3</sub>-N</th>
+                <th class="v-middle">TOTAL PHOSPHAT</th>
+                <th class="v-middle">FECAL COLIFORM</th>
+                	<th class="v-middle">RATAAN</th>
+                	<th class="v-middle">MAKSIMUM</th>
+                	<th class="v-middle">IPj</th> -->
+		</tr>
+	</thead>
+	<tbody>
+		{foreach from=$view item=v}
+		{$v.json_data = $v.json_data|@json_decode:true}
+		{if $v.jenis_indeks == 1}
+		<tr>
+			<td>{counter}</td>
+			<td><b>{$v.nama_provinsi}</b></td>
+			<td class="text-center">{$v.jumlah_titik_memenuhi}</td>
+			<td class="text-center">{$v.jumlah_titik_ringan}</td>
+			<td class="text-center">{$v.jumlah_titik_sedang}</td>
+			<td class="border-right-td text-center">{$v.jumlah_titik_berat}</td>
+			<td class="text-center">{number_format($v.nilai_mutu_memenuhi,2,".","")}</td>
+			<td class="text-center">{number_format($v.nilai_mutu_ringan,2,".","")}</td>
+			<td class="text-center">{number_format($v.nilai_mutu_sedang,2,".","")}</td>
+			<td class="text-center">{number_format($v.nilai_mutu_berat,2,".","")}</td>
+			<td class="text-center">{number_format($v.nilai_indeks,2,".","")}</td>
+			<td class="text-center">{number_format($v.nilai_indeks_ina,2,".","")}</td>
+			<td class="text-center">{$v.nilai_indeks_ina_mutu}</td>
+		</tr>
+		{/if}
+		{/foreach}
+	</tbody>
+</table>

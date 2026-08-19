@@ -1,0 +1,73 @@
+<div class="row">
+  <div class="col-sm-12">
+    <input type="text" class="form-control mb-1" id="seachFieldProvinsi" onkeyup="searchData('dataTableProvinsi','seachFieldProvinsi')" placeholder="Masukan Kata Kunci" value="{$search.keyword}" name="form[keyword]" />
+  </div>
+  <!-- <div class="col-sm-2 ">
+		<a href="{$baseUrl}{$ctrl}/exportData/ex/provinsi/y/{$search.tahun}" target="_blank" class="btn btn-success float-md-right"> <i class="ft-download"></i> EXPORT EXCEL</a>
+	</div> -->
+</div>
+<div class="table-responsive table-border freeze-table">
+  {if $view}
+  <table class="table" id="dataTableProvinsi">
+    <thead class="bg-info bg-darken-2 white">
+      <tr>
+        <th>No</th>
+        <th>Provinsi</th>
+        <th class="text-center">TL</th>
+        <th class="text-center">IKTL</th>
+        <th class="text-center">DKK</th>
+        <th class="text-center">TL-DKK</th>
+        <th class="text-center">IKL</th>
+        <th class="text-center" style="width: 200px;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {$cnProvinsi = 1}
+      {foreach from=$view item=v}
+      {$v.json_data = $v.json_data|@json_decode:true}
+      {if $v.jenis_indeks == 1}
+      <tr>
+        <td>{$cnProvinsi}</td>
+        <td><b>{$v.nama_provinsi}</b></td>
+        <td class="text-center">
+          {number_format($v.json_data.tl,2,".","")}
+          <br>--<br>
+          <span class="tl-{$v.uid_indeks_iktl}-prov"></span>
+        </td>
+        <td class="text-center">
+          {if $v.json_data.iktl > 100} 100 {else}{number_format($v.json_data.iktl,2,".","")}{/if}
+          <br>--<br>
+          <span class="iktl-{$v.uid_indeks_iktl}-prov"></span>
+        </td>
+        <td class="text-center">
+          {if $v.json_data.dkk}{$v.json_data.dkk}{else}0.00{/if}
+          <br>--<br>
+          <span class="dkk-{$v.uid_indeks_iktl}-prov"></span>
+        </td>
+        <td class="text-center">
+          {if $v.json_data.tl_dkk}{$v.json_data.tl_dkk}{else}0.00{/if}
+          <br>--<br>
+          <span class="tl-dkk-{$v.uid_indeks_iktl}-prov"></span>
+        </td>
+        <td class="text-center">
+          {if $v.nilai_indeks > 100} 100 {else} {number_format($v.nilai_indeks,2,".","")} {/if}
+          <br>--<br>
+          <span class="nilai-indeks-{$v.uid_indeks_iktl}-prov"></span>
+        </td>
+        <td class="text-center">
+          <button type="button" data-uid="{$v.uid_indeks_iktl}" id="btn-hitung-simulasi-prov" class="btn btn-sm {if $activeBtn == $v.uid_indeks_iktl  || $v.status_hitung == 1} btn-success {else} btn-warning {/if}">
+            <small class="white">Hitung</small>
+          </button>
+        </td>
+      </tr>
+      <p style="display: none">{$cnProvinsi++}</p>
+      {/if}
+      {/foreach}
+    </tbody>
+  </table>
+  {else}
+  <div class="alert alert-danger text-center">
+    <strong>Tidak Ada Data</strong>
+  </div>
+  {/if}
+</div>
