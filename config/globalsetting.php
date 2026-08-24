@@ -1,14 +1,14 @@
 <?php
 	//DATABASE SETTING
-	define("DBDRIVER", "mysqli");
-	define("DBSERVER", "localhost");
-	define("DBUSER", "root");
-	define("DBPASS", "");
-	define("DBNAME", "sitala_iklh");
+	define("DBDRIVER", getenv("DB_DRIVER") ?: "mysqli");
+	define("DBSERVER", getenv("DB_SERVER") ?: "localhost");
+	define("DBUSER", getenv("DB_USER") ?: "root");
+	define("DBPASS", getenv("DB_PASS") ?: "");
+	define("DBNAME", getenv("DB_NAME") ?: "sitala_iklh");
 
 	//APPLICATION SETTING
 	define("DEFAULTCONTROLLER", "dashboard");
-	define("BASEURL", "/");
+	define("BASEURL", getenv("BASE_URL") ?: "/");
 
 	define("ASSETS", BASEURL . "assets/");
 	define("LIMIT", 50);

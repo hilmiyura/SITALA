@@ -3,6 +3,7 @@
 *.sql
 .DS_Store
 /config/apikeys.php
+/.env
 /IKU/
 /IKA/
 /IKAL/

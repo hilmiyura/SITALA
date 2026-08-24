@@ -1,5 +1,7 @@
 <?php	    
-    require_once "globalsetting.php";
+    require_once "dotenv.php";
+	load_env(dirname(__DIR__) . "/.env");
+	require_once "globalsetting.php";
 	require_once "apikeys.php";
 	require_once "front/Front.php";
 	
