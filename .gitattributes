@@ -1,0 +1,10 @@
+# Script yang dieksekusi di dalam container Linux harus ber-line-ending LF.
+# Kalau ter-checkout sebagai CRLF di Windows, shebang-nya rusak dan container
+# gagal start dengan pesan seperti "exec format error" atau
+# "/usr/bin/env: 'sh\r': No such file or directory".
+*.sh text eol=lf
+docker/entrypoint.sh text eol=lf
+
+# Sengaja tidak memasang aturan global (`* text=auto`) — repo ini berisi banyak
+# file lama dengan line ending campur, dan menormalkannya sekaligus akan
+# menghasilkan diff raksasa yang tidak ada hubungannya dengan perubahan apa pun.

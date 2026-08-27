@@ -1,0 +1,22 @@
+# Rahasia — jangan pernah terpanggang ke dalam image.
+# config/apikeys.php dibuat ulang oleh docker/entrypoint.sh dari file contoh,
+# dan nilainya diambil dari environment container.
+.env
+config/apikeys.php
+
+# Metadata & artefak lokal
+.git
+.gitignore
+.dockerignore
+
+# Folder runtime — dibuat ulang oleh entrypoint, jangan ikut disalin
+temp/
+uploads/
+
+# Dump database (bisa ~1 GB) dan folder kerja lokal
+*.sql
+IKU/
+IKA/
+IKAL/
+
+.DS_Store

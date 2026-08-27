@@ -1,0 +1,105 @@
+# SITALA — stack development
+#
+#   docker compose up -d --build      jalankan aplikasi
+#   docker compose logs -f app        lihat log Apache + PHP
+#   docker compose down               hentikan
+#
+# Buka http://localhost:8000/login
+#
+# ---------------------------------------------------------------------------
+# CATATAN PENTING SOAL SUMBER KONFIGURASI
+#
+# Ada dua pihak yang membaca file .env di root repo, dan urutannya menentukan:
+#
+#   1. Docker Compose membacanya untuk mengisi ${...} di bawah ini.
+#   2. Aplikasi membacanya lagi saat runtime lewat config/dotenv.php, yang
+#      memanggil putenv() sehingga MENIMPA environment container.
+#
+# Konsekuensinya: selama .env ikut ter-bind-mount, isi .env-lah yang menang.
+# Mengubah `environment:` di sini tidak berpengaruh kalau .env menyebut nilai
+# lain. Untuk berpindah ke database lokal, ubah DB_SERVER di .env menjadi `db`
+# (lihat profil localdb di bawah), bukan mengubah file ini.
+# ---------------------------------------------------------------------------
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sitala-app:7.4
+    container_name: sitala-app
+    ports:
+      # Default 80 supaya cocok untuk produksi / Elastic Beanstalk, yang
+      # menyambungkan reverse proxy di host ke port container ini.
+      #
+      # Untuk development set APP_PORT di .env (mis. APP_PORT=8000) — port 80 di
+      # mesin lokal sering sudah dipakai dan butuh hak administrator.
+      #
+      # Container ini menjalankan Apache, bukan application server telanjang,
+      # jadi tidak ada nginx yang perlu ditaruh di depannya. Di Elastic Beanstalk
+      # nginx sudah disediakan platform di sisi host.
+      - "${APP_PORT:-80}:80"
+    volumes:
+      # Bind mount untuk development: edit di host, langsung terlihat tanpa
+      # rebuild. Smarty memakai force_compile=TRUE sehingga template pun
+      # tidak perlu clear cache.
+      #
+      # Ini menimpa source hasil COPY di Dockerfile. Untuk menguji image
+      # secara mandiri (seperti kondisi produksi), komentari baris ini.
+      - .:/var/www/html
+    environment:
+      DB_DRIVER: ${DB_DRIVER:-mysqli}
+      DB_SERVER: ${DB_SERVER:-db}
+      DB_USER: ${DB_USER:-root}
+      DB_PASS: ${DB_PASS:-}
+      DB_NAME: ${DB_NAME:-sitala}
+      BASE_URL: ${BASE_URL:-/}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_OCR_MODEL: ${OPENROUTER_OCR_MODEL:-google/gemini-2.5-flash}
+      OPENROUTER_API_URL: ${OPENROUTER_API_URL:-https://openrouter.ai/api/v1/chat/completions}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost/login"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 3
+
+  # ---------------------------------------------------------------------------
+  # Database lokal — OPSIONAL, tidak ikut jalan secara default.
+  #
+  #   docker compose --profile localdb up -d
+  #
+  # Gunakan kalau tidak mau menyentuh database bersama. Versi 8.4 dipilih agar
+  # setara dengan server yang dipakai (MySQL 8.4.9).
+  #
+  # Setelah menyalakannya, ubah DB_SERVER di .env menjadi `db` (baca catatan di
+  # atas soal urutan konfigurasi), lalu `docker compose restart app`.
+  #
+  # Taruh dump .sql di docker/initdb/ — MySQL mengeksekusinya otomatis saat
+  # volume pertama kali dibuat. Kalau dump berisi VIEW dengan DEFINER dari
+  # server asal, jalankan dulu perbaikan yang dijelaskan di README-DEV.md.
+  # ---------------------------------------------------------------------------
+  db:
+    profiles: ["localdb"]
+    image: mysql:8.4
+    container_name: sitala-db
+    command: --mysql-native-password=ON
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-root}
+      MYSQL_DATABASE: ${DB_NAME:-sitala}
+    ports:
+      # dipetakan ke 3307 supaya tidak bentrok dengan MySQL yang mungkin sudah
+      # berjalan di host
+      - "3307:3306"
+    volumes:
+      - sitala-db-data:/var/lib/mysql
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+volumes:
+  sitala-db-data:

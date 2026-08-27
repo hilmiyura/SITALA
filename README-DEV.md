@@ -25,7 +25,8 @@ udara (IKU), air laut (IKAL), dan tutupan lahan (IKTL).
   - [Integrasi eksternal](#integrasi-eksternal)
   - [API keluar](#api-keluar)
   - [Hal yang perlu diwaspadai](#hal-yang-perlu-diwaspadai)
-- [Menjalankan di local](#menjalankan-di-local)
+- [Menjalankan dengan Docker](#menjalankan-dengan-docker)
+- [Menjalankan di local (tanpa Docker)](#menjalankan-di-local-tanpa-docker)
 - [Service lain](#service-lain)
 - [Deploy production](#deploy-production)
 
@@ -63,6 +64,14 @@ sitala/
 ├── router.php             ← emulasi rewrite .htaccess untuk `php -S`
 ├── .htaccess              ← rewrite rule Apache (produksi)
 ├── .env.example           ← template konfigurasi (DB, BASE_URL, OpenRouter)
+├── Dockerfile             ← image PHP 7.4 + Apache
+├── docker-compose.yml     ← service app (+ db opsional lewat profil localdb)
+├── .dockerignore          ← menjaga .env & apikeys.php tidak masuk image
+├── docker/
+│   ├── apache/sitala.conf ← vhost: AllowOverride All, alias /assets/, proteksi dir
+│   ├── php/php.ini        ← batas upload/memori/eksekusi
+│   ├── entrypoint.sh      ← bikin stub wajib saat container start
+│   └── initdb/            ← dump .sql untuk service db opsional
 ├── config/
 │   ├── globalsetting.php  ← konstanta app (DB, BASEURL, path, ACTIVE_YEAR)
 │   ├── dotenv.php         ← loader .env buatan sendiri (bukan vlucas/phpdotenv)
@@ -300,7 +309,146 @@ di beberapa controller: `ini_set("display_errors", true)` di dalam `init()`.
 
 ---
 
-## Menjalankan di local
+## Menjalankan dengan Docker
+
+Cara tercepat, dan tidak menuntut PHP 7.4 terpasang di mesin kamu.
+
+```powershell
+docker compose up -d --build
+```
+
+Buka `http://localhost:8000/login`.
+
+| Perintah | Kegunaan |
+|---|---|
+| `docker compose logs -f app` | log Apache + PHP secara langsung |
+| `docker compose exec app bash` | shell di dalam container |
+| `docker compose restart app` | restart setelah mengubah `.env` |
+| `docker compose down` | hentikan |
+| `docker compose up -d --build` | rebuild setelah mengubah `Dockerfile`/`docker/` |
+
+### Isi stack
+
+| File | Peran |
+|---|---|
+| `Dockerfile` | `php:7.4.33-apache-bullseye` + `mysqli`, `gd`, `zip` + `mod_rewrite` |
+| `docker-compose.yml` | service `app` (port 8000) dan `db` opsional |
+| `docker/apache/sitala.conf` | vhost: `AllowOverride All`, alias `/assets/`, proteksi direktori |
+| `docker/php/php.ini` | batas upload/memori/eksekusi |
+| `docker/entrypoint.sh` | membuat stub wajib saat start, idempoten |
+| `.dockerignore` | menjaga `.env` dan `config/apikeys.php` tidak terpanggang ke image |
+
+Semua prasyarat manual yang dijelaskan di bagian berikutnya (`temp/tpl_compile/`,
+`uploads/`, `application/views/fe/`, `temp/allowupload.php`, `config/apikeys.php`)
+dibuat otomatis oleh `docker/entrypoint.sh` setiap container start, jadi **tidak perlu
+disiapkan sendiri**.
+
+### Tiga hal yang perlu dipahami
+
+**1. Masalah symlink `assets` hilang total.** Vhost memakai
+`Alias /assets/ → /var/www/html/application/views/be/assets/`, jadi container tidak
+bergantung pada symlink maupun junction. Ini menghapus seluruh keruwetan Windows yang
+dibahas di bagian [Setup — Windows](#setup--windows).
+
+**2. `.env` mengalahkan `environment:` di compose.** Ada dua pihak yang membaca `.env`:
+Docker Compose (untuk mengisi `${...}`) dan aplikasi sendiri lewat `config/dotenv.php`,
+yang memanggil `putenv()` sehingga **menimpa** environment container. Selama `.env` ikut
+ter-bind-mount, isinya yang menang. Untuk pindah database, ubah `DB_SERVER` di `.env` —
+bukan di `docker-compose.yml`.
+
+Tanpa `.env` (misalnya saat image dijalankan mandiri untuk produksi), `load_env()` keluar
+lebih awal dan `getenv()` jatuh ke environment container — jalur ini sudah diverifikasi
+bekerja.
+
+**3. Direktori sensitif ditolak Apache.** `config/`, `kick/`, `libs/`, `temp/`, dan
+`application/{controllers,models,prompts}` dikembalikan **403**. Ini bukan hardening
+teoretis: rewrite di `.htaccess` hanya meneruskan ke `index.php` kalau file-nya *tidak*
+ada, sehingga file `.php` yang benar-benar ada di path itu — termasuk template hasil
+kompilasi Smarty di `temp/` — akan dieksekusi Apache langsung di luar alur controller.
+
+### Port, dan kenapa tidak ada nginx
+
+`docker-compose.yml` mempublikasikan `${APP_PORT:-80}:80` — **default 80** supaya cocok
+untuk produksi. Saat development set `APP_PORT=8000` di `.env`, karena port 80 di mesin
+lokal sering sudah terpakai dan menuntut hak administrator.
+
+**Tidak ada nginx di stack ini, dan memang tidak dibutuhkan.** Container-nya menjalankan
+Apache — web server penuh yang sudah menyajikan aset statis, mengeksekusi rewrite
+`.htaccess`, dan menolak direktori sensitif. Ini berbeda dari pola Node.js yang lazim
+(`node` di port 5000 + nginx di depannya): di sana nginx dibutuhkan karena application
+server-nya memang bukan web server. Padanan proses Node di sini adalah mod_php **di dalam**
+Apache, bukan Apache itu sendiri. Menambahkan nginx berarti menumpuk dua web server untuk
+pekerjaan yang sama.
+
+### Catatan untuk deploy ke Elastic Beanstalk
+
+Platform Docker EB (AL2/AL2023) membaca `docker-compose.yml` di root source bundle, jadi
+stack ini bisa dipakai apa adanya. Lima hal yang perlu disiapkan:
+
+**1. Nginx sudah disediakan platform.** Rantainya
+`Domain → ALB → nginx milik EB di host → container Apache`. Dokumentasi AWS menyebut
+Elastic Beanstalk memakai nilai *ContainerPort* untuk menyambungkan container ke *reverse
+proxy running on the host*. Load balancer tidak menunjuk langsung ke container. Jangan
+tambahkan nginx sendiri.
+
+**2. Naikkan batas upload di nginx EB.** `php.ini` sudah mengizinkan 20 MB, tapi nginx
+milik platform akan memotongnya lebih dulu di 1 MB (default `client_max_body_size`) dan
+fitur OCR akan gagal dengan **413**. Perbaikannya lewat file di source bundle, bukan lewat
+compose:
+
+```
+.platform/nginx/conf.d/upload.conf
+    client_max_body_size 25M;
+```
+
+**3. Konfigurasi lewat environment properties, bukan `.env`.** `.env` sengaja tidak ikut
+ke image (lihat `.dockerignore`), jadi isi `DB_*`, `BASE_URL`, dan `OPENROUTER_*` sebagai
+environment properties di EB. Jalur ini sudah diverifikasi bekerja: image yang dijalankan
+tanpa bind mount dan tanpa `.env` tetap melayani `/login` dengan HTTP 200.
+
+**4. Session PHP tersimpan di disk container.** Aplikasi memakai `session_start()` dengan
+handler file bawaan. Begitu environment diskalakan ke lebih dari satu instance di belakang
+ALB, request user bisa mendarat di instance berbeda dan sesinya hilang — gejalanya user
+ter-logout acak. Aktifkan **sticky sessions** di ALB, atau pindahkan session ke penyimpanan
+bersama.
+
+**5. `uploads/` bersifat ephemeral.** Isinya ada di filesystem container dan **hilang setiap
+deploy maupun scale-in**. Untuk produksi, arahkan ke EFS yang di-mount, atau pindahkan ke
+S3. Ini bukan masalah di development karena bind mount menyimpannya di host.
+
+### Database lokal (opsional)
+
+Secara default hanya service `app` yang jalan, memakai database yang disebut `.env`.
+Untuk memakai MySQL dalam container:
+
+```powershell
+docker compose --profile localdb up -d
+```
+
+Lalu ubah `DB_SERVER` di `.env` menjadi `db` dan `docker compose restart app`. Taruh dump
+`.sql` di `docker/initdb/` — MySQL menjalankannya otomatis saat volume pertama dibuat.
+Port host-nya `3307` supaya tidak bentrok dengan MySQL yang mungkin sudah ada.
+
+### Hasil verifikasi
+
+Stack ini sudah diuji, bukan sekadar ditulis:
+
+| Cek | Hasil |
+|---|---|
+| `GET /login` | HTTP 200, `<title>IKLH</title>`, tanpa error PHP |
+| Asset lewat Alias | `bootstrap.css` 266 KB · `style.css` 6,4 KB — keduanya 200 |
+| Direktori sensitif | `/config/globalsetting.php`, `/kick/Kick.php`, `/application/controllers/*` → 403 |
+| Extension | `mysqli`, `gd`, `zip`, `curl`, `mbstring`, `openssl`, `fileinfo`, `session` |
+| php.ini di SAPI Apache | `max_execution_time=300`, `upload_max_filesize=20M`, `memory_limit=512M`, TZ `Asia/Jakarta` |
+| Koneksi database | OK (234 ms), MySQL 8.4.9 |
+| Image mandiri tanpa bind mount & tanpa `.env` | `GET /login` HTTP 200 — konfigurasi via env vars terbukti jalan |
+| Healthcheck compose | `healthy` |
+
+---
+
+## Menjalankan di local (tanpa Docker)
+
+Pakai bagian ini kalau tidak memakai Docker.
 
 FE dan BE dijalankan oleh **satu proses yang sama** — tidak ada perintah run terpisah.
 
