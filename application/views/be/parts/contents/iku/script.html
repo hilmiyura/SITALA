@@ -296,8 +296,9 @@
 		}
 
 		var labelMap = { no2: "NO2", so2: "SO2", pm25: "PM2.5" };
+		var params = data.parameters || {};
 		jQuery.each(["no2", "so2", "pm25"], function(i, param) {
-			var p = data[param];
+			var p = params[param];
 			if (!p) {
 				return;
 			}

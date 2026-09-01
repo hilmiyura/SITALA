@@ -590,9 +590,10 @@ Berbeda dari seluruh field lain di dokumen ini, nilai parameter **tidak dicocokk
 apa pun**. Nama parameternya di-hardcode dan nilainya diteruskan apa adanya:
 
 ```php
+$out['parameters'] = array();
 foreach (array('no2', 'so2', 'pm25') as $param) {
     $p = isset($entry[$param]) && is_array($entry[$param]) ? $entry[$param] : array();
-    $out[$param] = array(
+    $out['parameters'][$param] = array(
         'nilai'             => isset($p['nilai']) ? $p['nilai'] : null,
         'durasi_pemantauan' => isset($p['durasi_pemantauan']) ? $p['durasi_pemantauan'] : null,
         'metode'            => $this->matchMetode(
@@ -627,9 +628,19 @@ dengan koma, nilai itu masuk apa adanya ke form.
 | | IKU | IKA / IKAL |
 |---|---|---|
 | Bentuk keluaran model | objek bernama tetap: `no2`, `so2`, `pm25` | array bebas `parameters[]` |
+| **Key pada respons** | **`parameters`** | `parameters` |
+| **Isi tiap parameter** | **objek** `{nilai, durasi_pemantauan, metode}` | **skalar** — hanya nilainya |
 | Pencocokan nama | tidak ada — hardcode | tabel regex `*ParameterPatterns()` |
 | Jumlah parameter | 3 | IKA 55, IKAL 5 |
 | Parameter tak dikenali | tidak mungkin | masuk `unmatched_parameters` |
+
+> **Nama key sudah diseragamkan, isinya belum.** Ketiga modul kini sama-sama memakai key
+> `parameters`, tetapi nilainya berbeda bentuk: IKU menyimpan objek per parameter (karena
+> promptnya mengekstrak metode dan durasi per parameter), sedangkan IKA/IKAL menyimpan
+> skalar. Kode yang mengiterasi `parameters` secara generik **tetap tidak bisa dipakai
+> lintas modul**. Menyamakan sepenuhnya menuntut perubahan pada `prompts/ika.md` dan
+> `prompts/ikal.md` agar ikut mengekstrak metode per parameter — bukan sekadar perubahan
+> kode.
 
 Konsekuensinya: **menambah parameter baru untuk IKU berbeda caranya** dari IKA. Untuk IKU
 perlu menyentuh empat tempat sekaligus — array di `matchFieldsIku()`, struktur output di
@@ -649,12 +660,18 @@ alih-alih `24.50` — akan diteruskan utuh dan tersimpan sebagai data pelaporan.
 ## Contoh respons
 
 ```json
-"no2":  { "nilai": 24.5, "durasi_pemantauan": 14, "metode": { "uid": 2, "text": "Passive Sampler" } },
-"so2":  { "nilai": 18.2, "durasi_pemantauan": 14, "metode": { "uid": 2, "text": "Passive Sampler" } },
-"pm25": { "nilai": null, "durasi_pemantauan": null, "metode": { "uid": null, "text": null } }
+"parameters": {
+  "no2":  { "nilai": 24.5, "durasi_pemantauan": 14, "metode": { "uid": 2, "text": "Passive Sampler" } },
+  "so2":  { "nilai": 18.2, "durasi_pemantauan": 14, "metode": { "uid": 2, "text": "Passive Sampler" } },
+  "pm25": { "nilai": null, "durasi_pemantauan": null, "metode": { "uid": null, "text": null } }
+}
 ```
 
 `pm25` di atas adalah bentuk normal untuk dokumen yang memang tidak mengukur PM2.5.
+
+Ketiga kunci `no2`, `so2`, dan `pm25` **selalu ada** selama respons berhasil dibentuk,
+karena di-generate dari array tetap — berbeda dari IKA/IKAL yang hanya memuat parameter
+yang benar-benar terbaca.
 
 ---
 

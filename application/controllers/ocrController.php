@@ -157,9 +157,14 @@ class ocrController extends Front
         $out = $this -> matchFieldsBase($shared, $entry, 1);
         $out['peruntukan'] = $this -> matchPeruntukan(isset($entry['peruntukan_text']) ? $entry['peruntukan_text'] : null, 1);
 
+        //Parameter dikelompokkan di bawah key "parameters" supaya sebentuk dengan respons
+        //IKA dan IKAL. Perhatikan isinya TIDAK sama: di sini tiap parameter berupa objek
+        //{nilai, durasi_pemantauan, metode}, sedangkan IKA/IKAL hanya menyimpan nilainya
+        //(skalar) karena prompt kedua modul itu tidak mengekstrak metode per parameter.
+        $out['parameters'] = array();
         foreach (array('no2', 'so2', 'pm25') as $param) {
             $p = isset($entry[$param]) && is_array($entry[$param]) ? $entry[$param] : array();
-            $out[$param] = array(
+            $out['parameters'][$param] = array(
                 'nilai' => isset($p['nilai']) ? $p['nilai'] : null,
                 'durasi_pemantauan' => isset($p['durasi_pemantauan']) ? $p['durasi_pemantauan'] : null,
                 'metode' => $this -> matchMetode(isset($p['metode_text']) ? $p['metode_text'] : null, $shared['matrik_sampel_text']),
