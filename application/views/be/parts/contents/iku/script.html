@@ -346,6 +346,22 @@
 		});
 	}
 
+	//Kalau NO2 & SO2 sama-sama Manual Pasif, PM2.5 pasti ikut Manual Pasif juga (satu alat pasif
+	//yang sama dipasang buat sekaligus mengukur ketiganya) — jadi metode PM2.5 dipaksa ikut, ga perlu
+	//user pilih manual. Set metode-nya (kalau belum) lalu trigger "change" supaya toggleDurasiPemantauan/
+	//checkDurasiPasif/checkPm25Satelit yang sudah ada di handler metode PM2.5 ikut jalan otomatis.
+	function syncPm25MetodeFromPasif(sfx) {
+		sfx = sfx || "";
+		var no2Metode = $("#no2_uid_metode_pemantauan" + sfx).val();
+		var so2Metode = $("#so2_uid_metode_pemantauan" + sfx).val();
+		if (no2Metode == METODE_MANUAL_PASIF && so2Metode == METODE_MANUAL_PASIF) {
+			var $pm25Metode = $("#pm25_uid_metode_pemantauan" + sfx);
+			if ($pm25Metode.val() != METODE_MANUAL_PASIF) {
+				$pm25Metode.val(METODE_MANUAL_PASIF).trigger("change");
+			}
+		}
+	}
+
 	//===== Kriteria 3: durasi pemantauan Manual Pasif harus 13/14/15 hari =====
 	var DURASI_PASIF_ALLOWED_DAYS = [13, 14, 15];
 
@@ -403,8 +419,9 @@
 							$("#longitude" + sfx).val(val.longitude);
 							$("#uid_lokasi_pemantauan" + sfx).data("provinsi", val.uid_provinsi).data("kabkota", val.uid_kabkota);
 							renderKoordinatCheck(sfx, data.latitude, data.longitude, val.latitude, val.longitude);
-							var pm25Param = data.parameters && data.parameters.pm25;
-							if (pm25Param && pm25Param.metode && pm25Param.metode.uid == METODE_MANUAL_PASIF) {
+							//baca dari DOM (bukan objek data OCR) supaya ikut sinkron kalau metode PM2.5
+							//sempat dipaksa Manual Pasif oleh syncPm25MetodeFromPasif() (NO2+SO2 pasif)
+							if ($("#pm25_uid_metode_pemantauan" + sfx).val() == METODE_MANUAL_PASIF) {
 								checkPm25Satelit(sfx, val.uid_provinsi, val.uid_kabkota, getTahunFromTanggal());
 							} else {
 								$("#pm25-satelit-info" + sfx).hide().html("");
@@ -460,6 +477,7 @@
 				unmatched.push("Metode " + labelMap[param] + " (\"" + p.metode.text + "\")");
 			}
 		});
+		syncPm25MetodeFromPasif(sfx);
 
 		return unmatched;
 	}
@@ -564,6 +582,8 @@
 						} else {
 							$("#pm25-satelit-info" + sfx).hide().html("");
 						}
+					} else {
+						syncPm25MetodeFromPasif(sfx);
 					}
 				});
 			});
@@ -790,11 +810,13 @@
 	$("#no2_uid_metode_pemantauan").on("change", function() {
 		toggleDurasiPemantauan("no2", "", $(this).val());
 		checkDurasiPasif("no2", "");
+		syncPm25MetodeFromPasif("");
 	});
 
 	$("#so2_uid_metode_pemantauan").on("change", function() {
 		toggleDurasiPemantauan("so2", "", $(this).val());
 		checkDurasiPasif("so2", "");
+		syncPm25MetodeFromPasif("");
 	});
 
 	$("#pm25_uid_metode_pemantauan").on("change", function() {
@@ -854,7 +876,9 @@
 										$("#latitude").val(val.latitude);
 										$("#longitude").val(val.longitude);
 										$("#uid_lokasi_pemantauan").data("provinsi", val.uid_provinsi).data("kabkota", val.uid_kabkota);
-										if (req.pm25_uid_metode_pemantauan == METODE_MANUAL_PASIF) {
+										//baca dari DOM (bukan req.pm25_uid_metode_pemantauan) supaya ikut sinkron
+										//kalau sempat dipaksa Manual Pasif oleh syncPm25MetodeFromPasif() (NO2+SO2 pasif)
+										if ($("#pm25_uid_metode_pemantauan").val() == METODE_MANUAL_PASIF) {
 											checkPm25Satelit("", val.uid_provinsi, val.uid_kabkota, getTahunFromTanggal());
 										}
 									});
@@ -903,6 +927,7 @@
 							$("#pm25_durasi_pemantauan_pasif").val(req.pm25_durasi_pemantauan_pasif);
 						}
 						checkDurasiPasif("pm25", "");
+						syncPm25MetodeFromPasif("");
 						$("#pm25_faktor_koreksi").val(req.pm25_faktor_koreksi);
 						if (req.pm25_faktor_koreksi != 0) {
 							$("#pm25-faktor-koreksi").show();
