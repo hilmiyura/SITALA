@@ -1,6 +1,319 @@
-<!-- Modal -->
+<style>
+  /* ---- shell ---- */
+  #tambahData .modal-content {
+    border: none;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 16px 44px rgba(15, 23, 42, .3);
+  }
+  #tambahData .modal-header {
+    background: linear-gradient(135deg, #1cb5c4 0%, #0f7c8c 100%) !important;
+    border: none;
+    padding: 1.1rem 1.5rem;
+  }
+  #tambahData .modal-title {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  #tambahData .modal-title i {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, .18);
+    border-radius: 10px;
+    font-size: 1.05rem;
+  }
+  #tambahData .close { color: #fff; opacity: .85; text-shadow: none; }
+  #tambahData .close:hover { opacity: 1; }
+  #tambahData .modal-footer {
+    border-top: 1px solid #eef1f5;
+    padding: .9rem 1.5rem;
+    background: #fff;
+  }
+  #tambahData .modal-footer .btn {
+    border-radius: 8px;
+    padding: .55rem 1.5rem;
+    font-weight: 600;
+    border: none;
+  }
+  #tambahData .modal-footer .btn-secondary {
+    background: #eef1f5;
+    color: #4b5563;
+  }
+  #tambahData .modal-footer .btn-secondary:hover {
+    background: #e2e7ee;
+    color: #1f2937;
+  }
+  #tambahData #button-ikl-submit {
+    background: linear-gradient(135deg, #ef4b4d, #c42730);
+    box-shadow: 0 6px 16px rgba(196, 39, 48, .3);
+    color: #fff;
+  }
+
+  /* ---- panes ---- */
+  #tambahData .ikl-modal-body { height: 80vh; }
+  #tambahData .ikl-map-pane,
+  #tambahData .ikl-form-pane { height: 100%; overflow-y: auto; padding: 1.5rem; }
+  #tambahData .ikl-map-pane { background: #f6f8fb; display: flex; flex-direction: column; }
+
+  /* ---- section headers ---- */
+  #tambahData .form-section {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    font-size: .95rem;
+    font-weight: 700;
+    color: #263042;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    margin: 0 0 1.1rem;
+    padding-bottom: .65rem;
+    border-bottom: 2px solid #eef1f5;
+  }
+  #tambahData .ikl-form-pane > .form-section:not(:first-child) { margin-top: 1.5rem; }
+  #tambahData .form-section > i:first-child,
+  #tambahData .form-section > span > i:first-child {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #1cb5c4, #0f7c8c);
+    color: #fff;
+    font-size: .95rem;
+  }
+
+  /* ---- form controls ---- */
+  #tambahData label {
+    font-size: .8rem;
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: .35rem;
+  }
+  #tambahData .form-control {
+    border-radius: 8px;
+    border-color: #dde3ec;
+  }
+  #tambahData .form-control:focus {
+    border-color: #1cb5c4;
+    box-shadow: 0 0 0 3px rgba(28, 181, 196, .15);
+  }
+  #tambahData .form-control[readonly],
+  #tambahData .form-control:disabled {
+    background-color: #f2f4f7;
+    color: #6b7280;
+  }
+  #tambahData .select2-container--default .select2-selection--single,
+  #tambahData .select2-container--default .select2-selection--multiple {
+    border-radius: 8px !important;
+    border-color: #dde3ec !important;
+    min-height: 38px;
+  }
+  #tambahData .input-group-text {
+    border-radius: 0 8px 8px 0;
+    background: #f2f4f7;
+    color: #6b7280;
+    border-color: #dde3ec;
+  }
+
+  /* ---- tab bar ---- */
+  #tambahData .ikl-tab-bar {
+    display: flex;
+    gap: .5rem;
+    margin-bottom: .75rem;
+    flex: 0 0 auto;
+  }
+  #tambahData .ikl-tab {
+    flex: 1;
+    padding: .55rem 1rem;
+    border: 2px solid #dde3ec;
+    border-radius: 10px;
+    background: #fff;
+    font-weight: 700;
+    font-size: .82rem;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all .15s ease;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+  }
+  #tambahData .ikl-tab i { font-size: .9rem; }
+  #tambahData .ikl-tab:hover { border-color: #adb5bd; }
+  #tambahData .ikl-tab.active[data-layer="rth"] {
+    border-color: #28a745;
+    background: #eefaf1;
+    color: #1e7e34;
+  }
+  #tambahData .ikl-tab.active[data-layer="rhl"] {
+    border-color: #fd7e14;
+    background: #fff5eb;
+    color: #c45e00;
+  }
+
+  /* ---- map ---- */
+  #tambahData #ikl-map {
+    flex: 1;
+    min-height: 280px;
+    border-radius: 10px;
+    border: 1px solid #dde3ec;
+    z-index: 0;
+  }
+
+  /* ---- upload section ---- */
+  #tambahData .ikl-upload-section { margin-top: .75rem; flex: 0 0 auto; }
+  #tambahData .ikl-dropzone {
+    position: relative;
+    border: 2px dashed #c9d2de;
+    border-radius: 10px;
+    background: #fff;
+    padding: .8rem 1rem;
+    text-align: center;
+    transition: border-color .15s ease, background .15s ease;
+    cursor: pointer;
+  }
+  #tambahData .ikl-dropzone:hover,
+  #tambahData .ikl-dropzone.dragover {
+    border-color: #1cb5c4;
+    background: #f0fbfd;
+  }
+  #tambahData .ikl-dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+  }
+  #tambahData .ikl-dropzone i {
+    font-size: 22px;
+    color: #1cb5c4;
+    margin-bottom: .15rem;
+    display: block;
+  }
+  #tambahData .ikl-dropzone-title {
+    margin: 0;
+    font-size: .8rem;
+    font-weight: 600;
+    color: #344054;
+  }
+  #tambahData .ikl-dropzone-sub {
+    margin: .1rem 0 0;
+    font-size: .7rem;
+    color: #8a94a6;
+  }
+  #tambahData .ikl-dropzone.has-file {
+    padding: .45rem .8rem;
+    text-align: left;
+    border-style: solid;
+    border-color: #dde3ec;
+    background: #f8fafc;
+  }
+  #tambahData .ikl-dropzone-selected {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  #tambahData .ikl-dropzone-selected i {
+    font-size: 16px;
+    color: #1cb5c4;
+    margin: 0;
+    flex: 0 0 auto;
+  }
+  #tambahData .ikl-dropzone-filename {
+    font-size: .78rem;
+    font-weight: 600;
+    color: #344054;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1 1 auto;
+  }
+  #tambahData .ikl-dropzone-change {
+    font-size: .7rem;
+    color: #1c5fa8;
+    font-weight: 600;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* ---- area info ---- */
+  #tambahData .ikl-area-info {
+    margin-top: .5rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .78rem;
+    color: #4b5563;
+  }
+  #tambahData .ikl-area-value {
+    font-weight: 700;
+    font-size: .85rem;
+  }
+  #tambahData .ikl-area-info .badge {
+    font-size: .68rem;
+    padding: .2rem .45rem;
+    border-radius: 6px;
+  }
+
+  /* ---- pusat fields collapsible ---- */
+  #tambahData .ikl-pusat-toggle {
+    cursor: pointer;
+    user-select: none;
+  }
+  #tambahData .ikl-pusat-toggle .toggle-icon {
+    width: auto !important;
+    height: auto !important;
+    background: none !important;
+    color: #6b7280 !important;
+    font-size: .9rem !important;
+    border-radius: 0 !important;
+    transition: transform .2s;
+    margin-left: auto;
+  }
+  #tambahData .ikl-pusat-fields.collapsed { display: none; }
+
+  /* ---- map legend ---- */
+  #tambahData .ikl-map-legend {
+    display: flex;
+    gap: 1rem;
+    margin-top: .5rem;
+    font-size: .72rem;
+    color: #6b7280;
+    flex: 0 0 auto;
+  }
+  #tambahData .ikl-legend-item {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+  }
+  #tambahData .ikl-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  @media (max-width: 991px) {
+    #tambahData .ikl-modal-body { height: auto; }
+    #tambahData .ikl-map-pane,
+    #tambahData .ikl-form-pane { height: auto; overflow-y: visible; }
+    #tambahData #ikl-map { min-height: 350px; }
+  }
+</style>
+<!-- Modal: Tambah Data IKTL -->
 <div class="modal text-left" id="tambahData" role="dialog" data-backdrop="static" aria-labelledby="myModalLabel6" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
+  <div class="modal-dialog" style="max-width: 96vw; width: 96vw; margin: 1rem auto;" role="document">
     <div class="modal-content">
       <div class="modal-header bg-info bg-darken-2 white">
         <h4 class="modal-title white" id="myModalLabel6">
@@ -12,171 +325,203 @@
       </div>
       <form class="form_with_load" id="form-ikl-submit" method="POST" action="" enctype="multipart/form-data">
         <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
-        <div class="modal-body">
-          <h4 class="form-section"><i class="ft-calendar"></i>Tanggal</h4>
-          <div class="form-row mb-1">
-            <div class="col-md-12 mb-1">
-              <label for="name">Tanggal Pemantauan</label>
-              <input type="text" class="form-control pickadate-limits" id="tanggal" name="form[tanggal]" />
-            </div>
-          </div>
-          {if $me.role_user != 3}
-          <h4 class="form-section">
-            <i class="la la-map-marker"></i>Lokasi Pemantauan
-          </h4>
-          {/if}
-          <div class="form-row mb-1">
-            {if $me.role_user !=2 && $me.role_user !=3}
-            <div class="col-md-12 mb-1">
-              <label for="name">Provinsi</label>
-              <select class="select2 form-control position-relative provinsi_select" to="uid_kabkota" id="uid_provinsi" name="form[uid_provinsi]" style="width: 100%" required="">
-                <option value="">--PILIH PROVINSI--</option>
-                {foreach from=$provinsi item=v}
-                <option value="{$v.kd_propinsi}">{$v.nama_propinsi}</option>
-                {/foreach}
-              </select>
-            </div>
-            {/if}
-            {if $me.role_user !=3}
-            <div class="col-md-12 mb-1">
-              <label for="name">Kab/kota</label>
-              <select class="select2 form-control position-relative" id="uid_kabkota" name="form[uid_kabkota]" style="width: 100%" required="">
-                <option value="">--PILIH KAB/KOTA--</option>
-                {foreach from=$kabkota item=v}
-                <option value="{$v.kd_kota}">{$v.nama_kabkot}</option>
-                {/foreach}
-              </select>
-            </div>
-            {/if}
-          </div>
-          <h4 class="form-section"><i class="ft-edit"></i>Pemantauan</h4>
-          <h5 class="form-section text-uppercase text-center">Diisi oleh pusat</h5>
-          <div class="form-row mb-1">
-            <div class="col-md-12 mb-1">
-              <div class="alert alert-danger text-center">
-                Untuk Pengisian Format Ribu tidak menggunakan tanda baca, dan untuk bilangan desimal menggunakan titik
-                (.)
+        <input type="hidden" name="form[data_rth]" id="data_rth" value="" />
+        <input type="hidden" name="form[data_rth_json_file]" id="data_rth_json_file" value="" />
+        <input type="hidden" name="form[data_tutupan]" id="data_tutupan" value="" />
+        <input type="hidden" name="form[data_tutupan_json_file]" id="data_tutupan_json_file" value="" />
+
+        <div class="modal-body p-0">
+          <div class="row no-gutters ikl-modal-body">
+            <!-- ===================== LEFT PANE: Map ===================== -->
+            <div class="col-lg-6 ikl-map-pane border-right">
+              <div class="ikl-tab-bar">
+                <button type="button" class="ikl-tab active" data-layer="rth">
+                  <i class="ft-layers"></i> RTH
+                </button>
+                <button type="button" class="ikl-tab" data-layer="rhl">
+                  <i class="ft-layers"></i> RHL
+                </button>
               </div>
-            </div>
-            {include file="parts/contents/iktl/index/form_pusat_field.html"}
-          </div>
-          <h5 class="form-section text-uppercase text-center">Diisi oleh kabupaten/kota</h5>
-          <div class="form-row mb-1">
-            <div class="col-md-6 mb-1" style="display:none;" info="2025 dihide">
-              <label for="name">Kebun Raya (Data LIPI)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="kebun_raya_data_lipi" name="form[kebun_raya_data_lipi]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
-                <div class="input-group-append">
-                  <span class="input-group-text">HA</span>
+
+              <div id="ikl-map"></div>
+
+              <div class="ikl-map-legend">
+                <span class="ikl-legend-item">
+                  <span class="ikl-legend-dot" style="background:#28a745;"></span> RTH
+                </span>
+                <span class="ikl-legend-item">
+                  <span class="ikl-legend-dot" style="background:#fd7e14;"></span> RHL
+                </span>
+                <span style="margin-left:auto;font-style:italic;">Gunakan toolbar di kanan atas peta untuk menggambar</span>
+              </div>
+
+              <div class="ikl-upload-section">
+                <!-- RTH upload -->
+                <div id="ikl-upload-rth" class="ikl-upload-panel">
+                  <div class="ikl-dropzone" id="dropzone-rth">
+                    <input type="file" name="lampiran_kml" id="lampiran_kml" accept=".kml,.kmz,.geojson,.json,.zip,.rar,.shp" />
+                    <div id="dropzone-rth-placeholder">
+                      <i class="ft-upload-cloud"></i>
+                      <p class="ikl-dropzone-title">Upload atau seret file peta (data RTH)</p>
+                      <p class="ikl-dropzone-sub">KML, KMZ, GeoJSON &middot; maks 10 Mb</p>
+                    </div>
+                    <div class="ikl-dropzone-selected" id="dropzone-rth-selected" style="display:none;">
+                      <i class="ft-file-text"></i>
+                      <span class="ikl-dropzone-filename" id="dropzone-rth-filename"></span>
+                      <span class="ikl-dropzone-change">Ganti file</span>
+                    </div>
+                  </div>
+                  <div class="ikl-file-info">
+                    <span class="help-block lampiran-kml-download" style="display:none"></span>
+                  </div>
+                  <div class="ikl-area-info">
+                    <span>Luas dari peta:</span>
+                    <span class="ikl-area-value" id="rth-area-display">0</span>
+                    <span>HA</span>
+                    <span class="badge badge-success" id="rth-shapes-count" style="display:none">0 area</span>
+                  </div>
+                </div>
+                <!-- RHL upload -->
+                <div id="ikl-upload-rhl" class="ikl-upload-panel" style="display:none;">
+                  <div class="ikl-dropzone" id="dropzone-rhl">
+                    <input type="file" name="lampiran_kml_rhl" id="lampiran_kml_rhl" accept=".kml,.kmz,.geojson,.json,.zip,.rar,.shp" />
+                    <div id="dropzone-rhl-placeholder">
+                      <i class="ft-upload-cloud"></i>
+                      <p class="ikl-dropzone-title">Upload atau seret file peta (data RHL)</p>
+                      <p class="ikl-dropzone-sub">KML, KMZ, GeoJSON &middot; maks 10 Mb</p>
+                    </div>
+                    <div class="ikl-dropzone-selected" id="dropzone-rhl-selected" style="display:none;">
+                      <i class="ft-file-text"></i>
+                      <span class="ikl-dropzone-filename" id="dropzone-rhl-filename"></span>
+                      <span class="ikl-dropzone-change">Ganti file</span>
+                    </div>
+                  </div>
+                  <div class="ikl-file-info">
+                    <span class="help-block lampiran-kml-rhl-download" style="display:none"></span>
+                  </div>
+                  <div class="ikl-area-info">
+                    <span>Luas dari peta:</span>
+                    <span class="ikl-area-value" id="rhl-area-display">0</span>
+                    <span>HA</span>
+                    <span class="badge badge-warning" id="rhl-shapes-count" style="display:none">0 area</span>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">RTH</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="rth" name="form[rth]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
-                <div class="input-group-append">
-                  <span class="input-group-text">HA</span>
+
+            <!-- ===================== RIGHT PANE: Form ===================== -->
+            <div class="col-lg-6 ikl-form-pane">
+              <h4 class="form-section mt-0"><i class="ft-calendar"></i>Tanggal</h4>
+              <div class="form-row mb-1">
+                <div class="col-md-12 mb-1">
+                  <label>Tanggal Pemantauan</label>
+                  <input type="text" class="form-control pickadate-limits" id="tanggal" name="form[tanggal]" />
+                </div>
+              </div>
+
+              {if $me.role_user != 3}
+              <h4 class="form-section"><i class="la la-map-marker"></i>Lokasi Pemantauan</h4>
+              {/if}
+              <div class="form-row mb-1">
+                {if $me.role_user !=2 && $me.role_user !=3}
+                <div class="col-md-12 mb-1">
+                  <label>Provinsi</label>
+                  <select class="select2 form-control position-relative provinsi_select" to="uid_kabkota" id="uid_provinsi" name="form[uid_provinsi]" style="width: 100%" required="">
+                    <option value="">--PILIH PROVINSI--</option>
+                    {foreach from=$provinsi item=v}
+                    <option value="{$v.kd_propinsi}">{$v.nama_propinsi}</option>
+                    {/foreach}
+                  </select>
+                </div>
+                {/if}
+                {if $me.role_user !=3}
+                <div class="col-md-12 mb-1">
+                  <label>Kab/Kota</label>
+                  <select class="select2 form-control position-relative" id="uid_kabkota" name="form[uid_kabkota]" style="width: 100%" required="">
+                    <option value="">--PILIH KAB/KOTA--</option>
+                    {foreach from=$kabkota item=v}
+                    <option value="{$v.kd_kota}">{$v.nama_kabkot}</option>
+                    {/foreach}
+                  </select>
+                </div>
+                {/if}
+              </div>
+
+              <h4 class="form-section ikl-pusat-toggle" id="pusat-toggle">
+                <span style="display:flex;align-items:center;gap:.65rem;">
+                  <i class="ft-edit"></i>Data Tutupan Lahan (Pusat)
+                </span>
+                <i class="ft-chevron-down toggle-icon"></i>
+              </h4>
+              <div class="form-row mb-1 ikl-pusat-fields" id="pusat-fields">
+                <div class="col-md-12 mb-1">
+                  <div class="alert alert-danger text-center" style="font-size:.78rem;border-radius:8px;padding:.6rem;">
+                    Format bilangan ribu tanpa tanda baca, desimal menggunakan titik (.)
+                  </div>
+                </div>
+                {include file="parts/contents/iktl/index/form_pusat_field.html"}
+              </div>
+
+              <h4 class="form-section"><i class="ft-edit"></i>Data Kabupaten/Kota</h4>
+              <div class="form-row mb-1">
+                <div class="col-md-6 mb-1" style="display:none;" info="2025 dihide">
+                  <label>Kebun Raya (Data LIPI)</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control numberFormat" placeholder="Nilai" id="kebun_raya_data_lipi" name="form[kebun_raya_data_lipi]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
+                    <div class="input-group-append"><span class="input-group-text">HA</span></div>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-1">
+                  <label>RTH</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control numberFormat" placeholder="Nilai" id="rth" name="form[rth]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
+                    <div class="input-group-append"><span class="input-group-text">HA</span></div>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-1">
+                  <label>RHL <sub>(Rehabilitasi Hutan dan Lahan dari APBN)</sub></label>
+                  <div class="input-group">
+                    <input type="text" class="form-control numberFormat" placeholder="Nilai" id="rhl" name="form[rhl]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
+                    <div class="input-group-append"><span class="input-group-text">HA</span></div>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-1" style="display:none" info="2025 dihide">
+                  <label>Taman Kehati</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control numberFormat" placeholder="Nilai" id="taman_kehati" name="form[taman_kehati]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
+                    <div class="input-group-append"><span class="input-group-text">HA</span></div>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-1" style="display:none" info="2025 dihide">
+                  <label>Tutupan Vegetasi Relevan Lainnya</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control numberFormat" placeholder="Nilai" id="tutupan_vegetasi" name="form[tutupan_vegetasi]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
+                    <div class="input-group-append"><span class="input-group-text">HA</span></div>
+                  </div>
+                </div>
+                <div class="col-md-12 mb-1">
+                  <label>Catatan</label>
+                  <textarea class="form-control" name="form[catatan]" id="catatan" rows="3"></textarea>
+                </div>
+                <div class="col-md-12 mb-1">
+                  <input type="file" class="form-control mb-1" id="lampiran" name="lampiran" style="border-radius:8px;" />
+                  <label>Lampiran SK Penetapan RTH/Tutupan Vegetasi Relevan Lainnya (PDF)</label><br>
+                  <span class="danger" style="font-size:.72rem;">Format upload file (.pdf/.zip/.rar) max 10 Mb.</span><br>
+                  <span class="help-block lampiran-download" style="display:none"></span>
                 </div>
               </div>
             </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">RHL <sub>(Rehabilitasi Hutan dan Lahan dari APBN)</sub></label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="rhl" name="form[rhl]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
-                <div class="input-group-append">
-                  <span class="input-group-text">HA</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1" style="display:none" info="2025 dihide">
-              <label for="name">Taman Kehati</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="taman_kehati" name="form[taman_kehati]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
-                <div class="input-group-append">
-                  <span class="input-group-text">HA</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1" style="display:none" info="2025 dihide">
-              <label for="name">Tutupan Vegetasi Relevan Lainnya</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="tutupan_vegetasi" name="form[tutupan_vegetasi]" {if $me.role_user==2||$me.role_user==3||$me.role_user==4}readonly{/if} />
-                <div class="input-group-append">
-                  <span class="input-group-text">HA</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-12 mb-1">
-              <label for="name">Catatan</label>
-              <textarea type="text" class="form-control" name="form[catatan]" id="catatan" rows="5"></textarea>
-            </div>
-            <div class="col-md-12 mb-1">
-              <div class="alert alert-danger text-center">
-                Untuk saat ini hanya dapat upload 1 file, <br> jika lebih dari 1 file mohon digabung terlebih dahulu
-                dalam 1 folder kemudian di zip/rar.
-              </div>
-            </div>
-            <!-- <div class="col-md-6 mb-1">
-              <input type="file" class="form-control mb-1" id="lampiran_rth" name="lampiran_rth" />
-              <label for="name">Lampiran RTH</label><br>
-              <span class="danger">Format upload file (.xls/.xlsx/.zip/.rar) max 10 Mb.</span><br>
-              <span class="help-block lampiran-rth-download" style="display:none"></span>
-            </div>
-            <div class="col-md-6 mb-1">
-              <input type="file" class="form-control mb-1" id="lampiran_tutupan" name="lampiran_tutupan" />
-              <label for="name">Lampiran Tutupan Vegetasi</label><br>
-              <span class="danger">Format upload file (.xls/.xlsx/.zip/.rar) max 10 Mb.</span><br>
-              <span class="help-block lampiran-tutupan-download" style="display:none"></span>
-            </div> -->
-            <div class="col-md-6 mb-1">
-              <input type="file" class="form-control mb-1" id="lampiran_kml" name="lampiran_kml" />
-              <label for="name">Lampiran Peta KML/SHP (data RTH)</label><br>
-              <span class="danger">Format upload file (.zip/.rar/.kml/.kmz/.shp) max 10 Mb.</span><br>
-              <span class="help-block lampiran-kml-download" style="display:none"></span>
-              <!-- <div class="alert alert-warning">
-                Format upload file (.pdf/.zip/.rar)
-              </div> -->
-            </div>
-            <div class="col-md-6 mb-1">
-              <input type="file" class="form-control mb-1" id="lampiran_kml_rhl" name="lampiran_kml_rhl" />
-              <label for="name">Lampiran Peta KML/SHP (data RHL)</label><br>
-              <span class="danger">Format upload file (.zip/.rar/.kml/.kmz/.shp) max 10 Mb.</span><br>
-              <span class="help-block lampiran-kml-rhl-download" style="display:none"></span>
-              <!-- <div class="alert alert-warning">
-                Format upload file (.pdf/.zip/.rar)
-              </div> -->
-            </div>
-            <div class="col-md-12 mb-1">
-              <input type="file" class="form-control mb-1" id="lampiran" name="lampiran" />
-              <label for="name">Lampiran SK Penetapan RTH/Tutupan Vegetasi Relevan Lainnya (PDF)</label><br>
-              <span class="danger">Format upload file (.pdf/.zip/.rar) max 10 Mb.</span><br>
-              <span class="help-block lampiran-download" style="display:none"></span>
-              <!-- <div class="alert alert-warning">
-                Format upload file (.pdf/.zip/.rar)30
-              </div> -->
-            </div>
-            <!-- <div class="col-md-6 mb-1">
-              <label for="name">Lampiran Tabel RTH</label>
-              <input type="file" class="form-control mb-1" id="lampiran_dtp" name="lampiran_dtp" />
-              <span class="help-block lampiran-download-dtp" style="display:none"></span>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name white">Download</label><br>
-              <a title="Download Format Tabel RTH" class="btn btn-success" href="{$baseUrl}uploads/Format_Tabel_RTH.xlsx"><i class="fa fa-file-excel-o"></i> Format Tabel RTH</a>
-            </div> -->
           </div>
-          <div class="modal-footer">
-            <a type="button" class="btn grey btn-secondary white" id="button-ikl-close" data-dismiss="modal">Close</a>
-            <button type="submit" name="submit" id="button-ikl-submit" class="btn btn-danger">
-              Simpan
-            </button>
-          </div>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn grey btn-secondary white" id="button-ikl-close" data-dismiss="modal">Close</a>
+          <button type="submit" name="submit" id="button-ikl-submit" class="btn btn-danger">Simpan</button>
         </div>
       </form>
     </div>
   </div>
 </div>
+<!-- Modal: Rincian RTH -->
 <div class="modal text-left" id="rincianRth" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
@@ -291,6 +636,7 @@
     </div>
   </div>
 </div>
+<!-- Modal: Rincian Tutupan -->
 <div class="modal text-left" id="rincianTutupan" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
@@ -487,9 +833,6 @@
       </div>
       <form method="POST" class="form_with_load" action="" enctype="multipart/form-data">
         <div class="modal-body">
-          <!-- <h4 class="form-section">
-            <i class="la la-map-marker"></i>Catatan pelaporan
-          </h4> -->
           <div class="form-row mb-1">
             <div class="col-md-12 mb-1">
               <label for="name">Isi Catatan *</label>

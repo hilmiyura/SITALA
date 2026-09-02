@@ -153,6 +153,261 @@
 		// }]);
 	}
 
+	// ===================== MAP: IKL Peta RTH/RHL =====================
+	var iklMap = null;
+	var rthLayers = null;
+	var rhlLayers = null;
+	var iklActiveLayer = 'rth';
+	var iklDrawControl = null;
+
+	function initIklMap() {
+		if (iklMap) {
+			setTimeout(function(){ iklMap.invalidateSize(); }, 200);
+			return;
+		}
+		iklMap = L.map("ikl-map").setView([-2, 117], 5);
+		L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+			attribution: ''
+		}).addTo(iklMap);
+
+		rthLayers = new L.FeatureGroup().addTo(iklMap);
+		rhlLayers = new L.FeatureGroup().addTo(iklMap);
+
+		iklDrawControl = createDrawControl('rth');
+		iklMap.addControl(iklDrawControl);
+
+		iklMap.on(L.Draw.Event.CREATED, function(e) {
+			var layer = e.layer;
+			if (iklActiveLayer === 'rth') {
+				rthLayers.addLayer(layer);
+			} else {
+				rhlLayers.addLayer(layer);
+			}
+			updateIklAreaCalc();
+		});
+		iklMap.on(L.Draw.Event.EDITED, function() { updateIklAreaCalc(); });
+		iklMap.on(L.Draw.Event.DELETED, function() { updateIklAreaCalc(); });
+
+		setTimeout(function(){ iklMap.invalidateSize(); }, 300);
+	}
+
+	function createDrawControl(layerType) {
+		var color = layerType === 'rth' ? '#28a745' : '#fd7e14';
+		var fg = layerType === 'rth' ? rthLayers : rhlLayers;
+		return new L.Control.Draw({
+			position: "topright",
+			draw: {
+				polyline: { shapeOptions: { color: color } },
+				polygon: {
+					allowIntersection: false,
+					drawError: { color: "red", message: "Area tidak boleh tumpang tindih" },
+					shapeOptions: { color: color, fillOpacity: 0.3, clickable: true }
+				},
+				circle: false,
+				circlemarker: false,
+				rectangle: { shapeOptions: { color: color, fillOpacity: 0.3, clickable: true } },
+				marker: false
+			},
+			edit: { featureGroup: fg, remove: true }
+		});
+	}
+
+	function switchIklLayer(layerName) {
+		iklActiveLayer = layerName;
+		$('.ikl-tab').removeClass('active');
+		$('.ikl-tab[data-layer="' + layerName + '"]').addClass('active');
+		if (layerName === 'rth') {
+			$('#ikl-upload-rth').show();
+			$('#ikl-upload-rhl').hide();
+		} else {
+			$('#ikl-upload-rth').hide();
+			$('#ikl-upload-rhl').show();
+		}
+		if (iklMap && iklDrawControl) {
+			iklMap.removeControl(iklDrawControl);
+			iklDrawControl = createDrawControl(layerName);
+			iklMap.addControl(iklDrawControl);
+		}
+	}
+
+	function calcLayerGroupArea(layerGroup) {
+		var totalArea = 0;
+		layerGroup.eachLayer(function(layer) {
+			try {
+				var geojson = layer.toGeoJSON();
+				var geomType = geojson.geometry ? geojson.geometry.type : '';
+				if (geomType === 'Polygon' || geomType === 'MultiPolygon') {
+					totalArea += turf.area(geojson);
+				}
+			} catch(e) {}
+		});
+		return totalArea;
+	}
+
+	function updateIklAreaCalc() {
+		var rthArea = calcLayerGroupArea(rthLayers);
+		var rhlArea = calcLayerGroupArea(rhlLayers);
+		var rthHa = (rthArea / 10000).toFixed(2);
+		var rhlHa = (rhlArea / 10000).toFixed(2);
+
+		$('#rth-area-display').text(rthHa);
+		$('#rhl-area-display').text(rhlHa);
+
+		var rthCount = 0, rhlCount = 0;
+		rthLayers.eachLayer(function() { rthCount++; });
+		rhlLayers.eachLayer(function() { rhlCount++; });
+
+		if (rthCount > 0) { $('#rth-shapes-count').text(rthCount + ' area').show(); }
+		else { $('#rth-shapes-count').hide(); }
+		if (rhlCount > 0) { $('#rhl-shapes-count').text(rhlCount + ' area').show(); }
+		else { $('#rhl-shapes-count').hide(); }
+
+		if (parseFloat(rthHa) > 0) $('#rth').val(rthHa);
+		if (parseFloat(rhlHa) > 0) $('#rhl').val(rhlHa);
+	}
+
+	function addGeoJSONToIklMap(geojson, layerType) {
+		var targetGroup = layerType === 'rth' ? rthLayers : rhlLayers;
+		var color = layerType === 'rth' ? '#28a745' : '#fd7e14';
+		targetGroup.clearLayers();
+		L.geoJSON(geojson, {
+			style: function() { return { color: color, weight: 2, fillOpacity: 0.3 }; },
+			pointToLayer: function(feature, latlng) {
+				return L.circleMarker(latlng, { radius: 6, color: color, fillOpacity: 0.5 });
+			},
+			onEachFeature: function(feature, layer) {
+				if (feature.properties && feature.properties.name) {
+					layer.bindPopup(feature.properties.name);
+				}
+			}
+		}).eachLayer(function(layer) {
+			targetGroup.addLayer(layer);
+		});
+		if (targetGroup.getLayers().length > 0) {
+			try { iklMap.fitBounds(targetGroup.getBounds(), { padding: [30, 30] }); } catch(e) {}
+		}
+		updateIklAreaCalc();
+	}
+
+	function handleIklFileUpload(file, layerType) {
+		var name = file.name.toLowerCase();
+		var reader = new FileReader();
+
+		if (name.endsWith('.kml')) {
+			reader.onload = function(e) {
+				try {
+					var parser = new DOMParser();
+					var doc = parser.parseFromString(e.target.result, 'text/xml');
+					var geojson = toGeoJSON.kml(doc);
+					addGeoJSONToIklMap(geojson, layerType);
+				} catch(err) { console.error('Error parsing KML:', err); }
+			};
+			reader.readAsText(file);
+		} else if (name.endsWith('.kmz')) {
+			reader.onload = function(e) {
+				JSZip.loadAsync(e.target.result).then(function(zip) {
+					var kmlFile = null;
+					zip.forEach(function(path, entry) {
+						if (path.toLowerCase().endsWith('.kml') && !kmlFile) kmlFile = entry;
+					});
+					if (kmlFile) {
+						kmlFile.async('string').then(function(content) {
+							var parser = new DOMParser();
+							var doc = parser.parseFromString(content, 'text/xml');
+							var geojson = toGeoJSON.kml(doc);
+							addGeoJSONToIklMap(geojson, layerType);
+						});
+					}
+				}).catch(function(err) { console.error('Error parsing KMZ:', err); });
+			};
+			reader.readAsArrayBuffer(file);
+		} else if (name.endsWith('.geojson') || name.endsWith('.json')) {
+			reader.onload = function(e) {
+				try {
+					var geojson = JSON.parse(e.target.result);
+					addGeoJSONToIklMap(geojson, layerType);
+				} catch(err) { console.error('Error parsing GeoJSON:', err); }
+			};
+			reader.readAsText(file);
+		}
+	}
+
+	function resetIklMap() {
+		if (rthLayers) rthLayers.clearLayers();
+		if (rhlLayers) rhlLayers.clearLayers();
+		$('#rth-area-display').text('0');
+		$('#rhl-area-display').text('0');
+		$('#rth-shapes-count').hide();
+		$('#rhl-shapes-count').hide();
+		switchIklLayer('rth');
+		resetIklDropzone('rth');
+		resetIklDropzone('rhl');
+		if (iklMap) {
+			iklMap.setView([-2, 117], 5);
+			setTimeout(function(){ iklMap.invalidateSize(); }, 200);
+		}
+	}
+
+	function resetIklDropzone(type) {
+		$('#dropzone-' + type + '-placeholder').show();
+		$('#dropzone-' + type + '-selected').hide();
+		$('#dropzone-' + type).removeClass('has-file');
+	}
+
+	function setIklDropzoneFile(type, filename) {
+		$('#dropzone-' + type + '-placeholder').hide();
+		$('#dropzone-' + type + '-filename').text(filename);
+		$('#dropzone-' + type + '-selected').show();
+		$('#dropzone-' + type).addClass('has-file');
+	}
+
+	// tab click
+	$(document).on('click', '.ikl-tab', function(e) {
+		e.preventDefault();
+		switchIklLayer($(this).data('layer'));
+	});
+
+	// pusat fields toggle
+	$(document).on('click', '#pusat-toggle', function() {
+		$('#pusat-fields').toggleClass('collapsed');
+		var icon = $(this).find('.toggle-icon');
+		if ($('#pusat-fields').hasClass('collapsed')) {
+			icon.css('transform', 'rotate(-90deg)');
+		} else {
+			icon.css('transform', 'rotate(0deg)');
+		}
+	});
+
+	// file upload: RTH
+	$(document).on('change', '#lampiran_kml', function() {
+		var files = this.files;
+		if (files && files.length > 0) {
+			var file = files[0];
+			setIklDropzoneFile('rth', file.name);
+			handleIklFileUpload(file, 'rth');
+		}
+	});
+
+	// file upload: RHL
+	$(document).on('change', '#lampiran_kml_rhl', function() {
+		var files = this.files;
+		if (files && files.length > 0) {
+			var file = files[0];
+			setIklDropzoneFile('rhl', file.name);
+			handleIklFileUpload(file, 'rhl');
+		}
+	});
+
+	// dropzone drag/drop
+	$(document).on('dragover', '.ikl-dropzone', function(e) {
+		e.preventDefault();
+		$(this).addClass('dragover');
+	});
+	$(document).on('dragleave drop', '.ikl-dropzone', function(e) {
+		$(this).removeClass('dragover');
+	});
+	// ===================== END MAP =====================
+
 	var $repeaterDATATUTUPAN2 = $(".repeater-data_tutupan2").repeater({
 		initEmpty: true,
 		defaultValues: {
@@ -521,8 +776,13 @@
 		}
 	});
 
+	$('#tambahData').on('shown.bs.modal', function() {
+		initIklMap();
+	});
+
 	$('#tambahData').on('show.bs.modal', function(event) {
 		reset();
+		resetIklMap();
 		var button = $(event.relatedTarget) // Button that triggered the modal
 		var userBy = button.data('uid');
 
@@ -634,16 +894,53 @@
 							$(".lampiran-tutupan-download").hide();
 						}
 						if (req.lampiran_kml) {
-							var htmlDownload = '<a title="Download File" class="btn btn-dark btn-sm" href="' + baseUrl + 'uploads/kml/' + req.lampiran_kml + '" target="_blank" >Download</a>'
+							var kmlUrl = baseUrl + 'uploads/kml/' + req.lampiran_kml;
+							var htmlDownload = '<a title="Download File" class="btn btn-dark btn-sm" href="' + kmlUrl + '" target="_blank" >Download</a>'
 							$(".lampiran-kml-download").html(htmlDownload);
 							$(".lampiran-kml-download").show();
+							setIklDropzoneFile('rth', req.lampiran_kml);
+							// try to load existing KML on map
+							var kmlName = req.lampiran_kml.toLowerCase();
+							if (kmlName.endsWith('.kml') || kmlName.endsWith('.geojson') || kmlName.endsWith('.json')) {
+								$.get(kmlUrl, function(data) {
+									try {
+										if (kmlName.endsWith('.kml')) {
+											var parser = new DOMParser();
+											var doc = parser.parseFromString(data, 'text/xml');
+											var geojson = toGeoJSON.kml(doc);
+											addGeoJSONToIklMap(geojson, 'rth');
+										} else {
+											var geojson = typeof data === 'string' ? JSON.parse(data) : data;
+											addGeoJSONToIklMap(geojson, 'rth');
+										}
+									} catch(e) {}
+								});
+							}
 						} else {
 							$(".lampiran-kml-download").hide();
 						}
 						if (req.lampiran_kml_rhl) {
-							var htmlDownload = '<a title="Download File" class="btn btn-dark btn-sm" href="' + baseUrl + 'uploads/kml/' + req.lampiran_kml_rhl + '" target="_blank" >Download</a>'
+							var kmlRhlUrl = baseUrl + 'uploads/kml/' + req.lampiran_kml_rhl;
+							var htmlDownload = '<a title="Download File" class="btn btn-dark btn-sm" href="' + kmlRhlUrl + '" target="_blank" >Download</a>'
 							$(".lampiran-kml-rhl-download").html(htmlDownload);
 							$(".lampiran-kml-rhl-download").show();
+							setIklDropzoneFile('rhl', req.lampiran_kml_rhl);
+							var rhlName = req.lampiran_kml_rhl.toLowerCase();
+							if (rhlName.endsWith('.kml') || rhlName.endsWith('.geojson') || rhlName.endsWith('.json')) {
+								$.get(kmlRhlUrl, function(data) {
+									try {
+										if (rhlName.endsWith('.kml')) {
+											var parser = new DOMParser();
+											var doc = parser.parseFromString(data, 'text/xml');
+											var geojson = toGeoJSON.kml(doc);
+											addGeoJSONToIklMap(geojson, 'rhl');
+										} else {
+											var geojson = typeof data === 'string' ? JSON.parse(data) : data;
+											addGeoJSONToIklMap(geojson, 'rhl');
+										}
+									} catch(e) {}
+								});
+							}
 						} else {
 							$(".lampiran-kml-rhl-download").hide();
 						}

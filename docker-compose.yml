@@ -93,7 +93,7 @@ services:
       - "3307:3306"
     volumes:
       - sitala-db-data:/var/lib/mysql
-      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+      - ./sitalakx_iklh.sql:/docker-entrypoint-initdb.d/01_sitalakx_iklh.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
       interval: 10s
