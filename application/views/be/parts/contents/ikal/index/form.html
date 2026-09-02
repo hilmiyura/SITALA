@@ -274,6 +274,19 @@
   #tambahData #ocr-status.alert-warning { border-left-color: #f0ad4e; background: #fff8ec; color: #8a5a00; }
   #tambahData #ocr-status.alert-danger { border-left-color: #dc3545; background: #fdeeee; color: #a71d2a; }
 
+  /* ---- FE criteria-check badges (koordinat, DO, ...) ---- */
+  #tambahData .badge-kriteria {
+    display: inline-block;
+    font-size: .74rem;
+    font-weight: 600;
+    padding: .3rem .6rem;
+    border-radius: 6px;
+    margin-top: -.4rem;
+    margin-bottom: .75rem;
+  }
+  #tambahData .badge-kriteria-ok { background: #eefaf1; color: #1e7e34; }
+  #tambahData .badge-kriteria-warn { background: #fff8ec; color: #8a5a00; }
+
   /* ---- document preview ---- */
   #tambahData #doc-preview-wrapper,
   #tambahData #doc-preview {
@@ -442,6 +455,17 @@
               <label for="name">Alamat Lokasi</label>
               <input type="text" class="form-control position-relative" readonly name="form[alamat_detail]" id="alamat_detail" placeholder="Alamat Lokasi" value="" required="" />
             </div>
+            {if $me.role_user !=3}
+            <div class="col-md-6 mb-1">
+              <label for="name">Kab/kota</label>
+              <select class="select2 form-control position-relative" disabled id="uid_kabkota" name="form[uid_kabkota]" style="width: 100%" required="">
+                <option value="">--PILIH KAB/KOTA--</option>
+                {foreach from=$kabkota item=v}
+                <option value="{$v.kd_kota}">{$v.nama_kabkot}</option>
+                {/foreach}
+              </select>
+            </div>
+            {/if}
             {if $me.role_user !=2 && $me.role_user !=3}
             <div class="col-md-6 mb-1">
               <label for="name">Provinsi</label>
@@ -460,6 +484,9 @@
             <div class="col-md-6 mb-1">
               <label for="name">Longitude</label>
               <input type="text" class="form-control position-relative" readonly name="form[longitude]" id="longitude" placeholder="Longitude" value="" required="" />
+            </div>
+            <div class="col-md-12">
+              <span class="badge-kriteria" id="cek-koordinat" style="display:none;"></span>
             </div>
           </div>
           <h4 class="form-section"><i class="ft-edit"></i>Pemantauan</h4>
@@ -497,6 +524,7 @@
                   <span class="input-group-text">mg/L</span>
                 </div>
               </div>
+              <span class="badge-kriteria" id="cek-do" style="display:none;"></span>
             </div>
             <div class="col-md-6 mb-1">
               <label for="name">MINYAK & LEMAK</label>
@@ -554,6 +582,9 @@
               <label for="name">Longitude</label>
               <input type="text" class="form-control position-relative" readonly id="longitude" placeholder="Longitude" value="" />
             </div>
+            <div class="col-md-12">
+              <span class="badge-kriteria" id="cek-koordinat" style="display:none;"></span>
+            </div>
           </div>
           <h4 class="form-section"><i class="ft-edit"></i>Pemantauan</h4>
           <div class="form-row mb-1">
@@ -583,6 +614,7 @@
                   <span class="input-group-text">mg/L</span>
                 </div>
               </div>
+              <span class="badge-kriteria" id="cek-do" style="display:none;"></span>
             </div>
             <div class="col-md-6 mb-1">
               <label for="name">MINYAK & LEMAK</label>

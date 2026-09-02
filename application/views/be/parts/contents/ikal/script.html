@@ -5,6 +5,65 @@
   var ocrOptions = [];
   var ocrMode = null; //null|"single"|"all"
 
+  //FE-only criteria checks (mockup) on OCR results — koordinat SHU vs lokasi terdaftar, dan batas nilai DO
+  var COORD_TOLERANCE_METERS = 100;
+  var DO_MAX_VALUE = 8.5;
+
+  function haversineMeters(lat1, lng1, lat2, lng2) {
+    var R = 6371000;
+    var toRad = function(d) { return d * Math.PI / 180; };
+    var dLat = toRad(lat2 - lat1);
+    var dLng = toRad(lng2 - lng1);
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+      + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function formatJarak(meters) {
+    return meters >= 1000 ? (meters / 1000).toFixed(2) + " km" : Math.round(meters) + " m";
+  }
+
+  //sfx = "" for the single block, "_r0", "_r1", ... for repeater rows
+  function renderKoordinatCheck(sfx, ocrLat, ocrLng, regLat, regLng) {
+    var $badge = $("#cek-koordinat" + sfx);
+    var lat1 = parseFloat(ocrLat), lng1 = parseFloat(ocrLng);
+    var lat2 = parseFloat(regLat), lng2 = parseFloat(regLng);
+    if (isNaN(lat1) || isNaN(lng1) || isNaN(lat2) || isNaN(lng2)) {
+      $badge.hide();
+      return;
+    }
+    var jarak = haversineMeters(lat1, lng1, lat2, lng2);
+    if (jarak <= COORD_TOLERANCE_METERS) {
+      $badge.removeClass("badge-kriteria-warn").addClass("badge-kriteria-ok")
+        .text("✓ Koordinat SHU sesuai lokasi terdaftar (±" + formatJarak(jarak) + ")").show();
+    } else {
+      $badge.removeClass("badge-kriteria-ok").addClass("badge-kriteria-warn")
+        .text("⚠ Koordinat SHU berbeda ~" + formatJarak(jarak) + " dari lokasi terdaftar, mohon periksa").show();
+    }
+  }
+
+  function updateDoBadge(sfx) {
+    var $badge = $("#cek-do" + sfx);
+    var raw = $("#do_p" + sfx).val();
+    var num = parseFloat(String(raw).replace(",", "."));
+    if (raw === "" || raw === undefined || isNaN(num)) {
+      $badge.hide();
+      return;
+    }
+    if (num <= DO_MAX_VALUE) {
+      $badge.removeClass("badge-kriteria-warn").addClass("badge-kriteria-ok")
+        .text("✓ DO sesuai (" + num + " mg/L)").show();
+    } else {
+      $badge.removeClass("badge-kriteria-ok").addClass("badge-kriteria-warn")
+        .text("⚠ DO " + num + " mg/L melebihi batas maksimal " + DO_MAX_VALUE + " mg/L").show();
+    }
+  }
+
+  //live re-check on manual edit, covers both #do_p (single) and #do_p_r0, #do_p_r1, ... (repeater)
+  $(document).on("input change", "[id^='do_p']", function() {
+    updateDoBadge(this.id.replace("do_p", ""));
+  });
+
   function renderDocPreview(url, isPdf) {
     $("#doc-preview-empty").hide();
     $("#doc-preview-wrapper").show();
@@ -95,10 +154,17 @@
               $("#alamat_detail" + sfx).val(val.alamat_detail);
               $("#latitude" + sfx).val(val.latitude);
               $("#longitude" + sfx).val(val.longitude);
+              renderKoordinatCheck(sfx, data.latitude, data.longitude, val.latitude, val.longitude);
               if (!sfx) {
+                id_kabkota = val.uid_kabkota;
                 $("#uid_provinsi").val(val.uid_provinsi).trigger("change");
+                setTimeout(function() {
+                  $("#uid_kabkota").val(val.uid_kabkota).trigger("change");
+                }, 1000);
               }
             });
+          } else {
+            $("#cek-koordinat" + sfx).hide();
           }
           $("#uid_lokasi_pemantauan" + sfx).html(htmls);
           lokasiDone();
@@ -106,6 +172,7 @@
         error: lokasiDone
       });
     } else {
+      $("#cek-koordinat" + sfx).hide();
       if (data.lokasi && data.lokasi.text) {
         unmatched.push("Lokasi Pemantauan (\"" + data.lokasi.text + "\")");
       }
@@ -124,6 +191,7 @@
         $("#" + id + sfx).val(nilai);
       }
     });
+    updateDoBadge(sfx);
     if (data.unmatched_parameters && data.unmatched_parameters.length) {
       unmatched.push("Parameter lain terbaca di dokumen tapi tidak ada kolomnya di form: " + data.unmatched_parameters.join(", "));
     }
@@ -189,6 +257,7 @@
           $("#alamat_detail" + sfx).val("");
           $("#latitude" + sfx).val("");
           $("#longitude" + sfx).val("");
+          $("#cek-koordinat" + sfx).hide();
           return;
         }
         $.ajax({
@@ -201,7 +270,10 @@
                 $("#alamat_detail" + sfx).val(val.alamat_detail);
                 $("#latitude" + sfx).val(val.latitude);
                 $("#longitude" + sfx).val(val.longitude);
+                renderKoordinatCheck(sfx, opt.latitude, opt.longitude, val.latitude, val.longitude);
               });
+            } else {
+              $("#cek-koordinat" + sfx).hide();
             }
           }
         });
@@ -509,10 +581,13 @@
     $("#uid_lokasi_pemantauan").val("").trigger("change");
     $("#periode_pemantauan").val("").trigger("change");
     $("#uid_provinsi").val("").trigger("change");
+    $("#uid_kabkota").val("").trigger("change");
     $(".shu-download").hide();
     $("#uid_lab").val("").trigger("change");
     $("#shu").val("");
     $("#ocr-status").hide().html("");
+    $("#cek-koordinat").hide();
+    $("#cek-do").hide();
     ocrOptions = [];
     ocrMode = null;
     $("#ocr-multi-panel").hide();
