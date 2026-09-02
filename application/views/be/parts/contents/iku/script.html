@@ -4,6 +4,7 @@
 	var currentDocBlobUrl = null;
 	var ocrOptions = [];
 	var ocrMode = null; //null|"single"|"all"
+	var ocrDocType = "shu"; //"shu"|"aqms" — lihat radio #ocr-doctype-shu/#ocr-doctype-aqms
 
 	function renderDocPreview(url, isPdf) {
 		$("#doc-preview-empty").hide();
@@ -37,6 +38,24 @@
 		$("#ocr-dropzone-selected").hide();
 		$("#ocr-dropzone-placeholder").show();
 	}
+
+	var OCR_HINT_SHU = "Data di sebelah kanan akan terisi otomatis, mohon periksa kembali sebelum menyimpan.";
+	var OCR_HINT_AQMS = "Unggah laporan bulanan AQMS (bukan SHU) untuk mengisi NO2/SO2 dari Rata-Rata ringkasan tahunan. Lokasi Pemantauan tetap dari pilihan di form, bukan dari dokumen.";
+
+	$(document).on("change", "input[name='ocr_doctype']", function() {
+		ocrDocType = $(this).val();
+		$("#ocr-hint").text(ocrDocType === "aqms" ? OCR_HINT_AQMS : OCR_HINT_SHU);
+		$("#shu").val("");
+		ocrOptions = [];
+		ocrMode = null;
+		$("#ocr-status").hide().html("");
+		$("#aqms-konsistensi").hide().html("");
+		$("#ocr-multi-panel").hide();
+		$("#iku-repeater-rows").hide().empty();
+		$("#iku-single-block").show();
+		clearDocPreview();
+		resetDropzone();
+	});
 
 	$(document).on("dragover", "#ocr-dropzone", function(e) {
 		e.preventDefault();
@@ -226,6 +245,10 @@
 		$("#uid_lab").val("").trigger("change");
 		$("#shu").val("");
 		$("#ocr-status").hide().html("");
+		$("#aqms-konsistensi").hide().html("");
+		$("#ocr-doctype-shu").prop("checked", true);
+		ocrDocType = "shu";
+		$("#ocr-hint").text(OCR_HINT_SHU);
 		ocrOptions = [];
 		ocrMode = null;
 		$("#ocr-multi-panel").hide();
@@ -482,6 +505,165 @@
 		return unmatched;
 	}
 
+	//===== Jalur AQMS: isi nilai NO2/SO2/PM2.5 dari Rata-Rata ringkasan tahunan, TANPA menyentuh
+	//Lokasi Pemantauan (tetap dari pilihan user di form — lihat catatan matchFieldsIkuAqms() di
+	//ocrController.php), lalu tampilkan hasil pengecekan konsistensi (Hari Valid/Data Valid bulanan
+	//vs ringkasan, dan label stasiun antar parameter/terhadap lokasi yang dipilih).
+	var METODE_OTOMATIS_AQMS = 3;
+
+	function normalizeLabelJs(s) {
+		return (s || "").toString().toLowerCase().replace(/\s+/g, " ").trim();
+	}
+
+	//kata generik yang muncul di hampir semua label stasiun/alamat — dibuang dulu supaya
+	//perbandingan fokus ke kata yang benar-benar membedakan satu lokasi dari lokasi lain
+	//(mis. "kebonsari" vs "wonorejo"), bukan ikut menghitung "stasiun"/"pemantau"/dst yang
+	//muncul di semua label dan tidak bermakna apa-apa untuk pembeda lokasi
+	var LABEL_STOPWORDS = ["stasiun", "pemantau", "pemantauan", "kualitas", "udara", "ambien",
+		"otomatis", "aqms", "kota", "kab", "kabupaten", "provinsi", "jalan", "jln", "desa",
+		"kelurahan", "kecamatan", "manunggal"];
+
+	function labelSignificantWords(s) {
+		return normalizeLabelJs(s)
+			.replace(/[^a-z0-9\s]/g, " ")
+			.split(/\s+/)
+			.filter(function(w) { return w.length >= 4 && LABEL_STOPWORDS.indexOf(w) === -1; });
+	}
+
+	//null = salah satu/kedua teks tidak punya kata bermakna untuk dibandingkan (mis. lokasi belum
+	//dipilih), true/false = ada/tidaknya kata bermakna yang sama di kedua teks. Dibandingkan per
+	//kata (bukan substring seluruh kalimat) supaya "Stasiun Pemantau Udara (AQMS) Kebonsari, Jl.
+	//Kebon Sari Manunggal No.22" tetap dianggap cocok dengan "Stasiun Pemantau Kualitas Udara
+	//Kebonsari Surabaya" walau sisa kalimatnya beda total — keduanya sama-sama menyebut "kebonsari".
+	function labelOverlaps(a, b) {
+		var wa = labelSignificantWords(a);
+		var wb = labelSignificantWords(b);
+		if (!wa.length || !wb.length) {
+			return null;
+		}
+		for (var i = 0; i < wa.length; i++) {
+			if (wb.indexOf(wa[i]) !== -1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	function applyOcrResultAqms(data) {
+		var params = data.parameters || {};
+		var labelMap = { no2: "NO2", so2: "SO2", pm25: "PM2.5" };
+		var AQMS_HARI_VALID_MIN = 237;
+		var AQMS_HARI_VALID_MAX = 365;
+		var lines = [];
+		var anyWarn = false;
+		var anyDanger = false;
+		var anyData = false;
+
+		jQuery.each(["no2", "so2", "pm25"], function(i, param) {
+			var p = params[param];
+			if (!p) {
+				return;
+			}
+			anyData = true;
+			if (p.nilai !== null && p.nilai !== undefined) {
+				$("#" + param).val(p.nilai);
+			}
+			$("#" + param + "_uid_metode_pemantauan").val(METODE_OTOMATIS_AQMS).trigger("change");
+
+			var k = p.konsistensi || {};
+			var parts = [];
+			if (k.hari_valid_cocok === false) {
+				anyWarn = true;
+				parts.push("Hari Valid TIDAK cocok (jumlah bulanan " + k.sum_hari_valid + " vs ringkasan " + k.ringkasan_hari_valid + ")");
+			} else if (k.hari_valid_cocok === true) {
+				parts.push("Hari Valid cocok (" + k.ringkasan_hari_valid + ")");
+			}
+			if (k.data_valid_cocok === false) {
+				anyWarn = true;
+				parts.push("Data Valid TIDAK cocok (jumlah bulanan " + k.sum_data_valid + " vs ringkasan " + k.ringkasan_data_valid + ")");
+			} else if (k.data_valid_cocok === true) {
+				parts.push("Data Valid cocok (" + k.ringkasan_data_valid + ")");
+			}
+			if (p.jumlah_bulan_terbaca) {
+				parts.push(p.jumlah_bulan_terbaca + " halaman bulanan terbaca");
+			}
+			lines.push("<b>" + labelMap[param] + "</b> (Rata-Rata " + p.nilai + "): " + (parts.length ? parts.join(" &middot; ") : "tidak ada data konsistensi untuk dicek"));
+
+			if (k.hari_valid_dalam_rentang === false) {
+				anyDanger = true;
+				lines.push("<b>" + labelMap[param] + " TIDAK DITERIMA:</b> Jumlah Hari Valid (" + k.ringkasan_hari_valid + ") di luar rentang wajib "
+					+ AQMS_HARI_VALID_MIN + "–" + AQMS_HARI_VALID_MAX + " hari/tahun. Data tetap bisa disimpan manual kalau memang ingin dilanjutkan, tapi mohon dicek ulang dokumennya.");
+			}
+		});
+
+		if (data.label_konsisten === false) {
+			anyWarn = true;
+			var labelTexts = [];
+			jQuery.each(data.labels || {}, function(param, text) {
+				labelTexts.push(labelMap[param] + "=\"" + text + "\"");
+			});
+			lines.push("<b>Peringatan:</b> label stasiun berbeda antar parameter di dokumen ini (" + labelTexts.join(", ") + ") &mdash; kemungkinan salah satu bagian dokumen tertukar/korup.");
+		}
+
+		//Lokasi ikut diisi otomatis lewat matchLokasi() (sama seperti jalur SHU manual) — dicoba,
+		//bukan dipercaya buta: hasilnya tetap bisa diganti manual, dan kalau gagal cocok, dropdown
+		//dibiarkan kosong seperti biasa. Baru SETELAH lokasi diketahui (baik hasil auto-match maupun
+		//tetap kosong), label tiap parameter dibandingkan terhadapnya.
+		function finalizeAqms(selectedLokasiText, extraLine) {
+			if (extraLine) {
+				lines.push(extraLine);
+			}
+			if (selectedLokasiText) {
+				jQuery.each(data.labels || {}, function(param, text) {
+					if (labelOverlaps(text, selectedLokasiText) === false) {
+						anyWarn = true;
+						lines.push("<b>Peringatan:</b> label stasiun " + labelMap[param] + " di dokumen (\"" + text + "\") tidak cocok dengan Lokasi Pemantauan (\"" + selectedLokasiText + "\").");
+					}
+				});
+			}
+			if (!anyData) {
+				setBoxStatus($("#aqms-konsistensi"), "danger", "Tidak ada data NO2/SO2/PM2.5 yang terbaca dari dokumen ini.");
+				return;
+			}
+			setBoxStatus($("#aqms-konsistensi"), anyDanger ? "danger" : (anyWarn ? "warning" : "success"), lines.join("<br>"));
+		}
+
+		if (data.lokasi && data.lokasi.uid) {
+			$.ajax({
+				url: baseUrl + "ajax/lokasiById/x/" + data.lokasi.uid,
+				method: "GET",
+				success: function(r) {
+					var htmls = "<option value=''>--PILIH LOKASI PEMANTAUAN--</option>";
+					var selectedText = "";
+					if (r.total) {
+						jQuery.each(r.data, function(i, val) {
+							selectedText = val.kode_lokasi + " - " + val.alamat + " - " + val.alamat_detail;
+							htmls += "<option value='" + val.uid_lokasi_pemantauan + "' selected>" + selectedText + "</option>";
+							$("#alamat").val(val.alamat);
+							$("#alamat_detail").val(val.alamat_detail);
+							$("#latitude").val(val.latitude);
+							$("#longitude").val(val.longitude);
+							$("#uid_lokasi_pemantauan").data("provinsi", val.uid_provinsi).data("kabkota", val.uid_kabkota);
+							setTimeout(function() {
+								id_kabkota = val.uid_kabkota;
+								$("#uid_provinsi").val(val.uid_provinsi).trigger("change");
+								$("#uid_kabkota").val(val.uid_kabkota).trigger("change");
+							}, 1000);
+						});
+					}
+					$("#uid_lokasi_pemantauan").html(htmls);
+					finalizeAqms(selectedText, "Lokasi Pemantauan otomatis dipilih: \"" + selectedText + "\" (cocok dari label dokumen) &mdash; silakan periksa &amp; ganti manual kalau kurang tepat.");
+				},
+				error: function() {
+					finalizeAqms("", null);
+				}
+			});
+		} else {
+			var hint = (data.lokasi && data.lokasi.text) ? (" (dokumen menyebut \"" + data.lokasi.text + "\")") : "";
+			finalizeAqms("", "Lokasi Pemantauan tidak bisa dicocokkan otomatis dari dokumen" + hint + ", mohon pilih manual.");
+		}
+	}
+
 	//tanggal/periode/lab are document-level (identical for every location in the same OCR result)
 	function applySharedFields(data) {
 		if (data.tanggal) {
@@ -696,6 +878,7 @@
 		ocrOptions = [];
 		ocrMode = null;
 		$("#ocr-multi-panel").hide();
+		$("#aqms-konsistensi").hide().html("");
 		$("#iku-repeater-rows").hide().empty();
 		$("#iku-single-block").show();
 
@@ -711,7 +894,7 @@
 		$("#btn-simpan-iku").prop("disabled", true).text("Membaca dokumen...");
 
 		$.ajax({
-			url: baseUrl + "ocr/ikuExtract",
+			url: baseUrl + (ocrDocType === "aqms" ? "ocr/ikuAqmsExtract" : "ocr/ikuExtract"),
 			method: "POST",
 			data: fd,
 			processData: false,
@@ -722,42 +905,47 @@
 				} catch (err) {
 					res = { statusCode: 500, message: "Response OCR tidak valid" };
 				}
-				if (res.statusCode == 200) {
-					if (res.data && res.data.multi) {
-						ocrOptions = res.data.options || [];
-						applySharedFields(ocrOptions[0] || {});
-
-						var pickerHtml = '<option value="">--PILIH LOKASI--</option><option value="all">PILIH SEMUA</option>';
-						jQuery.each(ocrOptions, function(i, opt) {
-							pickerHtml += "<option value='" + i + "'>" + (opt.label || ("Lokasi " + (i + 1))) + "</option>";
-						});
-						$("#ocr-lokasi-picker").html(pickerHtml);
-						$("#ocr-multi-panel").show();
-
-						var matchedCount = 0;
-						jQuery.each(ocrOptions, function(i, o) {
-							if (o.lokasi && o.lokasi.uid) {
-								matchedCount++;
-							}
-						});
-						setOcrStatus("info", "Dokumen ini memuat " + ocrOptions.length + " lokasi pemantauan ("
-							+ matchedCount + " cocok otomatis). Pilih salah satu lokasi, atau \"PILIH SEMUA\" "
-							+ "untuk menampilkan semuanya sebagai form terpisah di bawah.");
-					} else {
-						$("#ocr-multi-panel").hide();
-						ocrOptions = [];
-						ocrMode = null;
-						applySharedFields(res.data);
-						var unmatched = applyOcrResult(res.data);
-						var msg = "Dokumen berhasil dibaca, form terisi otomatis. Mohon periksa kembali sebelum menyimpan.";
-						if (unmatched.length) {
-							setOcrStatus("warning", msg + "<br>Tidak dapat dicocokkan otomatis, mohon isi manual: " + unmatched.join(", "));
-						} else {
-							setOcrStatus("success", msg);
-						}
-					}
-				} else {
+				if (res.statusCode != 200) {
 					setOcrStatus("danger", (res.message || "OCR gagal dibaca") + ". Silakan isi form manual.");
+					return;
+				}
+				if (ocrDocType === "aqms") {
+					applyOcrResultAqms(res.data);
+					setOcrStatus("success", "Dokumen AQMS berhasil dibaca, NO2/SO2 terisi dari Rata-Rata ringkasan tahunan. Lokasi Pemantauan tetap dari pilihan di form. Lihat hasil pengecekan konsistensi di bawah, dan periksa kembali sebelum menyimpan.");
+					return;
+				}
+				if (res.data && res.data.multi) {
+					ocrOptions = res.data.options || [];
+					applySharedFields(ocrOptions[0] || {});
+
+					var pickerHtml = '<option value="">--PILIH LOKASI--</option><option value="all">PILIH SEMUA</option>';
+					jQuery.each(ocrOptions, function(i, opt) {
+						pickerHtml += "<option value='" + i + "'>" + (opt.label || ("Lokasi " + (i + 1))) + "</option>";
+					});
+					$("#ocr-lokasi-picker").html(pickerHtml);
+					$("#ocr-multi-panel").show();
+
+					var matchedCount = 0;
+					jQuery.each(ocrOptions, function(i, o) {
+						if (o.lokasi && o.lokasi.uid) {
+							matchedCount++;
+						}
+					});
+					setOcrStatus("info", "Dokumen ini memuat " + ocrOptions.length + " lokasi pemantauan ("
+						+ matchedCount + " cocok otomatis). Pilih salah satu lokasi, atau \"PILIH SEMUA\" "
+						+ "untuk menampilkan semuanya sebagai form terpisah di bawah.");
+				} else {
+					$("#ocr-multi-panel").hide();
+					ocrOptions = [];
+					ocrMode = null;
+					applySharedFields(res.data);
+					var unmatched = applyOcrResult(res.data);
+					var msg = "Dokumen berhasil dibaca, form terisi otomatis. Mohon periksa kembali sebelum menyimpan.";
+					if (unmatched.length) {
+						setOcrStatus("warning", msg + "<br>Tidak dapat dicocokkan otomatis, mohon isi manual: " + unmatched.join(", "));
+					} else {
+						setOcrStatus("success", msg);
+					}
 				}
 			},
 			error: function() {

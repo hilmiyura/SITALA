@@ -31,6 +31,30 @@ class ocrController extends Front
         $this -> respondExtract($result, "matchFieldsIku");
     }
 
+    //OCR auto-fill for "Tambah Data IKU" form — jalur khusus laporan bulanan AQMS (bukan SHU).
+    //Berbeda dari ikuExtract(): tidak ada lokasi_list/matchLokasi (label stasiun di dokumen jenis
+    //ini terbukti bisa korup/tertukar antar file — lokasi tetap dari yang sudah dipilih user di
+    //form), dan hasilnya disertai pengecekan konsistensi Hari Valid/Data Valid bulanan terhadap
+    //ringkasan tahunan tiap parameter — lihat matchFieldsIkuAqms().
+    public function ikuAqmsExtract()
+    {
+        header("Content-Type: application/json; charset=UTF-8");
+
+        $file = $this -> readUploadedFile();
+        if (isset($file['error'])) {
+            echo json_encode($file);
+            return;
+        }
+
+        $result = $this -> openrouter -> extractIkuAqms($file['tmp_name'], $file['mime']);
+        if (!$result['success']) {
+            echo json_encode(array("statusCode" => 500, "message" => "OCR gagal dibaca: " . $result['error']));
+            return;
+        }
+
+        echo json_encode(array("statusCode" => 200, "data" => $this -> matchFieldsIkuAqms($result['data'])));
+    }
+
     //OCR auto-fill for "Tambah Data IKA" form (uses application/prompts/ika.md — see matchFieldsIka())
     public function ikaExtract()
     {
@@ -170,6 +194,94 @@ class ocrController extends Front
                 'metode' => $this -> matchMetode(isset($p['metode_text']) ? $p['metode_text'] : null, $shared['matrik_sampel_text']),
             );
         }
+
+        return $out;
+    }
+
+    //Ambang representativeness data tahunan AQMS (standar pemantauan kualitas udara ambien
+    //otomatis): Jumlah Hari Valid dalam setahun wajib 237-365 hari, di bawah 237 dianggap tidak
+    //representatif. Ini VALIDASI, bukan penentu "cocok/tidak" — tetap non-blocking (badge merah),
+    //konsisten dengan kriteria lain di fitur OCR ini.
+    const AQMS_HARI_VALID_MIN = 237;
+    const AQMS_HARI_VALID_MAX = 365;
+
+    //Laporan bulanan AQMS: satu dokumen = satu stasiun, tanpa lokasi_list (lihat catatan di
+    //ikuAqmsExtract()). Untuk tiap parameter, "nilai" diambil apa adanya dari Rata-Rata di halaman
+    //ringkasan tahunan (dianggap valid — kesepakatan produk, angka itu sudah hasil pemrosesan alat
+    //AQMS sendiri), lalu dicek konsistensinya: SUM(hari_valid/data_valid per bulan) dibandingkan
+    //terhadap jumlah_hari_valid/jumlah_data_valid di ringkasan tahunan yang sama. Ini menangkap
+    //halaman yang salah render/tertukar (pernah terjadi di data produksi — lihat docs/ocrIku.md)
+    //TANPA perlu membaca ulang seluruh sel tabel per 30 menit. Definisi "hari valid" sendiri (>=36
+    //dari 48 pembacaan per-30-menit, alias >=75% kelengkapan data harian) sudah jadi tanggung jawab
+    //perhitungan dokumen sumbernya — TIDAK dihitung ulang di sini, cukup dipercaya apa adanya.
+    private function matchFieldsIkuAqms($ocr)
+    {
+        $out = array("parameters" => array());
+        $labels = array();
+
+        foreach (array('no2', 'so2', 'pm25') as $param) {
+            $p = isset($ocr[$param]) && is_array($ocr[$param]) ? $ocr[$param] : null;
+            if (!$p) {
+                $out['parameters'][$param] = null;
+                continue;
+            }
+
+            $bulanan = isset($p['bulanan']) && is_array($p['bulanan']) ? $p['bulanan'] : array();
+            $ringkasan = isset($p['ringkasan']) && is_array($p['ringkasan']) ? $p['ringkasan'] : array();
+
+            $sumHari = 0;
+            $sumData = 0;
+            foreach ($bulanan as $b) {
+                $sumHari += isset($b['hari_valid']) ? floatval($b['hari_valid']) : 0;
+                $sumData += isset($b['data_valid']) ? floatval($b['data_valid']) : 0;
+            }
+
+            $ringkasanHari = isset($ringkasan['jumlah_hari_valid']) && $ringkasan['jumlah_hari_valid'] !== null ? floatval($ringkasan['jumlah_hari_valid']) : null;
+            $ringkasanData = isset($ringkasan['jumlah_data_valid']) && $ringkasan['jumlah_data_valid'] !== null ? floatval($ringkasan['jumlah_data_valid']) : null;
+
+            $out['parameters'][$param] = array(
+                'lokasi_text' => isset($p['lokasi_text']) ? $p['lokasi_text'] : null,
+                'nilai' => isset($ringkasan['rata_rata']) ? $ringkasan['rata_rata'] : null,
+                'jumlah_bulan_terbaca' => count($bulanan),
+                'ringkasan' => $ringkasan,
+                'konsistensi' => array(
+                    'sum_hari_valid' => $sumHari,
+                    'ringkasan_hari_valid' => $ringkasanHari,
+                    'selisih_hari_valid' => ($ringkasanHari === null) ? null : round($sumHari - $ringkasanHari, 2),
+                    'hari_valid_cocok' => ($ringkasanHari === null) ? null : (abs($sumHari - $ringkasanHari) < 0.01),
+                    'sum_data_valid' => $sumData,
+                    'ringkasan_data_valid' => $ringkasanData,
+                    'selisih_data_valid' => ($ringkasanData === null) ? null : round($sumData - $ringkasanData, 2),
+                    'data_valid_cocok' => ($ringkasanData === null) ? null : (abs($sumData - $ringkasanData) < 0.01),
+                    'hari_valid_dalam_rentang' => ($ringkasanHari === null) ? null : ($ringkasanHari >= self::AQMS_HARI_VALID_MIN && $ringkasanHari <= self::AQMS_HARI_VALID_MAX),
+                ),
+            );
+
+            if (!empty($p['lokasi_text'])) {
+                $labels[$param] = $p['lokasi_text'];
+            }
+        }
+
+        //Coba cocokkan otomatis ke master data juga (sama seperti jalur SHU manual) — dicoba, bukan
+        //dipercaya buta: kalau gagal/skornya rendah, tetap kembali uid null seperti biasa dan
+        //frontend memperlakukannya sebagai "unmatched" (user pilih manual). Yang membedakan AQMS
+        //dari SHU cuma satu: di sini kita PUNYA cara tambahan untuk mengecek dugaan salah baca —
+        //label_konsisten di bawah (NO2 vs SO2) — yang tidak dimiliki SHU.
+        $primaryLabel = null;
+        foreach (array('no2', 'so2', 'pm25') as $param) {
+            if (!empty($labels[$param])) {
+                $primaryLabel = $labels[$param];
+                break;
+            }
+        }
+        $out['lokasi'] = $this -> matchLokasi($primaryLabel, 1);
+
+        //bandingkan label stasiun antar parameter (mis. NO2 vs SO2) dalam dokumen yang sama — beda
+        //label berarti salah satu bagian dokumen kemungkinan tertukar/korup (kasus nyata pernah
+        //ditemukan: halaman NO2 satu stasiun ternyata salinan dari stasiun lain)
+        $uniqueLabels = array_unique(array_map(array($this, 'normalize'), $labels));
+        $out['labels'] = $labels;
+        $out['label_konsisten'] = count($labels) <= 1 ? null : (count($uniqueLabels) === 1);
 
         return $out;
     }

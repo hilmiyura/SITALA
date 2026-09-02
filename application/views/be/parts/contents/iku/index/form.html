@@ -392,6 +392,17 @@
               <h4 class="form-section mt-0">
                 <i class="ft-magic"></i>Unggah Dokumen (Isi Otomatis via OCR)
               </h4>
+              <div class="form-group ocr-doctype-toggle">
+                <label class="mb-1">Jenis Dokumen</label>
+                <div>
+                  <label class="mr-3" style="font-weight:normal;">
+                    <input type="radio" name="ocr_doctype" value="shu" id="ocr-doctype-shu" checked /> SHU/LHP Manual
+                  </label>
+                  <label style="font-weight:normal;">
+                    <input type="radio" name="ocr_doctype" value="aqms" id="ocr-doctype-aqms" /> Laporan Bulanan AQMS (Otomatis)
+                  </label>
+                </div>
+              </div>
               <div class="ocr-dropzone" id="ocr-dropzone">
                 <input type="file" id="shu" name="shu" accept=".pdf,.jpg,.jpeg,.png" class="ocr-dropzone-input" />
                 <div id="ocr-dropzone-placeholder">
@@ -408,6 +419,7 @@
               <p class="ocr-hint" id="ocr-hint">Data di sebelah kanan akan terisi otomatis, mohon periksa kembali sebelum menyimpan.</p>
               <span class="help-block shu-download" style="display:none"></span>
               <div id="ocr-status" class="alert mb-0" style="display:none;"></div>
+              <div id="aqms-konsistensi" class="alert mb-0" style="display:none;"></div>
               <div id="ocr-multi-panel" style="display:none;">
                 <label class="mb-1" for="ocr-lokasi-picker">Lokasi Pemantauan Terdeteksi</label>
                 <select class="form-control" id="ocr-lokasi-picker">

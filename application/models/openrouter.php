@@ -56,6 +56,12 @@
 			return $this->extractDocument("iku", "Ekstrak data dari dokumen SHU/LHP kualitas udara ambien berikut sesuai instruksi.", $filePath, $mimeType);
 		}
 
+		//Extract structured pelaporan IKU fields from a laporan bulanan AQMS (bukan SHU) — dokumen
+		//kontinu per 30 menit ditutup ringkasan tahunan per parameter, lihat prompts/iku_aqms.md
+		public function extractIkuAqms($filePath, $mimeType){
+			return $this->extractDocument("iku_aqms", "Ekstrak data dari laporan bulanan pemantauan otomatis (AQMS) kualitas udara ambien berikut sesuai instruksi.", $filePath, $mimeType);
+		}
+
 		//Extract structured pelaporan IKA fields from a SHU/LHP/LHU document (image or pdf)
 		public function extractIka($filePath, $mimeType){
 			return $this->extractDocument("ika", "Ekstrak data dari dokumen SHU/LHP/LHU kualitas air permukaan berikut sesuai instruksi.", $filePath, $mimeType);
