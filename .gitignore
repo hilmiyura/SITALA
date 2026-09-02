@@ -1,6 +1,8 @@
 /temp/
 /uploads/
 *.sql
+# ...kecuali migrasi skema, yang memang harus ikut ter-commit
+!/migration/*.sql
 .DS_Store
 /config/apikeys.php
 /.env

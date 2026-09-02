@@ -102,6 +102,32 @@ class ikuController extends Front
                 $post['form']['shu'] = $fileUpload;
             }
 
+            //Payload OCR mentah (JSON) dari /ocr/ikuExtract, dikirim form lewat field
+            //tersembunyi form[ocr_result]. Disimpan sebagai jejak audit: dokumen sumbernya
+            //sendiri tidak ikut disimpan, jadi ini satu-satunya rekaman apa yang dibaca model.
+            //
+            //Kolomnya SENGAJA dibuang dari payload bila nilainya kosong atau bukan JSON valid.
+            //Alasannya: tables::post() meneruskan seluruh $post['form'] ke AutoExecute, sehingga
+            //field kosong akan menimpa nilai lama saat user menyimpan ulang baris yang sama
+            //secara manual. Dengan di-unset, kolomnya tidak ikut di-UPDATE dan isinya tetap utuh.
+            //Payload di-decode lalu di-encode ULANG, bukan disimpan apa adanya. Tujuannya
+            //memadatkan: json_encode() tanpa JSON_PRETTY_PRINT membuang seluruh indentasi
+            //dan spasi antar-token yang dikirim browser. Ini bukan sekadar kerapian —
+            //kolomnya TEXT (maks 65.535 byte) dan sql_mode server tidak memuat
+            //STRICT_TRANS_TABLES, jadi payload yang kepanjangan dipotong DIAM-DIAM.
+            //
+            //JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES dipakai agar nama lokasi
+            //dan URL tidak membengkak jadi "\uXXXX" / "\/" yang memakan byte percuma.
+            if (isset($post['form']['ocr_result'])) {
+                $ocrResult = trim($post['form']['ocr_result']);
+                $ocrDecoded = json_decode($ocrResult);
+                if ($ocrResult !== '' && json_last_error() === JSON_ERROR_NONE) {
+                    $post['form']['ocr_result'] = json_encode($ocrDecoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                } else {
+                    unset($post['form']['ocr_result']);
+                }
+            }
+
             $post['form']['cruser'] = $this -> me['uid_users'];
             if ($post['form'][$this->primaryKey]) {
                 unset($post['form']['cruser']);
@@ -560,7 +586,40 @@ class ikuController extends Front
         if ($this -> params("x")) {
             $this -> tables -> set("v_pelaporan_iku", "uid_pelaporan_iku");
             $dataEdit = $this -> tables -> fetch("deleted = 0 AND uid_pelaporan_iku=" . $this -> params("x"));
-            echo json_encode($dataEdit['data'][0]);
+            $row = $dataEdit['data'][0];
+
+            //ocr_result diambil lewat query TERPISAH ke tabel dasar, bukan dengan
+            //menambahkan kolomnya ke v_pelaporan_iku. Alasannya view itu bukan hanya
+            //milik endpoint ini:
+            //
+            //  1. getData() membangun filter keyword dari SHOW COLUMNS view ini, lalu
+            //     mem-LIKE SEMUA kolomnya. Kalau ocr_result ikut, pencarian akan
+            //     menyisir isi JSON mentah — user mencari nama lab bisa mendapat baris
+            //     yang lab-nya lain, hanya karena nama itu muncul di hasil OCR yang
+            //     sudah dikoreksi manual. Hasil pencarian jadi keliru.
+            //  2. getData() dan ekspor Excel memakai SELECT * dari view ini, sehingga
+            //     tiap baris daftar ikut memikul payload JSON yang tidak dipakai.
+            //
+            //Payload ini bersifat khusus-detail, jadi biayanya ditaruh di sini saja.
+            //
+            //Dikembalikan sudah ter-decode (objek), bukan string JSON, supaya sisi view
+            //bisa langsung meneruskannya ke applyOcrResult() tanpa parse lagi. null
+            //berarti: belum pernah ada hasil OCR, ATAU isinya gagal di-parse — yang bisa
+            //terjadi bila payload melebihi kapasitas TEXT lalu terpotong diam-diam.
+            if ($row) {
+                $ocrRow = $this -> db -> query("SELECT ocr_result FROM pelaporan_iku WHERE uid_pelaporan_iku = " . intval($this -> params("x")));
+                $ocrResult = (isset($ocrRow -> fields['ocr_result']) ? $ocrRow -> fields['ocr_result'] : null);
+
+                $row['ocr_result'] = null;
+                if ($ocrResult) {
+                    $decoded = json_decode($ocrResult);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $row['ocr_result'] = $decoded;
+                    }
+                }
+            }
+
+            echo json_encode($row);
         }
     }
 
