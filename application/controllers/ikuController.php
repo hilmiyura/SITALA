@@ -567,6 +567,14 @@ class ikuController extends Front
 
           $dataMetodePm25 = $this->db->query("SELECT * FROM rf_metode_pemantauan WHERE uid_metode_pemantauan = ".$value['pm25_uid_metode_pemantauan']);
           $data['data'][$key]['pm25_metode'] = $dataMetodePm25->fields['metode'];
+
+          //Bacaan mentah OCR, tersedia untuk template sebagai $v.ocr
+          $data['data'][$key]['ocr'] = $this->_ocrResult(isset($value['ocr_result']) ? $value['ocr_result'] : null);
+
+          //String JSON aslinya dibuang setelah di-decode. Tidak ada template daftar yang
+          //memakainya, sedangkan membiarkannya berarti tiap baris membawa dua salinan
+          //payload yang sama ke Smarty.
+          unset($data['data'][$key]['ocr_result']);
         }
 
         $this -> view -> pagination($this -> view, $totalRow, $offset + 1, $limit, $urlVar);
@@ -624,6 +632,29 @@ class ikuController extends Front
         } else {
             echo json_encode(array('statusCode' => 403, 'message' => $this -> message -> access()));
         }
+    }
+
+    private function _ocrResult($json)
+    {// decode kolom ocr_result (TEXT berisi JSON) jadi array siap pakai di template
+        //Di-decode sebagai ARRAY asosiatif, bukan objek, supaya Smarty bisa
+        //mengaksesnya dengan notasi titik: {$v.ocr.lokasi.text},
+        //{$v.ocr.parameters.no2.nilai}, dan seterusnya.
+        //
+        //Mengembalikan null untuk tiga keadaan yang semuanya berarti "tidak ada
+        //bacaan OCR yang bisa dipakai":
+        //  - kolomnya belum ada di view (migrasi view belum dijalankan)
+        //  - barisnya memang tidak berasal dari alur OCR (input manual / impor Excel)
+        //  - isinya gagal di-parse, misalnya karena payload melebihi kapasitas TEXT
+        //    lalu terpotong diam-diam (sql_mode server tanpa STRICT_TRANS_TABLES)
+        //Template cukup memeriksa {if $v.ocr} tanpa perlu membedakan ketiganya.
+        if (!$json) {
+            return null;
+        }
+        $decoded = json_decode($json, TRUE);
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+            return null;
+        }
+        return $decoded;
     }
 
     private function _getListExport($totalRow, $limitRow = LIMIT_DOWNLOAD_EXCEL)
@@ -750,6 +781,15 @@ class ikuController extends Front
           $offset = ($offset > 0 ? $offset - 1 : 0);
           $paging	= array("offset"=>$offset, "limit"=>LIMIT_DOWNLOAD_EXCEL);
           $data	= $this->tables->fetch($w, $o, $paging);
+
+          //Bacaan mentah OCR untuk kolom "HASIL OCR" di excel.html. String JSON aslinya
+          //dibuang setelah di-decode — dengan LIMIT_DOWNLOAD_EXCEL sebesar 2.500 baris,
+          //membiarkan keduanya berarti dua salinan payload per baris ditahan di memori
+          //sekaligus sepanjang proses render template.
+          foreach ($data['data'] as $key => $value) {
+              $data['data'][$key]['ocr'] = $this->_ocrResult(isset($value['ocr_result']) ? $value['ocr_result'] : null);
+              unset($data['data'][$key]['ocr_result']);
+          }
 
           $this->view->assign("offset", $offset+1);
           $this->view->assign("viewExcel", $data);

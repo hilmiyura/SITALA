@@ -27,6 +27,10 @@
 			<th rowspan="2" bgcolor="#1E9FC4">PERUNTUKAN</th>
 			<th rowspan="2" bgcolor="#1E9FC4">SHU</th>
 			<th colspan="3" bgcolor="#1E9FC4">NILAI PEMANTAUAN</th>
+			<!-- Bacaan mentah model OCR, dipisahkan warnanya supaya jelas ini BUKAN
+			     nilai tersimpan melainkan pembanding untuk penelusuran. Kolom kiri
+			     adalah data yang berlaku; kolom di bawah ini apa yang dibaca model. -->
+			<th colspan="10" bgcolor="#0E7C9B">HASIL OCR (BACAAN MENTAH MODEL)</th>
 		</tr>
 		<tr style="color: white;">
 			<th bgcolor="#1E9FC4">
@@ -41,6 +45,16 @@
 				PM<sub class="white">2.5</sub> <sup>(µg/m3)</sup><br>
 				<sup>(Partikulat)</sup>
 			</th>
+			<th bgcolor="#0E7C9B">STATUS</th>
+			<th bgcolor="#0E7C9B">LOKASI</th>
+			<th bgcolor="#0E7C9B">LABORATORIUM</th>
+			<th bgcolor="#0E7C9B">PERUNTUKAN</th>
+			<th bgcolor="#0E7C9B">NO<sub class="white">2</sub></th>
+			<th bgcolor="#0E7C9B">METODE NO<sub class="white">2</sub></th>
+			<th bgcolor="#0E7C9B">SO<sub class="white">2</sub></th>
+			<th bgcolor="#0E7C9B">METODE SO<sub class="white">2</sub></th>
+			<th bgcolor="#0E7C9B">PM<sub class="white">2.5</sub></th>
+			<th bgcolor="#0E7C9B">METODE PM<sub class="white">2.5</sub></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -74,10 +88,39 @@
 			<td align="center">'{$data.no2}</td>
 			<td align="center">'{$data.so2}</td>
 			<td align="center">'{$data.pm25}</td>
+			{if $data.ocr}
+			<td align="center">ADA</td>
+			<td>{$data.ocr.lokasi.text|escape}</td>
+			<td>{$data.ocr.lab.text|escape}</td>
+			<td>{$data.ocr.peruntukan.text|escape}</td>
+			{* Nilai diuji terhadap null, BUKAN dengan |default, supaya angka 0 yang sah
+			   tidak ikut tersembunyi. Apostrof di depan mengikuti pola kolom di kiri:
+			   memaksa Excel membaca sel sebagai teks agar pemisah desimal tidak diubah
+			   mengikuti locale mesin yang membuka berkasnya. *}
+			<td align="center">{if $data.ocr.parameters.no2.nilai !== null}'{$data.ocr.parameters.no2.nilai}{/if}</td>
+			<td>{$data.ocr.parameters.no2.metode.text|escape}</td>
+			<td align="center">{if $data.ocr.parameters.so2.nilai !== null}'{$data.ocr.parameters.so2.nilai}{/if}</td>
+			<td>{$data.ocr.parameters.so2.metode.text|escape}</td>
+			<td align="center">{if $data.ocr.parameters.pm25.nilai !== null}'{$data.ocr.parameters.pm25.nilai}{/if}</td>
+			<td>{$data.ocr.parameters.pm25.metode.text|escape}</td>
+			{else}
+			{* Sengaja sembilan sel kosong terpisah, bukan satu colspan. Sel tergabung
+			   membuat filter dan urutkan bawaan Excel tidak bisa dipakai di kolom itu. *}
+			<td align="center">TIDAK ADA</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			{/if}
 		</tr>
 		{foreachelse}
 		<tr style="color: white;">
-			<td colspan="18" align="center" bgcolor="#FA535D">BELUM ADA DATA</td>
+			<td colspan="28" align="center" bgcolor="#FA535D">BELUM ADA DATA</td>
 		</tr>
 		{/foreach}
 	</tbody>
