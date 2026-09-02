@@ -4,6 +4,7 @@
   var currentDocBlobUrl = null;
   var ocrOptions = [];
   var ocrMode = null; //null|"single"|"all"
+  var ikaTotalParamCount = {}; //sfx -> jumlah parameter yang terbaca OCR (matched + unmatched) untuk lokasi itu
   var IKA_PARAMS = ["debit","ph","bod","cod","tss","do_p","no3_n","total_phosphat","fecal_coliform",
     "kecerahan","klorofil_a","total_nitrogen","total_coliform","temperatur_air","temperatur_udara",
     "minyak_lemak","detergen_total","fenol","tds","sulfat","klorida","nitrit","amoniak","florida",
@@ -141,6 +142,151 @@
     setBoxStatus($box, type, "<b>" + label + "</b> &middot; " + koordDasar + " &middot; Selisih ~" + jarak + " m" + catatanTertukar);
   }
 
+  //===== anomali nilai parameter kunci, ditampilkan sebagai badge di bawah masing-masing field
+  //      (sama seperti pola badge-kriteria di IKAL) =====
+  function parseNum(v) {
+    var n = parseFloat(v);
+    return isNaN(n) ? null : n;
+  }
+
+  function doMaxForSuhu(suhuAir) {
+    if (suhuAir === null || suhuAir >= 25) return 8.24;
+    if (suhuAir >= 20) return 9.08;
+    return 10.07;
+  }
+
+  //badge sudah ada di markup (do_p/bod/fecal_coliform/ph) untuk field yang punya aturan khusus;
+  //untuk sisa parameter (cek nilai 0/negatif & kelengkapan parameter wajib) badge dibuat
+  //otomatis lewat JS di sebelah field-nya
+  function showFieldBadge($badge, ok, text) {
+    if (!$badge.length) return;
+    if (ok === null) {
+      $badge.hide();
+      return;
+    }
+    $badge.removeClass("badge-kriteria-ok badge-kriteria-warn")
+      .addClass(ok ? "badge-kriteria-ok" : "badge-kriteria-warn")
+      .html((ok ? "&#10003; " : "&#9888; ") + text)
+      .show();
+  }
+
+  function ensureParamBadge(id, sfx) {
+    var badgeId = "cek-param-" + id + sfx;
+    var $existing = $("#" + badgeId);
+    if ($existing.length) return $existing;
+    var $input = $("#" + id + sfx);
+    if (!$input.length) return $existing;
+    var $badge = $("<span>", { "class": "badge-kriteria", id: badgeId, style: "display:none;" });
+    var $group = $input.closest(".input-group");
+    ($group.length ? $group : $input).after($badge);
+    return $badge;
+  }
+
+  function updateDoBadge(sfx) {
+    var doP = parseNum($("#do_p" + sfx).val());
+    var $badge = $("#cek-do_p" + sfx);
+    if (doP === null) { showFieldBadge($badge, null); return; }
+    var suhuAir = parseNum($("#temperatur_air" + sfx).val());
+    var doMax = doMaxForSuhu(suhuAir);
+    if (doP > doMax) {
+      showFieldBadge($badge, false, "DO " + doP + " mg/L melebihi ambang " + doMax + " mg/L"
+        + (suhuAir === null ? " (suhu air tidak terisi, dianggap &ge;25&deg;C)" : " untuk suhu air " + suhuAir + "&deg;C"));
+    } else {
+      showFieldBadge($badge, true, "DO " + doP + " mg/L sesuai ambang " + doMax + " mg/L");
+    }
+  }
+
+  function updateBodBadge(sfx) {
+    var bod = parseNum($("#bod" + sfx).val());
+    var $badge = $("#cek-bod" + sfx);
+    if (bod === null) { showFieldBadge($badge, null); return; }
+    var cod = parseNum($("#cod" + sfx).val());
+    var msgs = [];
+    if (bod < 1) msgs.push("BOD " + bod + " mg/L di bawah minimal 1 mg/L");
+    if (cod !== null && bod > cod) msgs.push("BOD (" + bod + ") tidak boleh lebih besar dari COD (" + cod + ")");
+    if (msgs.length) {
+      showFieldBadge($badge, false, msgs.join("<br>"));
+    } else {
+      showFieldBadge($badge, true, "BOD " + bod + " mg/L sesuai");
+    }
+  }
+
+  function updateFecalBadge(sfx) {
+    var fc = parseNum($("#fecal_coliform" + sfx).val());
+    var $badge = $("#cek-fecal_coliform" + sfx);
+    if (fc === null) { showFieldBadge($badge, null); return; }
+    var tc = parseNum($("#total_coliform" + sfx).val());
+    var msgs = [];
+    if (fc < 1.8) msgs.push("Fecal Coliform " + fc + " MPN/100mL di bawah minimal 1,8 MPN/100mL");
+    if (tc !== null && fc > tc) msgs.push("Fecal Coliform (" + fc + ") tidak boleh lebih besar dari Total Coliform (" + tc + ")");
+    if (msgs.length) {
+      showFieldBadge($badge, false, msgs.join("<br>"));
+    } else {
+      showFieldBadge($badge, true, "Fecal Coliform " + fc + " MPN/100mL sesuai");
+    }
+  }
+
+  function updatePhBadge(sfx) {
+    var ph = parseNum($("#ph" + sfx).val());
+    var $badge = $("#cek-ph" + sfx);
+    if (ph === null) { showFieldBadge($badge, null); return; }
+    if (ph > 14) {
+      showFieldBadge($badge, false, "pH " + ph + " melebihi 14");
+    } else {
+      showFieldBadge($badge, true, "pH " + ph + " sesuai");
+    }
+  }
+
+  //sfx = "" for the single/default fields, "_r0", "_r1", ... for cloned repeater rows
+  function renderKriteriaCheck(sfx) {
+    updateDoBadge(sfx);
+    updateBodBadge(sfx);
+    updateFecalBadge(sfx);
+    updatePhBadge(sfx);
+
+    //kelengkapan parameter wajib IKA: hanya relevan kalau SHU terbaca OCR memuat lebih dari 8
+    //parameter (berarti panel lengkap) tapi salah satu dari 8 wajib itu kosong di form. Untuk
+    //entri manual (tidak pernah OCR) totalCount = 0 sehingga pengecekan ini otomatis diam.
+    var totalCount = ikaTotalParamCount[sfx] || 0;
+    var wajibLabel = {};
+    jQuery.each(IKA_WAJIB_FIELDS, function(i, f) { wajibLabel[f.id] = f.label; });
+
+    jQuery.each(IKA_PARAMS, function(i, id) {
+      var raw = $("#" + id + sfx).val();
+      var v = parseNum(raw);
+      var $badge = ensureParamBadge(id, sfx);
+      if (v !== null && v <= 0) {
+        showFieldBadge($badge, false, "Nilai " + (v === 0 ? "0" : "negatif")
+          + " &mdash; kemungkinan seharusnya diisi nilai limit deteksi, mohon konfirmasi ke laboratorium");
+      } else if ((raw === "" || raw === undefined) && wajibLabel[id] && totalCount > 8) {
+        showFieldBadge($badge, false, "Parameter wajib <b>" + wajibLabel[id] + "</b> kosong, padahal SHU terbaca memuat "
+          + totalCount + " parameter &mdash; mohon isi manual jika tersedia di dokumen");
+      } else {
+        showFieldBadge($badge, null);
+      }
+    });
+  }
+
+  //live re-check saat user edit manual; anchored regex (bukan wildcard [id^=...]) karena beberapa id
+  //parameter IKA adalah prefix dari id lain (mis. "co" prefix dari "cod", "bo" bukan prefix tapi tetap
+  //dijaga) sehingga wildcard selector bisa salah menangkap field yang tidak dimaksud
+  var IKA_PARAMS_RE = new RegExp("^(" + IKA_PARAMS.join("|") + ")(_r\\d+)?$");
+  $(document).on("input change", "input[id]", function() {
+    var m = IKA_PARAMS_RE.exec(this.id);
+    if (m) renderKriteriaCheck(m[2] || "");
+  });
+
+  //toggle "Lihat Semua Parameter" per blok (single maupun tiap row repeater); pakai class,
+  //bukan id, supaya tidak perlu peduli suffix _r0/_r1/... hasil clone template
+  $(document).on("click", ".btn-toggle-extra-params", function() {
+    var $btn = $(this);
+    var $wrap = $btn.closest(".form-row").next(".ika-extra-params");
+    var willShow = !$wrap.is(":visible");
+    $wrap.toggle(willShow);
+    $btn.find(".btn-toggle-extra-params-label").text(willShow ? "Sembunyikan Parameter Lainnya" : "Lihat Semua Parameter");
+    $btn.find("i").toggleClass("ft-eye ft-eye-off");
+  });
+
   function toggleKategoriFields($scope, val) {
     var $fields = $scope.find(".danau_parameter");
     if (val == 3) {
@@ -223,6 +369,9 @@
     if (data.unmatched_parameters && data.unmatched_parameters.length) {
       unmatched.push("Parameter lain yang terbaca tapi belum bisa dipetakan otomatis: " + data.unmatched_parameters.join(", "));
     }
+
+    ikaTotalParamCount[sfx] = Object.keys(data.parameters || {}).length + (data.unmatched_parameters || []).length;
+    renderKriteriaCheck(sfx);
 
     return unmatched;
   }
@@ -340,8 +489,38 @@
     }
   });
 
+  //===== 8 parameter wajib IKA (ditandai * pada label) tidak boleh kosong saat simpan =====
+  var IKA_WAJIB_FIELDS = [
+    { id: "ph", label: "pH" },
+    { id: "bod", label: "BOD" },
+    { id: "cod", label: "COD" },
+    { id: "tss", label: "TSS" },
+    { id: "do_p", label: "DO" },
+    { id: "no3_n", label: "NO3-N" },
+    { id: "total_phosphat", label: "Total Fosfat" },
+    { id: "fecal_coliform", label: "Fecal Coliform" }
+  ];
+
+  function validateWajibFields(sfx, lokasiLabel) {
+    var kosong = [];
+    jQuery.each(IKA_WAJIB_FIELDS, function(i, f) {
+      if ($("#" + f.id + sfx).val() === "" || $("#" + f.id + sfx).val() === undefined) {
+        kosong.push(f.label);
+      }
+    });
+    if (kosong.length) {
+      swal("Data belum lengkap", (lokasiLabel ? lokasiLabel + " &mdash; " : "")
+        + "Parameter wajib berikut belum diisi: " + kosong.join(", "), "warning");
+      return false;
+    }
+    return true;
+  }
+
   $(document).on("submit", "#tambahData form", function(event) {
     if (ocrMode !== "all") {
+      if (!validateWajibFields("")) {
+        event.preventDefault();
+      }
       return;
     }
     var $rows = $("#ocr-repeater-rows .iku-row");
@@ -349,6 +528,23 @@
       return;
     }
     event.preventDefault();
+
+    var rowsOk = true;
+    $rows.each(function() {
+      var idx = $(this).data("idx");
+      var sfx = "_r" + idx;
+      var lokasiLabel = $.trim($("#uid_lokasi_pemantauan" + sfx + " option:selected").text() || "");
+      if (!lokasiLabel || /^--.*--$/.test(lokasiLabel)) {
+        lokasiLabel = "Baris " + (idx + 1);
+      }
+      if (!validateWajibFields(sfx, lokasiLabel)) {
+        rowsOk = false;
+        return false;
+      }
+    });
+    if (!rowsOk) {
+      return;
+    }
 
     var formEl = this;
     var total = $rows.length;
@@ -655,6 +851,11 @@
     $("#latitude").val("");
     $("#longitude").val("");
     $("#koordinat-check").hide().html("");
+    ikaTotalParamCount[""] = 0;
+    renderKriteriaCheck("");
+    $("#ocr-single-block .ika-extra-params").hide();
+    $("#ocr-single-block .btn-toggle-extra-params .btn-toggle-extra-params-label").text("Lihat Semua Parameter");
+    $("#ocr-single-block .btn-toggle-extra-params i").removeClass("ft-eye-off").addClass("ft-eye");
     $("#uid_lokasi_pemantauan").val("").trigger("change");
     $("#periode_pemantauan").val("").trigger("change");
     $("#uid_provinsi").val("").trigger("change");
@@ -712,6 +913,20 @@
             jQuery.each(IKA_PARAMS, function(i, id) {
               $("#" + id).val(req[id]);
             });
+            renderKriteriaCheck("");
+            //saat edit data lama, buka panel "parameter lainnya" otomatis kalau ada isinya,
+            //supaya tidak terlihat seperti data hilang
+            var wajibIdSet = {};
+            jQuery.each(IKA_WAJIB_FIELDS, function(i, f) { wajibIdSet[f.id] = true; });
+            var hasExtraValue = false;
+            jQuery.each(IKA_PARAMS, function(i, id) {
+              if (!wajibIdSet[id] && req[id] !== undefined && req[id] !== null && req[id] !== "") {
+                hasExtraValue = true;
+              }
+            });
+            if (hasExtraValue) {
+              $("#ocr-single-block .btn-toggle-extra-params").trigger("click");
+            }
             $("#periode_pemantauan").val(req.periode_pemantauan).trigger("change");
             $.ajax({
               url: baseUrl + "ajax/lokasiById/x/" + req.uid_lokasi_pemantauan,

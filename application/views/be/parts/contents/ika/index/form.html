@@ -288,6 +288,21 @@
   #tambahData [id^="koordinat-check"].alert-warning { border-left-color: #f0ad4e; background: #fff8ec; color: #8a5a00; }
   #tambahData [id^="koordinat-check"].alert-danger { border-left-color: #dc3545; background: #fdeeee; color: #a71d2a; }
 
+  /* ---- OCR criteria check: anomali nilai parameter, badge per field (sama seperti IKAL) ---- */
+  #tambahData .badge-kriteria {
+    display: inline-block;
+    font-size: .74rem;
+    font-weight: 600;
+    padding: .3rem .6rem;
+    border-radius: 6px;
+    margin-top: .3rem;
+  }
+  #tambahData .badge-kriteria-ok { background: #eefaf1; color: #1e7e34; }
+  #tambahData .badge-kriteria-warn { background: #fff8ec; color: #8a5a00; }
+
+  /* ---- toggle "Lihat Semua Parameter" ---- */
+  #tambahData .btn-toggle-extra-params { margin-bottom: .5rem; }
+
   /* ---- document preview ---- */
   #tambahData #doc-preview-wrapper,
   #tambahData #doc-preview {
@@ -372,7 +387,7 @@
                 <i class="ft-magic"></i>Unggah Dokumen (Isi Otomatis via OCR)
               </h4>
               <div class="ocr-dropzone" id="ocr-dropzone">
-                <input type="file" id="shu" name="shu" accept=".pdf,.jpg,.jpeg,.png" class="ocr-dropzone-input" />
+                <input type="file" id="shu" name="shu" accept=".pdf" class="ocr-dropzone-input" />
                 <div id="ocr-dropzone-placeholder">
                   <i class="ft-upload-cloud"></i>
                   <p class="ocr-dropzone-title">Klik atau seret dokumen ke sini</p>
@@ -510,35 +525,28 @@
               <span class="text-danger"><small>Akan terisi otomatis ketika memilih lokasi, jika kategori sudah diupdate dimenu referensi lokasi pemantauan</small></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Debit Air</label>
+              <label for="name">pH (Potential Hydrogen) <span class="text-danger">*</span></label>
               <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Debit Air" id="debit" name="form[debit]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">m3/s</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">pH (Potential Hydrogen)</label>
-              <div class="input-group border-wajib">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ph" name="form[ph]" />
                 <div class="input-group-append">
                   <span class="input-group-text"></span>
                 </div>
               </div>
+              <span class="badge-kriteria" id="cek-ph" style="display:none;"></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">BOD (Biological Oxygen Demand)</label>
-              <div class="input-group border-wajib">
+              <label for="name">BOD (Biological Oxygen Demand) <span class="text-danger">*</span></label>
+              <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bod" name="form[bod]" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
                 </div>
               </div>
+              <span class="badge-kriteria" id="cek-bod" style="display:none;"></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">COD (Chemical Oxygen Demand)</label>
-              <div class="input-group border-wajib">
+              <label for="name">COD (Chemical Oxygen Demand) <span class="text-danger">*</span></label>
+              <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cod" name="form[cod]" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
@@ -546,8 +554,8 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">TSS (Total Susppended Solid)</label>
-              <div class="input-group border-wajib">
+              <label for="name">TSS (Total Susppended Solid) <span class="text-danger">*</span></label>
+              <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="tss" name="form[tss]" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
@@ -555,11 +563,58 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">DO (Dissolved Oxygen)</label>
-              <div class="input-group border-wajib">
+              <label for="name">DO (Dissolved Oxygen) <span class="text-danger">*</span></label>
+              <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="do_p" name="form[do_p]" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+              <span class="badge-kriteria" id="cek-do_p" style="display:none;"></span>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">FECAL COLIFORM <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fecal_coliform" name="form[fecal_coliform]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">MPN/100 mL</span>
+                </div>
+              </div>
+              <span class="badge-kriteria" id="cek-fecal_coliform" style="display:none;"></span>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">NO (Nitrat)<sub class="black">3</sub>-N <span class="text-danger">*</span></label>
+              <div class="input-group danau_parameter_3">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="no3_n" name="form[no3_n]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TOTAL FOSFAT <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="total_phosphat" name="form[total_phosphat]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1 text-center">
+              <button type="button" class="btn btn-outline-primary btn-sm btn-toggle-extra-params">
+                <i class="ft-eye"></i> <span class="btn-toggle-extra-params-label">Lihat Semua Parameter</span>
+              </button>
+            </div>
+          </div>
+          <div class="form-row mb-1 ika-extra-params" style="display:none;">
+            <div class="col-md-6 mb-1">
+              <label for="name">Debit Air</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Debit Air" id="debit" name="form[debit]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">m3/s</span>
                 </div>
               </div>
             </div>
@@ -572,33 +627,6 @@
                 </div>
               </div>
             </div> -->
-            <div class="col-md-6 mb-1">
-              <label for="name">NO (Nitrat)<sub class="black">3</sub>-N</label>
-              <div class="input-group danau_parameter_3 border-wajib">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="no3_n" name="form[no3_n]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">TOTAL FOSFAT</label>
-              <div class="input-group border-wajib">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="total_phosphat" name="form[total_phosphat]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">FECAL COLIFORM</label>
-              <div class="input-group border-wajib">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fecal_coliform" name="form[fecal_coliform]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">MPN/100 mL</span>
-                </div>
-              </div>
-            </div>
             <!-- new fields -->
             <div class="col-md-6 mb-1 danau_parameter" style="display:none">
               <label for="name">KECERAHAN (TRANSPARANSI)</label>
@@ -1072,35 +1100,28 @@
               <span class="text-danger"><small>Akan terisi otomatis ketika memilih lokasi, jika kategori sudah diupdate dimenu referensi lokasi pemantauan</small></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Debit Air</label>
+              <label for="name">pH (Potential Hydrogen) <span class="text-danger">*</span></label>
               <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Debit Air" id="debit" />
-                <div class="input-group-append">
-                  <span class="input-group-text">m3/s</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">pH (Potential Hydrogen)</label>
-              <div class="input-group border-wajib">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ph" />
                 <div class="input-group-append">
                   <span class="input-group-text"></span>
                 </div>
               </div>
+              <span class="badge-kriteria" id="cek-ph" style="display:none;"></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">BOD (Biological Oxygen Demand)</label>
-              <div class="input-group border-wajib">
+              <label for="name">BOD (Biological Oxygen Demand) <span class="text-danger">*</span></label>
+              <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bod" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
                 </div>
               </div>
+              <span class="badge-kriteria" id="cek-bod" style="display:none;"></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">COD (Chemical Oxygen Demand)</label>
-              <div class="input-group border-wajib">
+              <label for="name">COD (Chemical Oxygen Demand) <span class="text-danger">*</span></label>
+              <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cod" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
@@ -1108,8 +1129,8 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">TSS (Total Susppended Solid)</label>
-              <div class="input-group border-wajib">
+              <label for="name">TSS (Total Susppended Solid) <span class="text-danger">*</span></label>
+              <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="tss" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
@@ -1117,11 +1138,58 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">DO (Dissolved Oxygen)</label>
-              <div class="input-group border-wajib">
+              <label for="name">DO (Dissolved Oxygen) <span class="text-danger">*</span></label>
+              <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="do_p" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+              <span class="badge-kriteria" id="cek-do_p" style="display:none;"></span>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">FECAL COLIFORM <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fecal_coliform" />
+                <div class="input-group-append">
+                  <span class="input-group-text">MPN/100 mL</span>
+                </div>
+              </div>
+              <span class="badge-kriteria" id="cek-fecal_coliform" style="display:none;"></span>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">NO (Nitrat)<sub class="black">3</sub>-N <span class="text-danger">*</span></label>
+              <div class="input-group danau_parameter_3">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="no3_n" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TOTAL FOSFAT <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="total_phosphat" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row mb-1">
+            <div class="col-md-12 mb-1 text-center">
+              <button type="button" class="btn btn-outline-primary btn-sm btn-toggle-extra-params">
+                <i class="ft-eye"></i> <span class="btn-toggle-extra-params-label">Lihat Semua Parameter</span>
+              </button>
+            </div>
+          </div>
+          <div class="form-row mb-1 ika-extra-params" style="display:none;">
+            <div class="col-md-6 mb-1">
+              <label for="name">Debit Air</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Debit Air" id="debit" />
+                <div class="input-group-append">
+                  <span class="input-group-text">m3/s</span>
                 </div>
               </div>
             </div>
@@ -1134,33 +1202,6 @@
                 </div>
               </div>
             </div> -->
-            <div class="col-md-6 mb-1">
-              <label for="name">NO (Nitrat)<sub class="black">3</sub>-N</label>
-              <div class="input-group danau_parameter_3 border-wajib">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="no3_n" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">TOTAL FOSFAT</label>
-              <div class="input-group border-wajib">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="total_phosphat" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">FECAL COLIFORM</label>
-              <div class="input-group border-wajib">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fecal_coliform" />
-                <div class="input-group-append">
-                  <span class="input-group-text">MPN/100 mL</span>
-                </div>
-              </div>
-            </div>
             <!-- new fields -->
             <div class="col-md-6 mb-1 danau_parameter" style="display:none">
               <label for="name">KECERAHAN (TRANSPARANSI)</label>
