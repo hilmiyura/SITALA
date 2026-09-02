@@ -9,3 +9,5 @@
 /IKU/
 /IKA/
 /IKAL/
+.elasticbeanstalk
+!.elasticbeanstalk/config.yaml
