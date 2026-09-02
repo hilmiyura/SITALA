@@ -342,9 +342,10 @@
 		setBoxStatus($box, type, "<b>" + label + "</b> &middot; " + koordDasar + " &middot; Selisih ~" + jarak + " m" + catatanTertukar);
 	}
 
-	//===== Kriteria 2: PM2.5 metode Manual Pasif diambil dari data satelit (rf_nilai_pelengkap_iklh) =====
-	//uid_metode_pemantauan: 1=Manual Aktif, 2=Manual Pasif, 3=Otomatis (AQMS)
+	//===== Kriteria 2: PM2.5 tanpa data asli diambil dari data satelit (rf_nilai_pelengkap_iklh) =====
+	//uid_metode_pemantauan: 1=Manual Aktif, 2=Manual Pasif, 3=Otomatis (AQMS), 17=Satelit
 	var METODE_MANUAL_PASIF = 2;
+	var METODE_SATELIT = 17;
 
 	function checkPm25Satelit(sfx, uidProvinsi, uidKabkota, tahun) {
 		var $box = $("#pm25-satelit-info" + sfx);
@@ -359,29 +360,35 @@
 				if (r.total) {
 					var nilai = parseFloat(r.data[0].iku_pm25_satelit);
 					$("#pm25" + sfx).val(nilai);
-					setBoxStatus($box, "info", "Metode PM2.5 <b>Manual Pasif</b> tidak dapat mengukur PM2.5 langsung "
-						+ "&mdash; nilai diambil dari data satelit (Target Nilai IKLH) tahun " + tahun + ": <b>" + nilai + " &micro;g/m3</b>.");
+					setBoxStatus($box, "info", "PM2.5 tidak ada data hasil ukur langsung untuk lokasi ini "
+						+ "&mdash; nilai diisi dari data satelit (Target Nilai IKLH) tahun " + tahun + ": <b>" + nilai + " &micro;g/m3</b>.");
 				} else {
-					setBoxStatus($box, "warning", "Metode PM2.5 <b>Manual Pasif</b> dipilih, tapi data satelit PM2.5 untuk provinsi/kab-kota "
+					setBoxStatus($box, "warning", "Metode PM2.5 <b>Satelit</b> terpilih, tapi data satelit PM2.5 untuk provinsi/kab-kota "
 						+ "&amp; tahun " + tahun + " belum ada di menu Target Nilai IKLH. Mohon isi PM2.5 manual.");
 				}
 			}
 		});
 	}
 
-	//Kalau NO2 & SO2 sama-sama Manual Pasif, PM2.5 pasti ikut Manual Pasif juga (satu alat pasif
-	//yang sama dipasang buat sekaligus mengukur ketiganya) — jadi metode PM2.5 dipaksa ikut, ga perlu
-	//user pilih manual. Set metode-nya (kalau belum) lalu trigger "change" supaya toggleDurasiPemantauan/
-	//checkDurasiPasif/checkPm25Satelit yang sudah ada di handler metode PM2.5 ikut jalan otomatis.
-	function syncPm25MetodeFromPasif(sfx) {
+	//Kalau NO2 & SO2 sama-sama Manual Pasif DAN PM2.5 belum ada data hasil ukur sama sekali (bukan
+	//dites lab manapun di dokumen ini — beda dari kasus 1 PDF gabungan 2 lab, mis. lab A cuma NO2+SO2
+	//pasif & lab B PM2.5 aktif terpisah, di situ PM2.5 SUDAH ada data asli dan TIDAK boleh disentuh),
+	//metode PM2.5 diarahkan ke "Satelit" (uid 17, opsi yang memang sudah ada di rf_metode_pemantauan
+	//buat kasus ini — BUKAN "Manual Pasif", karena alat pasif secara fisik tidak bisa mengukur PM2.5)
+	//supaya nilainya keisi dari data satelit lewat handler metode PM2.5 yang sudah ada.
+	function syncPm25MetodeSatelitJikaKosong(sfx) {
 		sfx = sfx || "";
 		var no2Metode = $("#no2_uid_metode_pemantauan" + sfx).val();
 		var so2Metode = $("#so2_uid_metode_pemantauan" + sfx).val();
-		if (no2Metode == METODE_MANUAL_PASIF && so2Metode == METODE_MANUAL_PASIF) {
-			var $pm25Metode = $("#pm25_uid_metode_pemantauan" + sfx);
-			if ($pm25Metode.val() != METODE_MANUAL_PASIF) {
-				$pm25Metode.val(METODE_MANUAL_PASIF).trigger("change");
-			}
+		if (no2Metode != METODE_MANUAL_PASIF || so2Metode != METODE_MANUAL_PASIF) {
+			return;
+		}
+		if ($.trim($("#pm25" + sfx).val()) !== "") {
+			return; //PM2.5 sudah ada nilai (asli dari OCR/lab lain atau ketikan manual) — jangan ditimpa
+		}
+		var $pm25Metode = $("#pm25_uid_metode_pemantauan" + sfx);
+		if ($pm25Metode.val() != METODE_SATELIT) {
+			$pm25Metode.val(METODE_SATELIT).trigger("change");
 		}
 	}
 
@@ -443,8 +450,8 @@
 							$("#uid_lokasi_pemantauan" + sfx).data("provinsi", val.uid_provinsi).data("kabkota", val.uid_kabkota);
 							renderKoordinatCheck(sfx, data.latitude, data.longitude, val.latitude, val.longitude);
 							//baca dari DOM (bukan objek data OCR) supaya ikut sinkron kalau metode PM2.5
-							//sempat dipaksa Manual Pasif oleh syncPm25MetodeFromPasif() (NO2+SO2 pasif)
-							if ($("#pm25_uid_metode_pemantauan" + sfx).val() == METODE_MANUAL_PASIF) {
+							//sempat diarahkan ke Satelit oleh syncPm25MetodeSatelitJikaKosong() (NO2+SO2 pasif, PM2.5 kosong)
+							if ($("#pm25_uid_metode_pemantauan" + sfx).val() == METODE_SATELIT) {
 								checkPm25Satelit(sfx, val.uid_provinsi, val.uid_kabkota, getTahunFromTanggal());
 							} else {
 								$("#pm25-satelit-info" + sfx).hide().html("");
@@ -500,7 +507,7 @@
 				unmatched.push("Metode " + labelMap[param] + " (\"" + p.metode.text + "\")");
 			}
 		});
-		syncPm25MetodeFromPasif(sfx);
+		syncPm25MetodeSatelitJikaKosong(sfx);
 
 		return unmatched;
 	}
@@ -672,8 +679,19 @@
 		if (data.periode_pemantauan) {
 			$("#periode_pemantauan").val(data.periode_pemantauan).trigger("change");
 		}
-		if (data.lab && data.lab.uid) {
-			$("#uid_lab").val([String(data.lab.uid)]).trigger("change");
+		//data.lab = array {uid, text}[] — bisa >1 kalau lokasi ini hasil gabungan beberapa sertifikat
+		//dari lab berbeda (mis. lab A NO2+SO2 pasif, lab B PM2.5 aktif terpisah — lihat mergeSameLocationEntries()
+		//di ocrController.php)
+		if (data.lab && data.lab.length) {
+			var labUids = [];
+			jQuery.each(data.lab, function(i, l) {
+				if (l && l.uid) {
+					labUids.push(String(l.uid));
+				}
+			});
+			if (labUids.length) {
+				$("#uid_lab").val(labUids).trigger("change");
+			}
 		}
 	}
 
@@ -739,7 +757,7 @@
 								$("#longitude" + sfx).val(val.longitude);
 								$("#uid_lokasi_pemantauan" + sfx).data("provinsi", val.uid_provinsi).data("kabkota", val.uid_kabkota);
 								renderKoordinatCheck(sfx, opt.latitude, opt.longitude, val.latitude, val.longitude);
-								if ($("#pm25_uid_metode_pemantauan" + sfx).val() == METODE_MANUAL_PASIF) {
+								if ($("#pm25_uid_metode_pemantauan" + sfx).val() == METODE_SATELIT) {
 									checkPm25Satelit(sfx, val.uid_provinsi, val.uid_kabkota, getTahunFromTanggal());
 								}
 							});
@@ -758,14 +776,14 @@
 					toggleDurasiPemantauan(param, sfx, metodeId);
 					checkDurasiPasif(param, sfx);
 					if (param === "pm25") {
-						if (metodeId == METODE_MANUAL_PASIF) {
+						if (metodeId == METODE_SATELIT) {
 							var $lokasi = $("#uid_lokasi_pemantauan" + sfx);
 							checkPm25Satelit(sfx, $lokasi.data("provinsi"), $lokasi.data("kabkota"), getTahunFromTanggal());
 						} else {
 							$("#pm25-satelit-info" + sfx).hide().html("");
 						}
 					} else {
-						syncPm25MetodeFromPasif(sfx);
+						syncPm25MetodeSatelitJikaKosong(sfx);
 					}
 				});
 			});
@@ -998,20 +1016,20 @@
 	$("#no2_uid_metode_pemantauan").on("change", function() {
 		toggleDurasiPemantauan("no2", "", $(this).val());
 		checkDurasiPasif("no2", "");
-		syncPm25MetodeFromPasif("");
+		syncPm25MetodeSatelitJikaKosong("");
 	});
 
 	$("#so2_uid_metode_pemantauan").on("change", function() {
 		toggleDurasiPemantauan("so2", "", $(this).val());
 		checkDurasiPasif("so2", "");
-		syncPm25MetodeFromPasif("");
+		syncPm25MetodeSatelitJikaKosong("");
 	});
 
 	$("#pm25_uid_metode_pemantauan").on("change", function() {
 		var metodeId = $(this).val();
 		toggleDurasiPemantauan("pm25", "", metodeId);
 		checkDurasiPasif("pm25", "");
-		if (metodeId == METODE_MANUAL_PASIF) {
+		if (metodeId == METODE_SATELIT) {
 			var $lokasi = $("#uid_lokasi_pemantauan");
 			checkPm25Satelit("", $lokasi.data("provinsi"), $lokasi.data("kabkota"), getTahunFromTanggal());
 		} else {
@@ -1065,8 +1083,8 @@
 										$("#longitude").val(val.longitude);
 										$("#uid_lokasi_pemantauan").data("provinsi", val.uid_provinsi).data("kabkota", val.uid_kabkota);
 										//baca dari DOM (bukan req.pm25_uid_metode_pemantauan) supaya ikut sinkron
-										//kalau sempat dipaksa Manual Pasif oleh syncPm25MetodeFromPasif() (NO2+SO2 pasif)
-										if ($("#pm25_uid_metode_pemantauan").val() == METODE_MANUAL_PASIF) {
+										//kalau sempat diarahkan ke Satelit oleh syncPm25MetodeSatelitJikaKosong() (NO2+SO2 pasif, PM2.5 kosong)
+										if ($("#pm25_uid_metode_pemantauan").val() == METODE_SATELIT) {
 											checkPm25Satelit("", val.uid_provinsi, val.uid_kabkota, getTahunFromTanggal());
 										}
 									});
@@ -1115,7 +1133,7 @@
 							$("#pm25_durasi_pemantauan_pasif").val(req.pm25_durasi_pemantauan_pasif);
 						}
 						checkDurasiPasif("pm25", "");
-						syncPm25MetodeFromPasif("");
+						syncPm25MetodeSatelitJikaKosong("");
 						$("#pm25_faktor_koreksi").val(req.pm25_faktor_koreksi);
 						if (req.pm25_faktor_koreksi != 0) {
 							$("#pm25-faktor-koreksi").show();

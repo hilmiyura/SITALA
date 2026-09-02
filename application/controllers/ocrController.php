@@ -28,6 +28,9 @@ class ocrController extends Front
         }
 
         $result = $this -> openrouter -> extractIku($file['tmp_name'], $file['mime']);
+        if ($result['success'] && isset($result['data']['lokasi_list']) && is_array($result['data']['lokasi_list'])) {
+            $result['data']['lokasi_list'] = $this -> mergeSameLocationEntries($result['data']['lokasi_list']);
+        }
         $this -> respondExtract($result, "matchFieldsIku");
     }
 
@@ -180,6 +183,19 @@ class ocrController extends Front
     {
         $out = $this -> matchFieldsBase($shared, $entry, 1);
         $out['peruntukan'] = $this -> matchPeruntukan(isset($entry['peruntukan_text']) ? $entry['peruntukan_text'] : null, 1);
+
+        //Bisa >1 lab kalau entri ini hasil gabungan beberapa sertifikat (lihat mergeSameLocationEntries())
+        //— "lab" untuk IKU jadi ARRAY (beda dari matchFieldsBase() yang object tunggal, dipakai IKAL apa
+        //adanya), supaya bisa pre-select multi-select #uid_lab di FE dengan lebih dari satu lab sekaligus.
+        $labTexts = array();
+        $primaryLabText = !empty($entry['laboratorium_text']) ? $entry['laboratorium_text'] : $shared['laboratorium_text'];
+        if (!empty($primaryLabText)) {
+            $labTexts[] = $primaryLabText;
+        }
+        if (!empty($entry['_lab_texts']) && is_array($entry['_lab_texts'])) {
+            $labTexts = array_merge($labTexts, $entry['_lab_texts']);
+        }
+        $out['lab'] = $this -> matchLabMulti($labTexts);
 
         //Parameter dikelompokkan di bawah key "parameters" supaya sebentuk dengan respons
         //IKA dan IKAL. Perhatikan isinya TIDAK sama: di sini tiap parameter berupa objek
@@ -554,6 +570,125 @@ class ocrController extends Front
         return $r * $c;
     }
 
+    //Radius (meter) untuk mengelompokkan entri OCR MENTAH (lokasi_list) yang koordinatnya
+    //saling berdekatan — dipakai mergeSameLocationEntries() untuk kasus 1 PDF berisi gabungan
+    //sertifikat dari beberapa lab (tiap lab measure parameter berbeda) untuk 1 titik fisik yang
+    //sama, tapi ditulis model sebagai entri terpisah (lihat prompt iku.md). BEDA dari
+    //KOORDINAT_MATCH_RADIUS_M (2 km) yang buat cari lokasi TERDAFTAR di database — di sini kita
+    //bandingkan 2 bacaan OCR terhadap satu sama lain (harusnya persis situs yang sama), jadi
+    //radiusnya jauh lebih ketat.
+    const MERGE_KOORDINAT_RADIUS_M = 500;
+
+    //Kelompokkan entri lokasi_list mentah yang (a) koordinatnya berdekatan (≤ MERGE_KOORDINAT_RADIUS_M)
+    //DAN (b) cakupan parameternya saling melengkapi (tidak ada 2 entri di klaster yang sama-sama
+    //punya nilai untuk parameter yang sama — itu pertanda 2 lokasi fisik berbeda yang kebetulan
+    //berdekatan, BUKAN 1 lokasi 2 lab, jadi sengaja TIDAK digabung demi keamanan data). Union-find
+    //sederhana karena satu lokasi bisa saja muncul di >2 sertifikat.
+    private function mergeSameLocationEntries($lokasiList)
+    {
+        $n = count($lokasiList);
+        $parent = range(0, max(0, $n - 1));
+
+        $find = function ($x) use (&$parent, &$find) {
+            while ($parent[$x] !== $x) {
+                $parent[$x] = $parent[$parent[$x]];
+                $x = $parent[$x];
+            }
+            return $x;
+        };
+
+        for ($i = 0; $i < $n; $i++) {
+            if (!is_numeric($lokasiList[$i]['latitude']) || !is_numeric($lokasiList[$i]['longitude'])) {
+                continue;
+            }
+            for ($j = $i + 1; $j < $n; $j++) {
+                if (!is_numeric($lokasiList[$j]['latitude']) || !is_numeric($lokasiList[$j]['longitude'])) {
+                    continue;
+                }
+                $dist = $this -> haversineMeters(
+                    $lokasiList[$i]['latitude'], $lokasiList[$i]['longitude'],
+                    $lokasiList[$j]['latitude'], $lokasiList[$j]['longitude']
+                );
+                if ($dist > self::MERGE_KOORDINAT_RADIUS_M) {
+                    continue;
+                }
+                if (!$this -> entriesComplementary($lokasiList[$i], $lokasiList[$j])) {
+                    continue;
+                }
+                $ri = $find($i);
+                $rj = $find($j);
+                if ($ri !== $rj) {
+                    $parent[$rj] = $ri;
+                }
+            }
+        }
+
+        $groups = array();
+        for ($i = 0; $i < $n; $i++) {
+            $groups[$find($i)][] = $i;
+        }
+
+        $merged = array();
+        foreach ($groups as $indexes) {
+            if (count($indexes) === 1) {
+                $merged[] = $lokasiList[$indexes[0]];
+                continue;
+            }
+            $entries = array();
+            foreach ($indexes as $idx) {
+                $entries[] = $lokasiList[$idx];
+            }
+            $merged[] = $this -> mergeEntryGroup($entries);
+        }
+
+        return $merged;
+    }
+
+    private function entriesComplementary($a, $b)
+    {
+        foreach (array('no2', 'so2', 'pm25') as $param) {
+            $av = isset($a[$param]['nilai']) ? $a[$param]['nilai'] : null;
+            $bv = isset($b[$param]['nilai']) ? $b[$param]['nilai'] : null;
+            if ($av !== null && $bv !== null) {
+                return false; //tumpang tindih parameter yang sama -> kemungkinan 2 lokasi berbeda
+            }
+        }
+        return true;
+    }
+
+    //Gabungkan >1 entri lokasi_list jadi satu: per parameter (no2/so2/pm25) ambil dari entri
+    //manapun yang punya nilai (bukan null — sudah dipastikan tidak tumpang tindih oleh
+    //entriesComplementary()), kumpulkan semua laboratorium_text unik ke "_lab_texts" (field
+    //internal, dipakai matchFieldsIku() — bukan bagian skema prompt), dan pertahankan
+    //lokasi_text/peruntukan_text/koordinat dari entri pertama yang punya isi.
+    private function mergeEntryGroup($entries)
+    {
+        $out = $entries[0];
+        $labTexts = array();
+
+        foreach ($entries as $e) {
+            if (!empty($e['laboratorium_text'])) {
+                $labTexts[] = $e['laboratorium_text'];
+            }
+            foreach (array('no2', 'so2', 'pm25') as $param) {
+                $v = isset($e[$param]['nilai']) ? $e[$param]['nilai'] : null;
+                $curr = isset($out[$param]['nilai']) ? $out[$param]['nilai'] : null;
+                if ($curr === null && $v !== null) {
+                    $out[$param] = $e[$param];
+                }
+            }
+            if (empty($out['peruntukan_text']) && !empty($e['peruntukan_text'])) {
+                $out['peruntukan_text'] = $e['peruntukan_text'];
+            }
+            if (empty($out['lokasi_text']) && !empty($e['lokasi_text'])) {
+                $out['lokasi_text'] = $e['lokasi_text'];
+            }
+        }
+
+        $out['_lab_texts'] = array_values(array_unique($labTexts));
+        return $out;
+    }
+
     //$discriminator is rf_peruntukan.peruntukan (1=IKU, 2=IKAL — IKA has no Peruntukan field)
     private function matchPeruntukan($text, $discriminator)
     {
@@ -584,6 +719,37 @@ class ocrController extends Front
             $result['uid'] = $rows[0]['uid'];
         }
         return $result;
+    }
+
+    //$texts: array nama lab (bisa >1 kalau 1 entri lokasi hasil gabungan beberapa sertifikat/lab
+    //berbeda — lihat mergeSameLocationEntries()). Selalu kembalikan array hasil match (bisa kosong),
+    //tiap elemen {uid, text} lewat matchLab() apa adanya — uid null kalau teks itu tidak ketemu di
+    //rf_lab (tetap disertakan, biar konsisten dengan pola unmatched di field lain).
+    private function matchLabMulti($texts)
+    {
+        $results = array();
+        $seenUid = array();
+        $seenText = array();
+        foreach ($texts as $text) {
+            if (!$text) {
+                continue;
+            }
+            $norm = $this -> normalize($text);
+            if (isset($seenText[$norm])) {
+                continue;
+            }
+            $seenText[$norm] = true;
+
+            $result = $this -> matchLab($text);
+            if ($result['uid'] !== null) {
+                if (isset($seenUid[$result['uid']])) {
+                    continue;
+                }
+                $seenUid[$result['uid']] = true;
+            }
+            $results[] = $result;
+        }
+        return $results;
     }
 
     private function matchMetode($text, $matrikSampelText = null)
