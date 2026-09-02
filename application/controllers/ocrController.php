@@ -768,8 +768,10 @@ class ocrController extends Front
             array('otomatis', 'aqms', 'automatic'),
         );
 
-        //Method codes like "SNI 7119.xx:2023" don't state sampler type themselves;
-        //fall back to the document-level "Matrik Sampel"/"Sample Matrix" text when present.
+        //Method codes like "SNI 7119.xx" don't literally say "pasif/aktif", jadi urutan penentuan:
+        //(1) kata kunci eksplisit di teks metode itu sendiri; kalau tidak ada,
+        //(2) kode SNI yang dikenal (per-parameter, deterministik — lihat sniMethodKeyword());
+        //(3) fallback ke "Matrik Sampel"/"Sample Matrix" level dokumen.
         $hasKeyword = false;
         foreach ($keywordGroups as $keywords) {
             foreach ($keywords as $kw) {
@@ -779,7 +781,15 @@ class ocrController extends Front
                 }
             }
         }
-        $matchNeedle = (!$hasKeyword && $matrikSampelText) ? strtolower($matrikSampelText) : $needle;
+        if ($hasKeyword) {
+            $matchNeedle = $needle;
+        } elseif ($sniKeyword = $this -> sniMethodKeyword($needle)) {
+            $matchNeedle = $sniKeyword;
+        } elseif ($matrikSampelText) {
+            $matchNeedle = strtolower($matrikSampelText);
+        } else {
+            $matchNeedle = $needle;
+        }
 
         $this -> tables -> set("rf_metode_pemantauan", "uid_metode_pemantauan");
         $rows = $this -> tables -> fetch("deleted = 0")['data'];
@@ -807,6 +817,35 @@ class ocrController extends Front
             }
         }
         return $result;
+    }
+
+    //Kode SNI keluarga 7119 menentukan jenis sampler secara pasti (standar KLHK), walau teksnya
+    //tidak menyebut "pasif/aktif". Pemetaan per nomor bagian:
+    //  NO2 -> pasif: 7119-17:2023 | aktif (pompa): 7119.2:2017
+    //  SO2 -> pasif: 7119-16:2023 | aktif (pompa): 7119.7:2017
+    //  PM2.5 (debu halus) -> HANYA aktif: 7119.14:2016 (tidak ada metode pasif — partikel wajib
+    //  ditarik pompa)
+    //Pemisah titik/strip diperlakukan sama ("7119.17" == "7119-17"). Kembalikan 'pasif'/'aktif'
+    //sebagai kata kunci yang lalu dicocokkan ke rf_metode_pemantauan oleh matchMetode(), atau null
+    //kalau bukan kode 7119 yang dikenal.
+    private function sniMethodKeyword($needle)
+    {
+        if (strpos($needle, '7119') === false) {
+            return null;
+        }
+        if (!preg_match('/7119[\s._-]*(\d{1,2})/', $needle, $m)) {
+            return null;
+        }
+        $part = (int) $m[1];
+        $pasif = array(16, 17);
+        $aktif = array(2, 7, 14);
+        if (in_array($part, $pasif, true)) {
+            return 'pasif';
+        }
+        if (in_array($part, $aktif, true)) {
+            return 'aktif';
+        }
+        return null;
     }
 
     private function normalize($text)
