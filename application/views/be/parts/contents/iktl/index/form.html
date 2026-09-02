@@ -161,16 +161,96 @@
   }
 
   /* ---- map ---- */
-  #tambahData #ikl-map {
+  #tambahData .ikl-map-wrap {
+    position: relative;
     flex: 1;
     min-height: 280px;
+  }
+  #tambahData #ikl-map {
+    position: absolute;
+    inset: 0;
     border-radius: 10px;
     border: 1px solid #dde3ec;
     z-index: 0;
   }
 
-  /* ---- upload section ---- */
-  #tambahData .ikl-upload-section { margin-top: .75rem; flex: 0 0 auto; }
+  /* ---- floating map tools (layers / upload) ---- */
+  #tambahData .ikl-map-tools {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  #tambahData .ikl-map-tool-btn {
+    width: 34px;
+    height: 34px;
+    background: #fff;
+    border: 2px solid rgba(0, 0, 0, .2);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
+    color: #495057;
+    font-size: 15px;
+    padding: 0;
+  }
+  #tambahData .ikl-map-tool-btn:hover { background: #f4f5f7; }
+  #tambahData .ikl-map-tool-btn.active {
+    background: #eefaf1;
+    border-color: #28a745;
+    color: #1e7e34;
+  }
+  #tambahData .ikl-map-panel {
+    display: none;
+    position: absolute;
+    left: 52px;
+    bottom: 10px;
+    z-index: 500;
+    width: 235px;
+    max-height: calc(100% - 20px);
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #dde3ec;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .2);
+    padding: .75rem .85rem;
+  }
+  #tambahData .ikl-map-panel.ikl-map-panel-upload { width: 280px; }
+  #tambahData .ikl-map-panel-head {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: #6b7280;
+    margin-bottom: .5rem;
+  }
+  #tambahData .ikl-map-panel-divider { height: 1px; background: #eef1f5; margin: .45rem 0; }
+  #tambahData .ikl-legend-row {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .78rem;
+    color: #344054;
+    padding: .25rem 0;
+  }
+  #tambahData .ikl-legend-row input { margin: 0; }
+  #tambahData .ikl-legend-toggle { cursor: pointer; font-weight: 600; }
+  #tambahData .ikl-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex: 0 0 auto;
+    display: inline-block;
+  }
+  #tambahData .ikl-legend-koef { margin-left: auto; color: #8a94a6; font-size: .7rem; }
+
+  /* ---- results section (luas + rincian intersect) ---- */
+  #tambahData .ikl-results-section { margin-top: .75rem; flex: 0 0 auto; }
   #tambahData .ikl-dropzone {
     position: relative;
     border: 2px dashed #c9d2de;
@@ -283,36 +363,7 @@
   }
   #tambahData .ikl-pusat-fields.collapsed { display: none; }
 
-  /* ---- tutupan lahan control & breakdown (mockup RTH intersect) ---- */
-  #tambahData .ikl-tutupan-control {
-    margin-top: .5rem;
-    padding: .5rem .65rem;
-    background: #fff9ec;
-    border: 1px solid #f3dfa8;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: .4rem .75rem;
-    flex: 0 0 auto;
-  }
-  #tambahData .ikl-tutupan-toggle {
-    display: flex;
-    align-items: center;
-    gap: .4rem;
-    font-size: .76rem;
-    font-weight: 600;
-    color: #7a5a10;
-    margin: 0;
-    cursor: pointer;
-  }
-  #tambahData .ikl-tutupan-toggle input { margin: 0; }
-  #tambahData .ikl-tutupan-badge {
-    font-size: .68rem;
-    color: #a07a1f;
-    font-style: italic;
-    margin-left: auto;
-  }
+  /* ---- breakdown intersect RTH ---- */
   #tambahData .ikl-breakdown-panel {
     margin-top: .6rem;
     padding: .6rem .7rem;
@@ -327,12 +378,6 @@
     text-transform: uppercase;
     letter-spacing: .02em;
     margin-bottom: .4rem;
-  }
-  #tambahData .ikl-breakdown-subhead {
-    font-weight: 500;
-    text-transform: none;
-    letter-spacing: normal;
-    color: #8a94a6;
   }
   #tambahData .ikl-breakdown-table { font-size: .74rem; margin-bottom: 0; white-space: nowrap; }
   #tambahData .ikl-breakdown-table th,
@@ -349,32 +394,11 @@
   }
   #tambahData .ikl-breakdown-summary b { color: #0f7c8c; font-size: .9rem; }
 
-  /* ---- map legend ---- */
-  #tambahData .ikl-map-legend {
-    display: flex;
-    gap: 1rem;
-    margin-top: .5rem;
-    font-size: .72rem;
-    color: #6b7280;
-    flex: 0 0 auto;
-  }
-  #tambahData .ikl-legend-item {
-    display: flex;
-    align-items: center;
-    gap: .3rem;
-  }
-  #tambahData .ikl-legend-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 3px;
-    display: inline-block;
-  }
-
   @media (max-width: 991px) {
     #tambahData .ikl-modal-body { height: auto; }
     #tambahData .ikl-map-pane,
     #tambahData .ikl-form-pane { height: auto; overflow-y: visible; }
-    #tambahData #ikl-map { min-height: 350px; }
+    #tambahData .ikl-map-wrap { min-height: 350px; }
   }
 </style>
 <!-- Modal: Tambah Data IKTL -->
@@ -409,45 +433,80 @@
                 </button>
               </div>
 
-              <div id="ikl-map"></div>
+              <div class="ikl-map-wrap">
+                <div id="ikl-map"></div>
 
-              <div class="ikl-map-legend">
-                <span class="ikl-legend-item">
-                  <span class="ikl-legend-dot" style="background:#28a745;"></span> RTH
-                </span>
-                <span class="ikl-legend-item">
-                  <span class="ikl-legend-dot" style="background:#fd7e14;"></span> RHL
-                </span>
-                <span style="margin-left:auto;font-style:italic;">Gunakan toolbar di kanan atas peta untuk menggambar</span>
+                <div class="ikl-map-tools">
+                  <button type="button" class="ikl-map-tool-btn" id="btn-layers" title="Layer &amp; Legenda">
+                    <i class="ft-layers"></i>
+                  </button>
+                  <button type="button" class="ikl-map-tool-btn" id="btn-upload" title="Upload File Peta">
+                    <i class="ft-upload-cloud"></i>
+                  </button>
+                </div>
+
+                <div class="ikl-map-panel" id="panel-layers">
+                  <div class="ikl-map-panel-head">Layer &amp; Legenda</div>
+                  <div class="ikl-legend-row">
+                    <span class="ikl-legend-dot" style="background:#28a745;"></span>
+                    <span>RTH (poligon digambar)</span>
+                  </div>
+                  <div class="ikl-legend-row">
+                    <span class="ikl-legend-dot" style="background:#fd7e14;"></span>
+                    <span>RHL (poligon digambar)</span>
+                  </div>
+                  <div class="ikl-map-panel-divider"></div>
+                  <label class="ikl-legend-row ikl-legend-toggle">
+                    <input type="checkbox" id="tutupan-layer-toggle" checked />
+                    <span>Tutupan Lahan</span>
+                  </label>
+                  <div id="tutupan-legend-list"></div>
+                </div>
+
+                <div class="ikl-map-panel ikl-map-panel-upload" id="panel-upload">
+                  <div class="ikl-map-panel-head">Upload File Peta</div>
+                  <div id="dropzone-panel-rth" class="ikl-dropzone-panel">
+                    <div class="ikl-dropzone" id="dropzone-rth">
+                      <input type="file" name="lampiran_kml" id="lampiran_kml" accept=".kml,.kmz,.geojson,.json,.zip,.rar,.shp" />
+                      <div id="dropzone-rth-placeholder">
+                        <i class="ft-upload-cloud"></i>
+                        <p class="ikl-dropzone-title">Upload atau seret file peta (data RTH)</p>
+                        <p class="ikl-dropzone-sub">KML, KMZ, GeoJSON &middot; maks 10 Mb</p>
+                      </div>
+                      <div class="ikl-dropzone-selected" id="dropzone-rth-selected" style="display:none;">
+                        <i class="ft-file-text"></i>
+                        <span class="ikl-dropzone-filename" id="dropzone-rth-filename"></span>
+                        <span class="ikl-dropzone-change">Ganti file</span>
+                      </div>
+                    </div>
+                    <div class="ikl-file-info">
+                      <span class="help-block lampiran-kml-download" style="display:none"></span>
+                    </div>
+                  </div>
+                  <div id="dropzone-panel-rhl" class="ikl-dropzone-panel" style="display:none;">
+                    <div class="ikl-dropzone" id="dropzone-rhl">
+                      <input type="file" name="lampiran_kml_rhl" id="lampiran_kml_rhl" accept=".kml,.kmz,.geojson,.json,.zip,.rar,.shp" />
+                      <div id="dropzone-rhl-placeholder">
+                        <i class="ft-upload-cloud"></i>
+                        <p class="ikl-dropzone-title">Upload atau seret file peta (data RHL)</p>
+                        <p class="ikl-dropzone-sub">KML, KMZ, GeoJSON &middot; maks 10 Mb</p>
+                      </div>
+                      <div class="ikl-dropzone-selected" id="dropzone-rhl-selected" style="display:none;">
+                        <i class="ft-file-text"></i>
+                        <span class="ikl-dropzone-filename" id="dropzone-rhl-filename"></span>
+                        <span class="ikl-dropzone-change">Ganti file</span>
+                      </div>
+                    </div>
+                    <div class="ikl-file-info">
+                      <span class="help-block lampiran-kml-rhl-download" style="display:none"></span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div id="tutupan-layer-control" class="ikl-tutupan-control">
-                <label class="ikl-tutupan-toggle">
-                  <input type="checkbox" id="tutupan-layer-toggle" checked />
-                  Tampilkan layer tutupan lahan (dataset demo: Kota Cimahi)
-                </label>
-                <span class="ikl-tutupan-badge">Mockup — intersect dihitung di browser, nanti dipindah ke server</span>
-              </div>
-
-              <div class="ikl-upload-section">
-                <!-- RTH upload -->
+              <div class="ikl-results-section">
+                <!-- RTH results -->
                 <div id="ikl-upload-rth" class="ikl-upload-panel">
-                  <div class="ikl-dropzone" id="dropzone-rth">
-                    <input type="file" name="lampiran_kml" id="lampiran_kml" accept=".kml,.kmz,.geojson,.json,.zip,.rar,.shp" />
-                    <div id="dropzone-rth-placeholder">
-                      <i class="ft-upload-cloud"></i>
-                      <p class="ikl-dropzone-title">Upload atau seret file peta (data RTH)</p>
-                      <p class="ikl-dropzone-sub">KML, KMZ, GeoJSON &middot; maks 10 Mb</p>
-                    </div>
-                    <div class="ikl-dropzone-selected" id="dropzone-rth-selected" style="display:none;">
-                      <i class="ft-file-text"></i>
-                      <span class="ikl-dropzone-filename" id="dropzone-rth-filename"></span>
-                      <span class="ikl-dropzone-change">Ganti file</span>
-                    </div>
-                  </div>
-                  <div class="ikl-file-info">
-                    <span class="help-block lampiran-kml-download" style="display:none"></span>
-                  </div>
                   <div class="ikl-area-info">
                     <span>Luas RTH terhitung (setelah aturan koef &lt; 0.6):</span>
                     <span class="ikl-area-value" id="rth-area-display">0</span>
@@ -455,14 +514,14 @@
                     <span class="badge badge-success" id="rth-shapes-count" style="display:none">0 area</span>
                   </div>
                   <div class="ikl-breakdown-panel" id="rth-breakdown-panel" style="display:none;">
-                    <div class="ikl-breakdown-head">Rincian intersect per tutupan lahan <span class="ikl-breakdown-subhead">&mdash; hanya jenis yang tersentuh gambar</span></div>
+                    <div class="ikl-breakdown-head">Rincian intersect per tutupan lahan</div>
                     <div class="table-responsive">
                       <table class="table table-sm ikl-breakdown-table">
                         <thead>
                           <tr>
                             <th>Penutupan Lahan</th>
                             <th class="text-right">Koef</th>
-                            <th class="text-right" title="Luas utuh bidang tutupan lahan yang tersentuh gambar (bukan hasil potongan)">Luas Bidang (Ha)</th>
+                            <th class="text-right" title="Total luas kategori ini se-kab/kota (baseline, independen dari gambar)">Luas Total (Ha)</th>
                             <th class="text-right" title="Luas hasil potong (clip) poligon gambar dengan bidang tsb -- yang diklaim sebagai RTH">Luas RTH (Ha)</th>
                             <th class="text-right">Terhitung RTH (Ha)</th>
                             <th class="text-right">Terhitung PL (Ha)</th>
@@ -485,30 +544,13 @@
                       </table>
                     </div>
                     <div class="ikl-breakdown-summary">
-                      <span>TL area ini = <b id="rth-breakdown-tl">0</b></span>
-                      <span>IKTL area ini = <b id="rth-breakdown-iktl">0</b></span>
-                      <span class="ikl-breakdown-subhead">(indeks area yang digambar saja, bukan IKTL kab/kota)</span>
+                      <span>TL kab/kota = <b id="rth-breakdown-tl">0</b></span>
+                      <span>IKTL kab/kota = <b id="rth-breakdown-iktl">0</b></span>
                     </div>
                   </div>
                 </div>
-                <!-- RHL upload -->
+                <!-- RHL results -->
                 <div id="ikl-upload-rhl" class="ikl-upload-panel" style="display:none;">
-                  <div class="ikl-dropzone" id="dropzone-rhl">
-                    <input type="file" name="lampiran_kml_rhl" id="lampiran_kml_rhl" accept=".kml,.kmz,.geojson,.json,.zip,.rar,.shp" />
-                    <div id="dropzone-rhl-placeholder">
-                      <i class="ft-upload-cloud"></i>
-                      <p class="ikl-dropzone-title">Upload atau seret file peta (data RHL)</p>
-                      <p class="ikl-dropzone-sub">KML, KMZ, GeoJSON &middot; maks 10 Mb</p>
-                    </div>
-                    <div class="ikl-dropzone-selected" id="dropzone-rhl-selected" style="display:none;">
-                      <i class="ft-file-text"></i>
-                      <span class="ikl-dropzone-filename" id="dropzone-rhl-filename"></span>
-                      <span class="ikl-dropzone-change">Ganti file</span>
-                    </div>
-                  </div>
-                  <div class="ikl-file-info">
-                    <span class="help-block lampiran-kml-rhl-download" style="display:none"></span>
-                  </div>
                   <div class="ikl-area-info">
                     <span>Luas dari peta:</span>
                     <span class="ikl-area-value" id="rhl-area-display">0</span>
