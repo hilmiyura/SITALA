@@ -283,6 +283,72 @@
   }
   #tambahData .ikl-pusat-fields.collapsed { display: none; }
 
+  /* ---- tutupan lahan control & breakdown (mockup RTH intersect) ---- */
+  #tambahData .ikl-tutupan-control {
+    margin-top: .5rem;
+    padding: .5rem .65rem;
+    background: #fff9ec;
+    border: 1px solid #f3dfa8;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .4rem .75rem;
+    flex: 0 0 auto;
+  }
+  #tambahData .ikl-tutupan-toggle {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .76rem;
+    font-weight: 600;
+    color: #7a5a10;
+    margin: 0;
+    cursor: pointer;
+  }
+  #tambahData .ikl-tutupan-toggle input { margin: 0; }
+  #tambahData .ikl-tutupan-badge {
+    font-size: .68rem;
+    color: #a07a1f;
+    font-style: italic;
+    margin-left: auto;
+  }
+  #tambahData .ikl-breakdown-panel {
+    margin-top: .6rem;
+    padding: .6rem .7rem;
+    background: #fff;
+    border: 1px solid #dde3ec;
+    border-radius: 8px;
+  }
+  #tambahData .ikl-breakdown-head {
+    font-size: .74rem;
+    font-weight: 700;
+    color: #263042;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    margin-bottom: .4rem;
+  }
+  #tambahData .ikl-breakdown-subhead {
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: normal;
+    color: #8a94a6;
+  }
+  #tambahData .ikl-breakdown-table { font-size: .74rem; margin-bottom: 0; white-space: nowrap; }
+  #tambahData .ikl-breakdown-table th,
+  #tambahData .ikl-breakdown-table td { padding: .3rem .4rem; vertical-align: middle; }
+  #tambahData .ikl-breakdown-table .badge { font-size: .65rem; }
+  #tambahData .ikl-breakdown-summary {
+    display: flex;
+    gap: 1.25rem;
+    margin-top: .55rem;
+    padding-top: .55rem;
+    border-top: 1px solid #eef1f5;
+    font-size: .8rem;
+    color: #4b5563;
+  }
+  #tambahData .ikl-breakdown-summary b { color: #0f7c8c; font-size: .9rem; }
+
   /* ---- map legend ---- */
   #tambahData .ikl-map-legend {
     display: flex;
@@ -355,6 +421,14 @@
                 <span style="margin-left:auto;font-style:italic;">Gunakan toolbar di kanan atas peta untuk menggambar</span>
               </div>
 
+              <div id="tutupan-layer-control" class="ikl-tutupan-control">
+                <label class="ikl-tutupan-toggle">
+                  <input type="checkbox" id="tutupan-layer-toggle" checked />
+                  Tampilkan layer tutupan lahan (dataset demo: Kota Cimahi)
+                </label>
+                <span class="ikl-tutupan-badge">Mockup — intersect dihitung di browser, nanti dipindah ke server</span>
+              </div>
+
               <div class="ikl-upload-section">
                 <!-- RTH upload -->
                 <div id="ikl-upload-rth" class="ikl-upload-panel">
@@ -375,10 +449,46 @@
                     <span class="help-block lampiran-kml-download" style="display:none"></span>
                   </div>
                   <div class="ikl-area-info">
-                    <span>Luas dari peta:</span>
+                    <span>Luas RTH terhitung (setelah aturan koef &lt; 0.6):</span>
                     <span class="ikl-area-value" id="rth-area-display">0</span>
                     <span>HA</span>
                     <span class="badge badge-success" id="rth-shapes-count" style="display:none">0 area</span>
+                  </div>
+                  <div class="ikl-breakdown-panel" id="rth-breakdown-panel" style="display:none;">
+                    <div class="ikl-breakdown-head">Rincian intersect per tutupan lahan <span class="ikl-breakdown-subhead">&mdash; hanya jenis yang tersentuh gambar</span></div>
+                    <div class="table-responsive">
+                      <table class="table table-sm ikl-breakdown-table">
+                        <thead>
+                          <tr>
+                            <th>Penutupan Lahan</th>
+                            <th class="text-right">Koef</th>
+                            <th class="text-right" title="Luas utuh bidang tutupan lahan yang tersentuh gambar (bukan hasil potongan)">Luas Bidang (Ha)</th>
+                            <th class="text-right" title="Luas hasil potong (clip) poligon gambar dengan bidang tsb -- yang diklaim sebagai RTH">Luas RTH (Ha)</th>
+                            <th class="text-right">Terhitung RTH (Ha)</th>
+                            <th class="text-right">Terhitung PL (Ha)</th>
+                            <th class="text-right">Koef&times;RTH</th>
+                            <th class="text-right">Koef&times;PL</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody id="rth-breakdown-body"></tbody>
+                        <tfoot>
+                          <tr>
+                            <td colspan="2" class="text-right"><b>Total</b></td>
+                            <td class="text-right"><b id="rth-breakdown-totald">0</b></td>
+                            <td colspan="3"></td>
+                            <td class="text-right"><b id="rth-breakdown-totalh">0</b></td>
+                            <td class="text-right"><b id="rth-breakdown-totali">0</b></td>
+                            <td></td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                    <div class="ikl-breakdown-summary">
+                      <span>TL area ini = <b id="rth-breakdown-tl">0</b></span>
+                      <span>IKTL area ini = <b id="rth-breakdown-iktl">0</b></span>
+                      <span class="ikl-breakdown-subhead">(indeks area yang digambar saja, bukan IKTL kab/kota)</span>
+                    </div>
                   </div>
                 </div>
                 <!-- RHL upload -->

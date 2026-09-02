@@ -160,14 +160,197 @@
 	var iklActiveLayer = 'rth';
 	var iklDrawControl = null;
 
+	// ---- Klaim RTH via intersect tutupan lahan (mockup, dataset demo: Kota Cimahi) ----
+	// Koefisien & pemetaan nama REMARK (RBI25K) -> kategori tutupan lahan mengikuti
+	// "Perhitungan IKTL.xlsx". Hanya kategori berkoefisien < 0.6 yang klaim RTH-nya diakui.
+	var IKL_RTH_KOEF = 0.6;
+	var IKL_RTH_ELIGIBLE_MAX = 0.6;
+	var IKL_KATEGORI = [
+		{ key:"hutan_tanaman",    nama:"Hutan tanaman",                koef:0.80, color:"#2f5d34" },
+		{ key:"permukiman",       nama:"Permukiman / Lahan terbangun", koef:0.10, color:"#b5495b" },
+		{ key:"sawah",            nama:"Sawah",                        koef:0.35, color:"#e3c567" },
+		{ key:"pertanian_kering", nama:"Pertanian lahan kering",       koef:0.35, color:"#d1a054" },
+		{ key:"perkebunan",       nama:"Perkebunan / Kebun",           koef:0.45, color:"#7a9d54" },
+		{ key:"belukar",          nama:"Belukar",                      koef:0.40, color:"#a8bf7e" },
+		{ key:"lahan_terbuka",    nama:"Lahan terbuka",                koef:0.10, color:"#c9bfa5" },
+		{ key:"tubuh_air",        nama:"Tubuh air",                    koef:0.10, color:"#5b9bd5" }
+	];
+	var IKL_KATEGORI_BY_KEY = {};
+	IKL_KATEGORI.forEach(function(k) { IKL_KATEGORI_BY_KEY[k.key] = k; });
+	// Catatan: "Semak Belukar" sengaja dipetakan ke "Hutan tanaman" (koef 0.80, bukan
+	// "Belukar" koef 0.40) -- manipulasi khusus dataset demo supaya ada contoh nyata
+	// kategori berkoefisien >= 0.6 di peta, untuk membuktikan klaim RTH di dalamnya DITOLAK.
+	var IKL_REMARK_TO_KATEGORI = {
+		"Permukiman dan Tempat Kegiatan": "permukiman",
+		"Gedung/Bangunan":                "permukiman",
+		"Properti Tumpang Susun":         "permukiman",
+		"Sawah":                          "sawah",
+		"Sawah Tadah Hujan":              "sawah",
+		"Tegalan/Ladang":                 "pertanian_kering",
+		"Perkebunan/Kebun":               "perkebunan",
+		"Semak Belukar":                  "hutan_tanaman",
+		"Vegetasi Non Budidaya Lainnya":  "belukar",
+		"Tanah Kosong/Gundul":            "lahan_terbuka",
+		"Pasir/Bukit Pasir Darat":        "lahan_terbuka",
+		"Danau/Situ":                     "tubuh_air"
+	};
+
+	var tutupanLahanLayer = null;      // layer tampilan (per kategori, fitur asli)
+	var tutupanLahanFeatures = null;   // dipakai untuk intersect (sudah di-flatten jadi Polygon)
+	var tutupanLahanLoading = false;
+
+	function loadTutupanLahanLayer() {
+		if (tutupanLahanFeatures || tutupanLahanLoading) return;
+		tutupanLahanLoading = true;
+		$.getJSON(baseUrl + "assets/assets/data/iktl/tutupan-lahan-cmi.geojson", function(raw) {
+			tutupanLahanFeatures = [];
+			tutupanLahanLayer = new L.FeatureGroup();
+			raw.features.forEach(function(f) {
+				var kategoriKey = IKL_REMARK_TO_KATEGORI[f.properties.REMARK] || null;
+				if (!kategoriKey) return;
+				var kat = IKL_KATEGORI_BY_KEY[kategoriKey];
+				// turf@5 intersect() selalu null kalau salah satu input MultiPolygon,
+				// walau bbox-nya overlap -- jadi di-flatten dulu jadi Polygon per bidang.
+				var flat = turf.flatten(f);
+				flat.features.forEach(function(pf) {
+					tutupanLahanFeatures.push({ feature: pf, kategoriKey: kategoriKey, bbox: turf.bbox(pf), areaHa: turf.area(pf) / 10000 });
+				});
+				L.geoJSON(f, { style: { color: kat.color, weight: 1, fillColor: kat.color, fillOpacity: 0.35 } })
+					.bindPopup("<b>" + f.properties.REMARK + "</b><br>Kategori: " + kat.nama + "<br>Koefisien: " + kat.koef)
+					.addTo(tutupanLahanLayer);
+			});
+			tutupanLahanLoading = false;
+			if (iklActiveLayer === 'rth' && $('#tutupan-layer-toggle').is(':checked') && iklMap) {
+				tutupanLahanLayer.addTo(iklMap);
+			}
+			updateIklAreaCalc();
+		}).fail(function() {
+			tutupanLahanLoading = false;
+		});
+	}
+
+	function iklBboxOverlap(a, b) {
+		return !(a[2] < b[0] || a[0] > b[2] || a[3] < b[1] || a[1] > b[3]);
+	}
+
+	function iklUnionAll(feats) {
+		return feats.reduce(function(acc, f) { return acc ? turf.union(acc, f) : f; }, null);
+	}
+
+	// Intersect poligon RTH yang digambar dengan layer tutupan lahan, lalu terapkan
+	// perhitungan mengikuti "Perhitungan IKTL.xlsx". Hanya kategori yang benar-benar
+	// tersentuh gambar yang muncul sebagai baris, tapi D BUKAN hasil clip:
+	//   D = Luas UTUH bidang tutupan lahan yang tersentuh gambar (parcel apa adanya,
+	//       bukan dipotong oleh batas gambar -- persis seperti kolom "Luas (Ha)" di Excel)
+	//   E = Luas RTH diklaim = luas hasil intersect (clip) poligon gambar dgn bidang itu (E <= D)
+	//   F = Luas terhitung RTH -- E hanya diakui kalau koef kategori < 0.6
+	//   G = Luas terhitung PL  = D - F
+	//   H = Koef x RTH = F * 0.6 (koefisien RTH tetap, bukan koef kategori asal)
+	//   I = Koef x PL  = G * koef kategori
+	//   TL/IKTL di sini adalah indeks LOKAL dari bidang-bidang yang tersentuh gambar saja
+	//   (bukan IKTL kota) -- sinyal kasar: makin banyak klaim jatuh di kategori >=0.6, makin turun.
+	function computeRthBreakdown() {
+		if (!tutupanLahanFeatures || !rthLayers) return null;
+		var layers = rthLayers.getLayers();
+		var drawnFeatures = [];
+		layers.forEach(function(l) {
+			var gj = l.toGeoJSON();
+			var t = gj.geometry ? gj.geometry.type : '';
+			if (t === 'Polygon' || t === 'MultiPolygon') drawnFeatures.push(gj);
+		});
+		if (!drawnFeatures.length) return { rows: [], totalD: 0, totalH: 0, totalI: 0, totalEligible: 0, TL: 0, IKTL: 0, hasClaim: false };
+
+		var claimed = {};      // E per kategori: luas hasil clip (yg diklaim)
+		var touched = {};      // D per kategori: luas utuh bidang yg tersentuh gambar
+		IKL_KATEGORI.forEach(function(k) { claimed[k.key] = 0; touched[k.key] = 0; });
+
+		var claimArea;
+		try { claimArea = iklUnionAll(drawnFeatures); }
+		catch (e) { claimArea = drawnFeatures[0]; }
+		var claimBbox;
+		try { claimBbox = turf.bbox(claimArea); } catch (e) { claimBbox = null; }
+
+		if (claimBbox) {
+			tutupanLahanFeatures.forEach(function(rf) {
+				if (!iklBboxOverlap(rf.bbox, claimBbox)) return;
+				var inter = null;
+				try { inter = turf.intersect(claimArea, rf.feature); } catch (e) {}
+				if (!inter) return;
+				var area = turf.area(inter) / 10000;
+				if (area <= 0) return;
+				claimed[rf.kategoriKey] += area;
+				touched[rf.kategoriKey] += rf.areaHa; // luas utuh bidang ini, bukan hasil clip
+			});
+		}
+
+		var rows = [], totalD = 0, totalH = 0, totalI = 0, totalF = 0;
+		IKL_KATEGORI.forEach(function(k) {
+			var D = touched[k.key] || 0;
+			if (D <= 0) return; // hanya kategori yang benar-benar tersentuh gambar
+			var E = claimed[k.key] || 0;
+			var eligible = k.koef < IKL_RTH_ELIGIBLE_MAX;
+			var F = eligible ? E : 0;
+			var G = D - F;
+			var H = F * IKL_RTH_KOEF;
+			var I = G * k.koef;
+			totalD += D; totalH += H; totalI += I; totalF += F;
+			rows.push({ kategori: k, D: D, E: E, F: F, G: G, H: H, I: I, eligible: eligible });
+		});
+
+		var pembilang = totalH + totalI;
+		var TL = totalD > 0 ? pembilang / totalD : 0;
+		var IKTL = 100 - ((84.3 - (TL * 100)) * 50 / 54.3);
+		if (IKTL > 100) IKTL = 100;
+
+		return { rows: rows, totalD: totalD, totalH: totalH, totalI: totalI, totalEligible: totalF, TL: TL, IKTL: IKTL, hasClaim: true };
+	}
+
+	function renderRthBreakdown(result) {
+		var $panel = $('#rth-breakdown-panel');
+		var $body = $('#rth-breakdown-body');
+		if (!result || !result.rows.length) {
+			$panel.hide();
+			$body.html('');
+			return;
+		}
+		var html = result.rows.map(function(r) {
+			var tag = r.eligible
+				? '<span class="badge badge-success">diakui</span>'
+				: '<span class="badge badge-secondary">koef &ge; 0.6, ditolak</span>';
+			return '<tr>' +
+				'<td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;background:' + r.kategori.color + ';"></span>' + r.kategori.nama + '</td>' +
+				'<td class="text-right">' + r.kategori.koef.toFixed(2) + '</td>' +
+				'<td class="text-right">' + r.D.toFixed(2) + '</td>' +
+				'<td class="text-right">' + (r.E > 0 ? r.E.toFixed(2) : '&ndash;') + '</td>' +
+				'<td class="text-right">' + (r.F > 0 ? r.F.toFixed(2) : '&ndash;') + '</td>' +
+				'<td class="text-right">' + r.G.toFixed(2) + '</td>' +
+				'<td class="text-right">' + (r.H > 0 ? r.H.toFixed(2) : '&ndash;') + '</td>' +
+				'<td class="text-right">' + r.I.toFixed(2) + '</td>' +
+				'<td>' + (r.E > 0 ? tag : '') + '</td>' +
+			'</tr>';
+		}).join('');
+		$body.html(html);
+		$('#rth-breakdown-totald').text(result.totalD.toFixed(2));
+		$('#rth-breakdown-totalh').text(result.totalH.toFixed(2));
+		$('#rth-breakdown-totali').text(result.totalI.toFixed(2));
+		$('#rth-breakdown-tl').text(result.TL.toFixed(4));
+		$('#rth-breakdown-iktl').text(result.IKTL.toFixed(2));
+		$panel.show();
+	}
+
+	// Bounding box dataset demo (Kota Cimahi) -- mockup diarahkan langsung ke sini.
+	var IKL_DEMO_BOUNDS = [[-6.93287299999999, 107.510319348], [-6.82735223299996, 107.576185715]];
+
 	function initIklMap() {
 		if (iklMap) {
 			setTimeout(function(){ iklMap.invalidateSize(); }, 200);
 			return;
 		}
-		iklMap = L.map("ikl-map").setView([-2, 117], 5);
-		L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-			attribution: ''
+		iklMap = L.map("ikl-map");
+		iklMap.fitBounds(IKL_DEMO_BOUNDS, { padding: [10, 10] });
+		L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+			attribution: 'Tiles &copy; Esri',
+			maxZoom: 19
 		}).addTo(iklMap);
 
 		rthLayers = new L.FeatureGroup().addTo(iklMap);
@@ -187,6 +370,8 @@
 		});
 		iklMap.on(L.Draw.Event.EDITED, function() { updateIklAreaCalc(); });
 		iklMap.on(L.Draw.Event.DELETED, function() { updateIklAreaCalc(); });
+
+		loadTutupanLahanLayer();
 
 		setTimeout(function(){ iklMap.invalidateSize(); }, 300);
 	}
@@ -219,9 +404,18 @@
 		if (layerName === 'rth') {
 			$('#ikl-upload-rth').show();
 			$('#ikl-upload-rhl').hide();
+			$('#tutupan-layer-control').show();
+			if (tutupanLahanLayer && iklMap && $('#tutupan-layer-toggle').is(':checked')) {
+				tutupanLahanLayer.addTo(iklMap);
+			}
+			var switchBreakdown = computeRthBreakdown();
+			renderRthBreakdown(switchBreakdown && switchBreakdown.hasClaim ? switchBreakdown : null);
 		} else {
 			$('#ikl-upload-rth').hide();
 			$('#ikl-upload-rhl').show();
+			$('#tutupan-layer-control').hide();
+			if (tutupanLahanLayer && iklMap) iklMap.removeLayer(tutupanLahanLayer);
+			renderRthBreakdown(null);
 		}
 		if (iklMap && iklDrawControl) {
 			iklMap.removeControl(iklDrawControl);
@@ -245,25 +439,33 @@
 	}
 
 	function updateIklAreaCalc() {
-		var rthArea = calcLayerGroupArea(rthLayers);
 		var rhlArea = calcLayerGroupArea(rhlLayers);
-		var rthHa = (rthArea / 10000).toFixed(2);
 		var rhlHa = (rhlArea / 10000).toFixed(2);
-
-		$('#rth-area-display').text(rthHa);
 		$('#rhl-area-display').text(rhlHa);
+		if (parseFloat(rhlHa) > 0) $('#rhl').val(rhlHa);
 
 		var rthCount = 0, rhlCount = 0;
 		rthLayers.eachLayer(function() { rthCount++; });
 		rhlLayers.eachLayer(function() { rhlCount++; });
-
 		if (rthCount > 0) { $('#rth-shapes-count').text(rthCount + ' area').show(); }
 		else { $('#rth-shapes-count').hide(); }
 		if (rhlCount > 0) { $('#rhl-shapes-count').text(rhlCount + ' area').show(); }
 		else { $('#rhl-shapes-count').hide(); }
 
-		if (parseFloat(rthHa) > 0) $('#rth').val(rthHa);
-		if (parseFloat(rhlHa) > 0) $('#rhl').val(rhlHa);
+		// RTH: kalau layer tutupan lahan sudah termuat, luas yang dipakai adalah luas
+		// TERHITUNG (setelah aturan koef<0.6) hasil intersect -- bukan luas gambar mentah.
+		var breakdown = computeRthBreakdown();
+		if (breakdown && breakdown.hasClaim) {
+			$('#rth-area-display').text(breakdown.totalEligible.toFixed(2));
+			if (breakdown.totalEligible > 0) $('#rth').val(breakdown.totalEligible.toFixed(2));
+			renderRthBreakdown(breakdown);
+		} else {
+			var rthArea = calcLayerGroupArea(rthLayers);
+			var rthHa = (rthArea / 10000).toFixed(2);
+			$('#rth-area-display').text(rthHa);
+			if (parseFloat(rthHa) > 0) $('#rth').val(rthHa);
+			renderRthBreakdown(null);
+		}
 	}
 
 	function addGeoJSONToIklMap(geojson, layerType) {
@@ -339,11 +541,12 @@
 		$('#rhl-area-display').text('0');
 		$('#rth-shapes-count').hide();
 		$('#rhl-shapes-count').hide();
+		renderRthBreakdown(null);
 		switchIklLayer('rth');
 		resetIklDropzone('rth');
 		resetIklDropzone('rhl');
 		if (iklMap) {
-			iklMap.setView([-2, 117], 5);
+			iklMap.fitBounds(IKL_DEMO_BOUNDS, { padding: [10, 10] });
 			setTimeout(function(){ iklMap.invalidateSize(); }, 200);
 		}
 	}
@@ -405,6 +608,13 @@
 	});
 	$(document).on('dragleave drop', '.ikl-dropzone', function(e) {
 		$(this).removeClass('dragover');
+	});
+
+	// toggle layer referensi tutupan lahan (demo: Kota Cimahi)
+	$(document).on('change', '#tutupan-layer-toggle', function() {
+		if (!tutupanLahanLayer || !iklMap) return;
+		if ($(this).is(':checked')) tutupanLahanLayer.addTo(iklMap);
+		else iklMap.removeLayer(tutupanLahanLayer);
 	});
 	// ===================== END MAP =====================
 
