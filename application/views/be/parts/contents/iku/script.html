@@ -212,7 +212,10 @@
 		$("#alamat_detail").val("");
 		$("#latitude").val("");
 		$("#longitude").val("");
-		$("#uid_lokasi_pemantauan").val("").trigger("change");
+		$("#koordinat-check").hide().html("").removeClass("alert-info alert-success alert-warning alert-danger");
+		$("#pm25-satelit-info").hide().html("").removeClass("alert-info alert-success alert-warning alert-danger");
+		$(".durasi-pasif-warning").hide().text("");
+		$("#uid_lokasi_pemantauan").val("").data("provinsi", null).data("kabkota", null).trigger("change");
 		$("#uid_rf_peruntukan").val("").trigger("change");
 		$("#uid_metode_pemantauan").val("").trigger("change");
 		$("#uid_provinsi").val("").trigger("change");
@@ -242,6 +245,136 @@
 			.show();
 	}
 
+	function setBoxStatus($box, type, html) {
+		$box.removeClass("alert-info alert-success alert-warning alert-danger")
+			.addClass("alert-" + type)
+			.html(html)
+			.show();
+	}
+
+	function getTahunFromTanggal() {
+		var val = $("#tanggal").val();
+		if (!val) {
+			return null;
+		}
+		var year = new Date(val).getFullYear();
+		return isNaN(year) ? null : year;
+	}
+
+	//===== Kriteria 1: koordinat SHU (OCR) vs koordinat lokasi terdaftar, dengan toleransi jarak =====
+	var KOORDINAT_TOLERANSI_OK_M = 50;
+	var KOORDINAT_TOLERANSI_WARN_M = 100;
+
+	function haversineMeters(lat1, lon1, lat2, lon2) {
+		var R = 6371000; //radius bumi, meter
+		var toRad = function(d) { return d * Math.PI / 180; };
+		var dLat = toRad(lat2 - lat1);
+		var dLon = toRad(lon2 - lon1);
+		var a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+			+ Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		return R * c;
+	}
+
+	function renderKoordinatCheck(sfx, ocrLat, ocrLng, regLat, regLng) {
+		var $box = $("#koordinat-check" + sfx);
+		ocrLat = parseFloat(ocrLat);
+		ocrLng = parseFloat(ocrLng);
+		regLat = parseFloat(regLat);
+		regLng = parseFloat(regLng);
+
+		if (isNaN(ocrLat) || isNaN(ocrLng) || isNaN(regLat) || isNaN(regLng)) {
+			$box.hide().html("");
+			return;
+		}
+
+		var jarakLangsung = Math.round(haversineMeters(ocrLat, ocrLng, regLat, regLng));
+		//sejumlah lokasi terdaftar diketahui punya kolom latitude/longitude tertukar (data entry lama,
+		//lihat rf_nilai_pelengkap_iklh/lokasi_pemantauan) — cek juga jarak seandainya keduanya ditukar,
+		//supaya tidak menampilkan selisih raksasa yang menyesatkan padahal sebenarnya cuma tertukar
+		var jarakTertukar = Math.round(haversineMeters(ocrLat, ocrLng, regLng, regLat));
+		var koordDasar = "Koordinat SHU: " + ocrLat + ", " + ocrLng + " &middot; Terdaftar: " + regLat + ", " + regLng;
+
+		if (jarakTertukar <= KOORDINAT_TOLERANSI_WARN_M && jarakTertukar < jarakLangsung * 0.5) {
+			setBoxStatus($box, "warning", "<b>Latitude/Longitude lokasi terdaftar kemungkinan tertukar</b> &middot; " + koordDasar
+				+ " &middot; Selisih langsung ~" + jarakLangsung + " m, setelah ditukar ~" + jarakTertukar + " m"
+				+ " &middot; Mohon periksa &amp; perbaiki data Lokasi Pemantauan.");
+			return;
+		}
+
+		var jarak = Math.min(jarakLangsung, jarakTertukar);
+		var type = "danger";
+		var label = "Koordinat SHU tidak sesuai lokasi terdaftar";
+		if (jarak <= KOORDINAT_TOLERANSI_OK_M) {
+			type = "success";
+			label = "Koordinat SHU sesuai lokasi terdaftar";
+		} else if (jarak <= KOORDINAT_TOLERANSI_WARN_M) {
+			type = "warning";
+			label = "Koordinat SHU perlu diperiksa";
+		}
+		var catatanTertukar = (jarakTertukar < jarakLangsung)
+			? " &middot; (jarak setelah ditukar lebih dekat: ~" + jarakTertukar + " m, kemungkinan lat/long lokasi terdaftar tertukar)"
+			: "";
+
+		setBoxStatus($box, type, "<b>" + label + "</b> &middot; " + koordDasar + " &middot; Selisih ~" + jarak + " m" + catatanTertukar);
+	}
+
+	//===== Kriteria 2: PM2.5 metode Manual Pasif diambil dari data satelit (rf_nilai_pelengkap_iklh) =====
+	//uid_metode_pemantauan: 1=Manual Aktif, 2=Manual Pasif, 3=Otomatis (AQMS)
+	var METODE_MANUAL_PASIF = 2;
+
+	function checkPm25Satelit(sfx, uidProvinsi, uidKabkota, tahun) {
+		var $box = $("#pm25-satelit-info" + sfx);
+		if (!uidProvinsi || !uidKabkota || !tahun) {
+			$box.hide().html("");
+			return;
+		}
+		$.ajax({
+			url: baseUrl + "ajax/pm25Satelit/x/" + uidProvinsi + "/y/" + uidKabkota + "/z/" + tahun,
+			method: "GET",
+			success: function(r) {
+				if (r.total) {
+					var nilai = parseFloat(r.data[0].iku_pm25_satelit);
+					$("#pm25" + sfx).val(nilai);
+					setBoxStatus($box, "info", "Metode PM2.5 <b>Manual Pasif</b> tidak dapat mengukur PM2.5 langsung "
+						+ "&mdash; nilai diambil dari data satelit (Target Nilai IKLH) tahun " + tahun + ": <b>" + nilai + " &micro;g/m3</b>.");
+				} else {
+					setBoxStatus($box, "warning", "Metode PM2.5 <b>Manual Pasif</b> dipilih, tapi data satelit PM2.5 untuk provinsi/kab-kota "
+						+ "&amp; tahun " + tahun + " belum ada di menu Target Nilai IKLH. Mohon isi PM2.5 manual.");
+				}
+			}
+		});
+	}
+
+	//===== Kriteria 3: durasi pemantauan Manual Pasif harus 13/14/15 hari =====
+	var DURASI_PASIF_ALLOWED_DAYS = [13, 14, 15];
+
+	function checkDurasiPasif(param, sfx) {
+		sfx = sfx || "";
+		var $warn = $("#" + param + "-durasi-pasif-warning" + sfx);
+		var metodeId = $("#" + param + "_uid_metode_pemantauan" + sfx).val();
+		if (metodeId != METODE_MANUAL_PASIF) {
+			$warn.hide().text("");
+			return;
+		}
+		var val = parseInt($("#" + param + "_durasi_pemantauan_pasif" + sfx).val(), 10);
+		if (!val) {
+			$warn.hide().text("");
+			return;
+		}
+		if (DURASI_PASIF_ALLOWED_DAYS.indexOf(val) === -1) {
+			$warn.text("Pemantauan Manual Pasif idealnya berlangsung 13-15 hari (saat ini " + val + " hari).").show();
+		} else {
+			$warn.hide().text("");
+		}
+	}
+
+	$(document).on("input change", ".durasi-pasif-input", function() {
+		var param = $(this).data("param");
+		var sfx = this.id.replace(param + "_durasi_pemantauan_pasif", "");
+		checkDurasiPasif(param, sfx);
+	});
+
 	//sfx = "" for the single/default fields, "_r0", "_r1", ... for cloned repeater rows
 	function applyOcrResult(data, opts) {
 		opts = opts || {};
@@ -268,6 +401,14 @@
 							$("#alamat_detail" + sfx).val(val.alamat_detail);
 							$("#latitude" + sfx).val(val.latitude);
 							$("#longitude" + sfx).val(val.longitude);
+							$("#uid_lokasi_pemantauan" + sfx).data("provinsi", val.uid_provinsi).data("kabkota", val.uid_kabkota);
+							renderKoordinatCheck(sfx, data.latitude, data.longitude, val.latitude, val.longitude);
+							var pm25Param = data.parameters && data.parameters.pm25;
+							if (pm25Param && pm25Param.metode && pm25Param.metode.uid == METODE_MANUAL_PASIF) {
+								checkPm25Satelit(sfx, val.uid_provinsi, val.uid_kabkota, getTahunFromTanggal());
+							} else {
+								$("#pm25-satelit-info" + sfx).hide().html("");
+							}
 							if (!sfx) {
 								setTimeout(function() {
 									id_kabkota = val.uid_kabkota;
@@ -314,6 +455,7 @@
 				} else if (p.durasi_pemantauan) {
 					$("#" + param + "_durasi_pemantauan_pasif" + sfx).val(p.durasi_pemantauan);
 				}
+				checkDurasiPasif(param, sfx);
 			} else if (p.metode && p.metode.text) {
 				unmatched.push("Metode " + labelMap[param] + " (\"" + p.metode.text + "\")");
 			}
@@ -380,6 +522,9 @@
 					$("#alamat_detail" + sfx).val("");
 					$("#latitude" + sfx).val("");
 					$("#longitude" + sfx).val("");
+					$(this).data("provinsi", null).data("kabkota", null);
+					$("#koordinat-check" + sfx).hide().html("");
+					$("#pm25-satelit-info" + sfx).hide().html("");
 					return;
 				}
 				$.ajax({
@@ -392,6 +537,11 @@
 								$("#alamat_detail" + sfx).val(val.alamat_detail);
 								$("#latitude" + sfx).val(val.latitude);
 								$("#longitude" + sfx).val(val.longitude);
+								$("#uid_lokasi_pemantauan" + sfx).data("provinsi", val.uid_provinsi).data("kabkota", val.uid_kabkota);
+								renderKoordinatCheck(sfx, opt.latitude, opt.longitude, val.latitude, val.longitude);
+								if ($("#pm25_uid_metode_pemantauan" + sfx).val() == METODE_MANUAL_PASIF) {
+									checkPm25Satelit(sfx, val.uid_provinsi, val.uid_kabkota, getTahunFromTanggal());
+								}
 							});
 						}
 					}
@@ -404,7 +554,17 @@
 				toggleDurasiPemantauan(param, sfx, "");
 				$("#" + param + "-faktor-koreksi" + sfx).hide();
 				$("#" + param + "_uid_metode_pemantauan" + sfx).on("change", function() {
-					toggleDurasiPemantauan(param, sfx, $(this).val());
+					var metodeId = $(this).val();
+					toggleDurasiPemantauan(param, sfx, metodeId);
+					checkDurasiPasif(param, sfx);
+					if (param === "pm25") {
+						if (metodeId == METODE_MANUAL_PASIF) {
+							var $lokasi = $("#uid_lokasi_pemantauan" + sfx);
+							checkPm25Satelit(sfx, $lokasi.data("provinsi"), $lokasi.data("kabkota"), getTahunFromTanggal());
+						} else {
+							$("#pm25-satelit-info" + sfx).hide().html("");
+						}
+					}
 				});
 			});
 
@@ -629,14 +789,24 @@
 
 	$("#no2_uid_metode_pemantauan").on("change", function() {
 		toggleDurasiPemantauan("no2", "", $(this).val());
+		checkDurasiPasif("no2", "");
 	});
 
 	$("#so2_uid_metode_pemantauan").on("change", function() {
 		toggleDurasiPemantauan("so2", "", $(this).val());
+		checkDurasiPasif("so2", "");
 	});
 
 	$("#pm25_uid_metode_pemantauan").on("change", function() {
-		toggleDurasiPemantauan("pm25", "", $(this).val());
+		var metodeId = $(this).val();
+		toggleDurasiPemantauan("pm25", "", metodeId);
+		checkDurasiPasif("pm25", "");
+		if (metodeId == METODE_MANUAL_PASIF) {
+			var $lokasi = $("#uid_lokasi_pemantauan");
+			checkPm25Satelit("", $lokasi.data("provinsi"), $lokasi.data("kabkota"), getTahunFromTanggal());
+		} else {
+			$("#pm25-satelit-info").hide().html("");
+		}
 	});
 
 	function checkAllSelected3() {
@@ -683,6 +853,10 @@
 										$("#alamat_detail").val(val.alamat_detail);
 										$("#latitude").val(val.latitude);
 										$("#longitude").val(val.longitude);
+										$("#uid_lokasi_pemantauan").data("provinsi", val.uid_provinsi).data("kabkota", val.uid_kabkota);
+										if (req.pm25_uid_metode_pemantauan == METODE_MANUAL_PASIF) {
+											checkPm25Satelit("", val.uid_provinsi, val.uid_kabkota, getTahunFromTanggal());
+										}
 									});
 								}
 								$("#uid_lokasi_pemantauan").html(htmls);
@@ -698,6 +872,7 @@
 							$("#no2-dp-pasif").show();
 							$("#no2_durasi_pemantauan_pasif").val(req.no2_durasi_pemantauan_pasif);
 						}
+						checkDurasiPasif("no2", "");
 						$("#no2_faktor_koreksi").val(req.no2_faktor_koreksi);
 						if (req.no2_faktor_koreksi != 0) {
 							$("#no2-faktor-koreksi").show();
@@ -712,6 +887,7 @@
 							$("#so2-dp-pasif").show();
 							$("#so2_durasi_pemantauan_pasif").val(req.so2_durasi_pemantauan_pasif);
 						}
+						checkDurasiPasif("so2", "");
 						$("#so2_faktor_koreksi").val(req.so2_faktor_koreksi);
 						if (req.so2_faktor_koreksi != 0) {
 							$("#so2-faktor-koreksi").show();
@@ -726,6 +902,7 @@
 							$("#pm25-dp-pasif").show();
 							$("#pm25_durasi_pemantauan_pasif").val(req.pm25_durasi_pemantauan_pasif);
 						}
+						checkDurasiPasif("pm25", "");
 						$("#pm25_faktor_koreksi").val(req.pm25_faktor_koreksi);
 						if (req.pm25_faktor_koreksi != 0) {
 							$("#pm25-faktor-koreksi").show();

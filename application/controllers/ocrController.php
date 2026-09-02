@@ -141,10 +141,10 @@ class ocrController extends Front
         $out = array();
         $out['tanggal'] = $shared['tanggal'];
         $out['periode_pemantauan'] = $shared['periode_pemantauan'];
-        $out['lokasi'] = $this -> matchLokasi(isset($entry['lokasi_text']) ? $entry['lokasi_text'] : null, $component);
-        $out['lab'] = $this -> matchLab($shared['laboratorium_text']);
         $out['latitude'] = isset($entry['latitude']) ? $entry['latitude'] : null;
         $out['longitude'] = isset($entry['longitude']) ? $entry['longitude'] : null;
+        $out['lokasi'] = $this -> matchLokasi(isset($entry['lokasi_text']) ? $entry['lokasi_text'] : null, $component, $out['latitude'], $out['longitude']);
+        $out['lab'] = $this -> matchLab($shared['laboratorium_text']);
         $out['label'] = trim(
             (isset($entry['peruntukan_text']) ? $entry['peruntukan_text'] : '')
             . (isset($entry['lokasi_text']) ? ' - ' . $entry['lokasi_text'] : '')
@@ -183,10 +183,10 @@ class ocrController extends Front
         $out = array();
         $out['tanggal'] = isset($entry['tanggal']) ? $entry['tanggal'] : $shared['tanggal'];
         $out['periode_pemantauan'] = $shared['periode_pemantauan'];
-        $out['lokasi'] = $this -> matchLokasi(isset($entry['lokasi_text']) ? $entry['lokasi_text'] : null, 2);
-        $out['lab'] = $this -> matchLab($shared['laboratorium_text']);
         $out['latitude'] = isset($entry['latitude']) ? $entry['latitude'] : null;
         $out['longitude'] = isset($entry['longitude']) ? $entry['longitude'] : null;
+        $out['lokasi'] = $this -> matchLokasi(isset($entry['lokasi_text']) ? $entry['lokasi_text'] : null, 2, $out['latitude'], $out['longitude']);
+        $out['lab'] = $this -> matchLab($shared['laboratorium_text']);
         $out['label'] = trim(isset($entry['lokasi_text']) ? $entry['lokasi_text'] : '');
         $out['kategori'] = $this -> matchKategoriIka(isset($entry['jenis_contoh_text']) ? $entry['jenis_contoh_text'] : null);
 
@@ -359,12 +359,18 @@ class ocrController extends Front
         return null;
     }
 
-    private function matchLokasi($text, $component)
+    //Radius (meter) untuk pencocokan lokasi berbasis koordinat — lihat matchLokasi().
+    const KOORDINAT_MATCH_RADIUS_M = 2000;
+
+    //$lat/$lng = koordinat hasil bacaan OCR untuk lokasi ini (bisa null kalau dokumen tidak
+    //mencantumkan koordinat). Nama/alamat lokasi sering generik ("Perumahan X", "Pemukiman") dan
+    //gampang salah cocok lewat similarity teks saja — kalau ada koordinat OCR, cari dulu lokasi
+    //terdaftar (komponen sama) yang koordinatnya paling dekat; koordinat GPS praktis unik per titik
+    //pemantauan fisik jadi jauh lebih bisa diandalkan daripada kecocokan teks. Baru kalau tidak ada
+    //koordinat OCR, atau tidak ada lokasi terdaftar dalam radius, fallback ke similarity teks (cara lama).
+    private function matchLokasi($text, $component, $lat = null, $lng = null)
     {
         $result = array('uid' => null, 'text' => $text);
-        if (!$text) {
-            return $result;
-        }
 
         $w = "deleted = 0 AND uid_rf_component = " . (int) $component;
         if ($this -> me['role_user'] == 3) {
@@ -375,6 +381,29 @@ class ocrController extends Front
 
         $this -> tables -> set("lokasi_pemantauan", "uid_lokasi_pemantauan");
         $rows = $this -> tables -> fetch($w)['data'];
+
+        if (is_numeric($lat) && is_numeric($lng)) {
+            $nearest = null;
+            $nearestDist = null;
+            foreach ($rows as $row) {
+                if (!is_numeric($row['latitude']) || !is_numeric($row['longitude'])) {
+                    continue;
+                }
+                $dist = $this -> haversineMeters($lat, $lng, $row['latitude'], $row['longitude']);
+                if ($nearestDist === null || $dist < $nearestDist) {
+                    $nearestDist = $dist;
+                    $nearest = $row;
+                }
+            }
+            if ($nearest && $nearestDist <= self::KOORDINAT_MATCH_RADIUS_M) {
+                $result['uid'] = $nearest['uid_lokasi_pemantauan'];
+                return $result;
+            }
+        }
+
+        if (!$text) {
+            return $result;
+        }
 
         $needle = $this -> normalize($text);
         $best = null;
@@ -400,6 +429,17 @@ class ocrController extends Front
             $result['uid'] = $best['uid_lokasi_pemantauan'];
         }
         return $result;
+    }
+
+    private function haversineMeters($lat1, $lon1, $lat2, $lon2)
+    {
+        $r = 6371000; //radius bumi, meter
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat / 2) * sin($dLat / 2)
+            + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon / 2) * sin($dLon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        return $r * $c;
     }
 
     //$discriminator is rf_peruntukan.peruntukan (1=IKU, 2=IKAL — IKA has no Peruntukan field)

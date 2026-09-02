@@ -157,6 +157,23 @@
             echo json_encode($rf);
         }
 
+        //Nilai PM2.5 satelit (rf_nilai_pelengkap_iklh, diisi lewat menu Target Nilai IKLH) untuk
+        //provinsi+kabkota+tahun tertentu — dipakai form IKU untuk mengisi PM2.5 saat metode
+        //pemantauan Manual Pasif (alat pasif tidak bisa mengukur PM2.5 langsung). Pola pencocokan
+        //sama dengan join np di view v_pelaporan_iku.
+        public function pm25Satelit()
+        {
+            header("Content-Type: application/json; charset=UTF-8");
+
+            $this->tables->set("rf_nilai_pelengkap_iklh", "uid_nilai_pelengkap_iklh");
+            $rf = $this->tables->fetch(
+                "deleted = 0 AND uid_provinsi=".(int) $this->params("x").
+                " AND uid_kabkota=".(int) $this->params("y").
+                " AND tahun=".(int) $this->params("z")
+            );
+            echo json_encode($rf);
+        }
+
         public function sumberPencemarByKomponen()
         {
             header("Content-Type: application/json; charset=UTF-8");
