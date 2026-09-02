@@ -525,7 +525,7 @@
               <span class="text-danger"><small>Akan terisi otomatis ketika memilih lokasi, jika kategori sudah diupdate dimenu referensi lokasi pemantauan</small></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">pH (Potential Hydrogen) <span class="text-danger">*</span></label>
+              <label for="name">pH (Derajat Keasaman) <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ph" name="form[ph]" />
                 <div class="input-group-append">
@@ -535,7 +535,7 @@
               <span class="badge-kriteria" id="cek-ph" style="display:none;"></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">BOD (Biological Oxygen Demand) <span class="text-danger">*</span></label>
+              <label for="name">BOD (Kebutuhan Oksigen Biokimiawi) <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bod" name="form[bod]" />
                 <div class="input-group-append">
@@ -545,7 +545,7 @@
               <span class="badge-kriteria" id="cek-bod" style="display:none;"></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">COD (Chemical Oxygen Demand) <span class="text-danger">*</span></label>
+              <label for="name">COD (Kebutuhan Oksigen Kimiawi) <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cod" name="form[cod]" />
                 <div class="input-group-append">
@@ -554,7 +554,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">TSS (Total Susppended Solid) <span class="text-danger">*</span></label>
+              <label for="name">TSS (Padatan Tersuspensi Total) <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="tss" name="form[tss]" />
                 <div class="input-group-append">
@@ -563,7 +563,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">DO (Dissolved Oxygen) <span class="text-danger">*</span></label>
+              <label for="name">DO (Oksigen Terlarut) <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="do_p" name="form[do_p]" />
                 <div class="input-group-append">
@@ -583,7 +583,7 @@
               <span class="badge-kriteria" id="cek-fecal_coliform" style="display:none;"></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">NO (Nitrat)<sub class="black">3</sub>-N <span class="text-danger">*</span></label>
+              <label for="name">NO<sub class="black">3</sub>-N (Nitrat sebagai N) <span class="text-danger">*</span></label>
               <div class="input-group danau_parameter_3">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="no3_n" name="form[no3_n]" />
                 <div class="input-group-append">
@@ -592,7 +592,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">TOTAL FOSFAT <span class="text-danger">*</span></label>
+              <label for="name">TOTAL FOSFAT (SEBAGAI P) <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="total_phosphat" name="form[total_phosphat]" />
                 <div class="input-group-append">
@@ -628,7 +628,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">As (Arsenik)</label>
+              <label for="name">ARSEN (As) TERLARUT</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="as_" name="form[as_]" />
                 <div class="input-group-append">
@@ -637,16 +637,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">B (Boron)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bo" name="form[bo]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">Ba (Barium)</label>
+              <label for="name">BARIUM (Ba) TERLARUT</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ba" name="form[ba]" />
                 <div class="input-group-append">
@@ -655,7 +646,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">BELERANG SBG H<sub>2</sub>S</label>
+              <label for="name">BELERANG SEBAGAI H<sub>2</sub>S</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="belerang_sbg_h2s" name="form[belerang_sbg_h2s]" />
                 <div class="input-group-append">
@@ -664,7 +655,16 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">BHC (Benzene Hexachloride)</label>
+              <label for="name">BESI (Fe) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fe" name="form[fe]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">BHC</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bhc" name="form[bhc]" />
                 <div class="input-group-append">
@@ -673,9 +673,9 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Cd (Kadmium)</label>
+              <label for="name">BORON (B) TERLARUT</label>
               <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cd" name="form[cd]" />
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bo" name="form[bo]" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
                 </div>
@@ -691,34 +691,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Co (Kobalt)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="co" name="form[co]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">Cr-6 (Kromium)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cr_6" name="form[cr_6]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">Cu (Cuprum)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cu" name="form[cu]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">DDT (Dichoro Diphenyl Trichlorethane)</label>
+              <label for="name">DDT</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ddt" name="form[ddt]" />
                 <div class="input-group-append">
@@ -736,7 +709,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">DETERGEN TOTAL</label>
+              <label for="name">DETERJEN TOTAL</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="detergen_total" name="form[detergen_total]" />
                 <div class="input-group-append">
@@ -763,15 +736,6 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Fe (Ferrum)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fe" name="form[fe]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
               <label for="name">FENOL</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fenol" name="form[fenol]" />
@@ -781,7 +745,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">FLOURIDA</label>
+              <label for="name">FLUORIDA</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="florida" name="form[florida]" />
                 <div class="input-group-append">
@@ -799,20 +763,11 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Hg (Hydrargyrum)</label>
+              <label for="name">KADMIUM (Cd) TERLARUT</label>
               <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="hg" name="form[hg]" />
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cd" name="form[cd]" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1 danau_parameter" style="display:none">
-              <label for="name">KECERAHAN (TRANSPARANSI)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="kecerahan" name="form[kecerahan]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">m</span>
                 </div>
               </div>
             </div>
@@ -835,11 +790,29 @@
               </div>
             </div>
             <div class="col-md-6 mb-1 danau_parameter" style="display:none">
-              <label for="name">KLOROFIL a</label>
+              <label for="name">KLOROFIL-A</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="klorofil_a" name="form[klorofil_a]" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/m<sup>3</sup></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">KOBALT (Co) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="co" name="form[co]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">KROMIUM HEKSAVALEN (Cr-VI)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cr_6" name="form[cr_6]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
                 </div>
               </div>
             </div>
@@ -853,6 +826,24 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
+              <label for="name">MANGAN (Mn) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="mn" name="form[mn]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">MERKURI (Hg) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="hg" name="form[hg]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
               <label for="name">METHOXYCHLOR</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="methoxychlor" name="form[methoxychlor]" />
@@ -862,7 +853,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">MINYAK LEMAK</label>
+              <label for="name">MINYAK DAN LEMAK</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="minyak_lemak" name="form[minyak_lemak]" />
                 <div class="input-group-append">
@@ -871,16 +862,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Mn (Mangan)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="mn" name="form[mn]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">Ni (Nikel)</label>
+              <label for="name">NIKEL (Ni) TERLARUT</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ni" name="form[ni]" />
                 <div class="input-group-append">
@@ -889,18 +871,9 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">NITRIT</label>
+              <label for="name">NITRIT (SEBAGAI N)</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="nitrit" name="form[nitrit]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">Pb (Plumbum)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="pb" name="form[pb]" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
                 </div>
@@ -934,9 +907,18 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Se (Selenium)</label>
+              <label for="name">SELENIUM (Se) TERLARUT</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="se" name="form[se]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">SENG (Zn) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="zn" name="form[zn]" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
                 </div>
@@ -961,9 +943,18 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">TDS (Total Dissolved Solid)</label>
+              <label for="name">TDS (PADATAN TERLARUT TOTAL)</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="tds" name="form[tds]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TEMBAGA (Cu) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cu" name="form[cu]" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
                 </div>
@@ -974,7 +965,7 @@
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="temperatur_air" name="form[temperatur_air]" />
                 <div class="input-group-append">
-                  <span class="input-group-text"><sup>0</sup>C</span>
+                  <span class="input-group-text">°C</span>
                 </div>
               </div>
             </div>
@@ -983,7 +974,16 @@
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="temperatur_udara" name="form[temperatur_udara]" />
                 <div class="input-group-append">
-                  <span class="input-group-text"><sup>0</sup>C</span>
+                  <span class="input-group-text">°C</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TIMBAL (Pb) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="pb" name="form[pb]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
                 </div>
               </div>
             </div>
@@ -1014,21 +1014,21 @@
                 </div>
               </div>
             </div>
+            <div class="col-md-6 mb-1 danau_parameter" style="display:none">
+              <label for="name">TRANSPARANSI (KECERAHAN)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="kecerahan" name="form[kecerahan]" />
+                <div class="input-group-append">
+                  <span class="input-group-text">m</span>
+                </div>
+              </div>
+            </div>
             <div class="col-md-6 mb-1">
               <label for="name">WARNA</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="warna" name="form[warna]" />
                 <div class="input-group-append">
                   <span class="input-group-text">Pt-Co Unit</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">Zn (Zinc)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="zn" name="form[zn]" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
                 </div>
               </div>
             </div>
@@ -1099,7 +1099,7 @@
               <span class="text-danger"><small>Akan terisi otomatis ketika memilih lokasi, jika kategori sudah diupdate dimenu referensi lokasi pemantauan</small></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">pH (Potential Hydrogen) <span class="text-danger">*</span></label>
+              <label for="name">pH (Derajat Keasaman) <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ph" />
                 <div class="input-group-append">
@@ -1109,7 +1109,7 @@
               <span class="badge-kriteria" id="cek-ph" style="display:none;"></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">BOD (Biological Oxygen Demand) <span class="text-danger">*</span></label>
+              <label for="name">BOD (Kebutuhan Oksigen Biokimiawi) <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bod" />
                 <div class="input-group-append">
@@ -1119,7 +1119,7 @@
               <span class="badge-kriteria" id="cek-bod" style="display:none;"></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">COD (Chemical Oxygen Demand) <span class="text-danger">*</span></label>
+              <label for="name">COD (Kebutuhan Oksigen Kimiawi) <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cod" />
                 <div class="input-group-append">
@@ -1128,7 +1128,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">TSS (Total Susppended Solid) <span class="text-danger">*</span></label>
+              <label for="name">TSS (Padatan Tersuspensi Total) <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="tss" />
                 <div class="input-group-append">
@@ -1137,7 +1137,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">DO (Dissolved Oxygen) <span class="text-danger">*</span></label>
+              <label for="name">DO (Oksigen Terlarut) <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="do_p" />
                 <div class="input-group-append">
@@ -1157,7 +1157,7 @@
               <span class="badge-kriteria" id="cek-fecal_coliform" style="display:none;"></span>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">NO (Nitrat)<sub class="black">3</sub>-N <span class="text-danger">*</span></label>
+              <label for="name">NO<sub class="black">3</sub>-N (Nitrat sebagai N) <span class="text-danger">*</span></label>
               <div class="input-group danau_parameter_3">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="no3_n" />
                 <div class="input-group-append">
@@ -1166,7 +1166,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">TOTAL FOSFAT <span class="text-danger">*</span></label>
+              <label for="name">TOTAL FOSFAT (SEBAGAI P) <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="total_phosphat" />
                 <div class="input-group-append">
@@ -1202,7 +1202,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">As (Arsenik)</label>
+              <label for="name">ARSEN (As) TERLARUT</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="as_" />
                 <div class="input-group-append">
@@ -1211,16 +1211,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">B (Boron)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bo" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">Ba (Barium)</label>
+              <label for="name">BARIUM (Ba) TERLARUT</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ba" />
                 <div class="input-group-append">
@@ -1229,7 +1220,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">BELERANG SBG H<sub>2</sub>S</label>
+              <label for="name">BELERANG SEBAGAI H<sub>2</sub>S</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="belerang_sbg_h2s" />
                 <div class="input-group-append">
@@ -1238,7 +1229,16 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">BHC (Benzene Hexachloride)</label>
+              <label for="name">BESI (Fe) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fe" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">BHC</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bhc" />
                 <div class="input-group-append">
@@ -1247,9 +1247,9 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Cd (Kadmium)</label>
+              <label for="name">BORON (B) TERLARUT</label>
               <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cd" />
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="bo" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
                 </div>
@@ -1265,34 +1265,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Co (Kobalt)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="co" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">Cr-6 (Kromium)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cr_6" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">Cu (Cuprum)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cu" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">DDT (Dichoro Diphenyl Trichlorethane)</label>
+              <label for="name">DDT</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ddt" />
                 <div class="input-group-append">
@@ -1310,7 +1283,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">DETERGEN TOTAL</label>
+              <label for="name">DETERJEN TOTAL</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="detergen_total" />
                 <div class="input-group-append">
@@ -1337,15 +1310,6 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Fe (Ferrum)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fe" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
               <label for="name">FENOL</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="fenol" />
@@ -1355,7 +1319,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">FLOURIDA</label>
+              <label for="name">FLUORIDA</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="florida" />
                 <div class="input-group-append">
@@ -1373,20 +1337,11 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Hg (Hydrargyrum)</label>
+              <label for="name">KADMIUM (Cd) TERLARUT</label>
               <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="hg" />
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cd" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1 danau_parameter" style="display:none">
-              <label for="name">KECERAHAN (TRANSPARANSI)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="kecerahan" />
-                <div class="input-group-append">
-                  <span class="input-group-text">m</span>
                 </div>
               </div>
             </div>
@@ -1409,11 +1364,29 @@
               </div>
             </div>
             <div class="col-md-6 mb-1 danau_parameter" style="display:none">
-              <label for="name">KLOROFIL a</label>
+              <label for="name">KLOROFIL-A</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="klorofil_a" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/m<sup>3</sup></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">KOBALT (Co) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="co" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">KROMIUM HEKSAVALEN (Cr-VI)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cr_6" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
                 </div>
               </div>
             </div>
@@ -1427,6 +1400,24 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
+              <label for="name">MANGAN (Mn) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="mn" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">MERKURI (Hg) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="hg" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
               <label for="name">METHOXYCHLOR</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="methoxychlor" />
@@ -1436,7 +1427,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">MINYAK LEMAK</label>
+              <label for="name">MINYAK DAN LEMAK</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="minyak_lemak" />
                 <div class="input-group-append">
@@ -1445,16 +1436,7 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Mn (Mangan)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="mn" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">Ni (Nikel)</label>
+              <label for="name">NIKEL (Ni) TERLARUT</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="ni" />
                 <div class="input-group-append">
@@ -1463,18 +1445,9 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">NITRIT</label>
+              <label for="name">NITRIT (SEBAGAI N)</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="nitrit" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">Pb (Plumbum)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="pb" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
                 </div>
@@ -1508,9 +1481,18 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">Se (Selenium)</label>
+              <label for="name">SELENIUM (Se) TERLARUT</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="se" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">SENG (Zn) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="zn" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
                 </div>
@@ -1535,9 +1517,18 @@
               </div>
             </div>
             <div class="col-md-6 mb-1">
-              <label for="name">TDS (Total Dissolved Solid)</label>
+              <label for="name">TDS (PADATAN TERLARUT TOTAL)</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="tds" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TEMBAGA (Cu) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="cu" />
                 <div class="input-group-append">
                   <span class="input-group-text">mg/L</span>
                 </div>
@@ -1548,7 +1539,7 @@
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="temperatur_air" />
                 <div class="input-group-append">
-                  <span class="input-group-text"><sup>0</sup>C</span>
+                  <span class="input-group-text">°C</span>
                 </div>
               </div>
             </div>
@@ -1557,7 +1548,16 @@
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="temperatur_udara" />
                 <div class="input-group-append">
-                  <span class="input-group-text"><sup>0</sup>C</span>
+                  <span class="input-group-text">°C</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-1">
+              <label for="name">TIMBAL (Pb) TERLARUT</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="pb" />
+                <div class="input-group-append">
+                  <span class="input-group-text">mg/L</span>
                 </div>
               </div>
             </div>
@@ -1588,21 +1588,21 @@
                 </div>
               </div>
             </div>
+            <div class="col-md-6 mb-1 danau_parameter" style="display:none">
+              <label for="name">TRANSPARANSI (KECERAHAN)</label>
+              <div class="input-group">
+                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="kecerahan" />
+                <div class="input-group-append">
+                  <span class="input-group-text">m</span>
+                </div>
+              </div>
+            </div>
             <div class="col-md-6 mb-1">
               <label for="name">WARNA</label>
               <div class="input-group">
                 <input type="text" class="form-control numberFormat" placeholder="Nilai" id="warna" />
                 <div class="input-group-append">
                   <span class="input-group-text">Pt-Co Unit</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 mb-1">
-              <label for="name">Zn (Zinc)</label>
-              <div class="input-group">
-                <input type="text" class="form-control numberFormat" placeholder="Nilai" id="zn" />
-                <div class="input-group-append">
-                  <span class="input-group-text">mg/L</span>
                 </div>
               </div>
             </div>
