@@ -47,6 +47,19 @@ services:
       # Ini menimpa source hasil COPY di Dockerfile. Untuk menguji image
       # secara mandiri (seperti kondisi produksi), komentari baris ini.
       - .:/var/www/html
+      # Folder upload harus persisten: instance EB diganti setiap redeploy dan
+      # bisa di-scale, sedangkan disk-nya ephemeral.
+      #
+      # Target mount WAJIB /var/www/html/uploads, bukan /uploads — lihat
+      # UPLOADFOLDER di config/globalsetting.php, yang diturunkan dari DOCROOT.
+      # Nested di dalam bind mount `.:/var/www/html` di atas: Docker mengurutkan
+      # mount dari path terpendek ke terpanjang, jadi yang ini yang menang.
+      #
+      # Di produksi UPLOADS_PATH diisi /mnt/efs/uploads lewat environment
+      # property di Elastic Beanstalk (EB men-generate .env dari properti itu,
+      # dan .env repo tidak ikut ter-deploy karena di-gitignore). Di development
+      # nilai default ./uploads dipakai, sehingga tidak ada yang berubah.
+      - "${UPLOADS_PATH:-./uploads}:/var/www/html/uploads"
     environment:
       DB_DRIVER: ${DB_DRIVER:-mysqli}
       DB_SERVER: ${DB_SERVER:-db}
