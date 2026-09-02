@@ -24,6 +24,10 @@
 			<th rowspan="2" bgcolor="#1E9FC4">PERUNTUKAN</th>
 			<th rowspan="2" bgcolor="#1E9FC4">SHU</th>
 			<th colspan="5" bgcolor="#1E9FC4">NILAI PEMANTAUAN</th>
+			<!-- Bacaan mentah model OCR, dipisahkan warnanya supaya jelas ini BUKAN
+			     nilai tersimpan melainkan pembanding untuk penelusuran. Kolom kiri
+			     adalah data yang berlaku; kolom di bawah ini apa yang dibaca model. -->
+			<th colspan="10" bgcolor="#0E7C9B">HASIL OCR (BACAAN MENTAH MODEL)</th>
 		</tr>
 		<tr style="color: white;">
 			<th bgcolor="#1E9FC4">
@@ -37,6 +41,16 @@
 			<th bgcolor="#1E9FC4">MINYAK & LEMAK <sup>(mg/L)</sup></th>
 			<th bgcolor="#1E9FC4">AMONIA TOTAL <sup>(mg/L)</sup></th>
 			<th bgcolor="#1E9FC4">ORTOFOSFAT (PO4-P) <sup>(mg/L)</sup></th>
+			<th bgcolor="#0E7C9B">STATUS</th>
+			<th bgcolor="#0E7C9B">LOKASI</th>
+			<th bgcolor="#0E7C9B">LABORATORIUM</th>
+			<th bgcolor="#0E7C9B">PERUNTUKAN</th>
+			<th bgcolor="#0E7C9B">TSS</th>
+			<th bgcolor="#0E7C9B">DO</th>
+			<th bgcolor="#0E7C9B">MINYAK &amp; LEMAK</th>
+			<th bgcolor="#0E7C9B">AMONIA TOTAL</th>
+			<th bgcolor="#0E7C9B">ORTOFOSFAT</th>
+			<th bgcolor="#0E7C9B">TIDAK DIKENALI</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -69,10 +83,44 @@
 			<td align="center">'{$data.minyak_dan_lemak}</td>
 			<td align="center">'{$data.amonia_total}</td>
 			<td align="center">'{$data.orto_fosfat}</td>
+			{if $data.ocr}
+			<td align="center">ADA</td>
+			<td>{$data.ocr.lokasi.text|escape}</td>
+			<td>{$data.ocr.lab.text|escape}</td>
+			<td>{$data.ocr.peruntukan.text|escape}</td>
+			{* Nilai diuji terhadap null, BUKAN dengan |default, supaya angka 0 yang sah
+			   tidak ikut tersembunyi. Apostrof di depan mengikuti pola kolom di kiri:
+			   memaksa Excel membaca sel sebagai teks agar pemisah desimal tidak diubah
+			   mengikuti locale mesin yang membuka berkasnya. *}
+			<td align="center">{if $data.ocr.parameters.tss !== null}'{$data.ocr.parameters.tss}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.do_p !== null}'{$data.ocr.parameters.do_p}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.minyak_dan_lemak !== null}'{$data.ocr.parameters.minyak_dan_lemak}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.amonia_total !== null}'{$data.ocr.parameters.amonia_total}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.orto_fosfat !== null}'{$data.ocr.parameters.orto_fosfat}{/if}</td>
+			{* Parameter yang terbaca model tapi namanya tidak cocok dengan satu pun dari
+			   kelima field di atas. Dirakit dengan foreach, bukan |@implode, karena urutan
+			   argumen implode(array, glue) sudah deprecated di PHP 7.4 dan hilang di 8.0. *}
+			<td>{foreach from=$data.ocr.unmatched_parameters item=u name=unm}{$u|escape}{if !$smarty.foreach.unm.last}; {/if}{/foreach}</td>
+			{else}
+			{* Sengaja sembilan sel kosong terpisah, bukan satu colspan. Sel tergabung
+			   membuat filter dan urutkan bawaan Excel tidak bisa dipakai di kolom itu. *}
+			<td align="center">TIDAK ADA</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			{/if}
 		</tr>
 		{foreachelse}
 		<tr style="color: white;">
-			<td colspan="10" align="center" bgcolor="#FA535D">BELUM ADA DATA</td>
+			{* colspan sebelumnya 10, padahal tabelnya 17 kolom — sudah keliru sejak
+			   sebelum kolom OCR ditambahkan. Sekarang 17 + 10 = 27. *}
+			<td colspan="27" align="center" bgcolor="#FA535D">BELUM ADA DATA</td>
 		</tr>
 		{/foreach}
 	</tbody>

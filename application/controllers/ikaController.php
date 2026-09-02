@@ -111,6 +111,32 @@ class ikaController extends Front
                   $post['form']['shu'] = $fileUpload;
               }
 
+              //Payload OCR mentah (JSON) dari /ocr/ikaExtract, dikirim form lewat field
+              //tersembunyi form[ocr_result]. Disimpan sebagai jejak audit: dokumen sumbernya
+              //sendiri tidak ikut disimpan, jadi ini satu-satunya rekaman apa yang dibaca model.
+              //
+              //Kolomnya SENGAJA dibuang dari payload bila nilainya kosong atau bukan JSON valid.
+              //Alasannya: tables::post() meneruskan seluruh $post['form'] ke AutoExecute, sehingga
+              //field kosong akan menimpa nilai lama saat user menyimpan ulang baris yang sama
+              //secara manual. Dengan di-unset, kolomnya tidak ikut di-UPDATE dan isinya tetap utuh.
+              //
+              //Payload di-decode lalu di-encode ULANG, bukan disimpan apa adanya, untuk
+              //memadatkan: json_encode() tanpa JSON_PRETTY_PRINT membuang seluruh indentasi
+              //dan spasi antar-token yang dikirim browser. Ini bukan sekadar kerapian —
+              //kolomnya TEXT (maks 65.535 byte) dan sql_mode server tidak memuat
+              //STRICT_TRANS_TABLES, jadi payload yang kepanjangan dipotong DIAM-DIAM.
+              //Perhatikan IKA paling rawan di sini: satu lokasi bisa memuat sampai 55
+              //parameter, jadi payloadnya terbesar di antara ketiga modul.
+              if (isset($post['form']['ocr_result'])) {
+                  $ocrResult = trim($post['form']['ocr_result']);
+                  $ocrDecoded = json_decode($ocrResult);
+                  if ($ocrResult !== '' && json_last_error() === JSON_ERROR_NONE) {
+                      $post['form']['ocr_result'] = json_encode($ocrDecoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                  } else {
+                      unset($post['form']['ocr_result']);
+                  }
+              }
+
               $post['form']['uid_rf_bma'] = 2;
               $post['form']['cruser'] = $this -> me['uid_users'];
               if ($post['form'][$this->primaryKey]) {
@@ -601,6 +627,14 @@ class ikaController extends Front
           }else{
             $data['data'][$key]['kurang_jumlah_lapor'] = 0;
           }
+
+          //Bacaan mentah OCR, tersedia untuk template sebagai $v.ocr
+          $data['data'][$key]['ocr'] = $this->_ocrResult(isset($value['ocr_result']) ? $value['ocr_result'] : null);
+
+          //String JSON aslinya dibuang setelah di-decode. Tidak ada template daftar yang
+          //memakainya, sedangkan membiarkannya berarti tiap baris membawa dua salinan
+          //payload yang sama ke Smarty.
+          unset($data['data'][$key]['ocr_result']);
         }
 
         $this -> view -> pagination($this -> view, $totalRow, $offset + 1, $limit, $urlVar);
@@ -619,7 +653,24 @@ class ikaController extends Front
         if ($this -> params("x")) {
             $this -> tables -> set("pelaporan_ika", "uid_pelaporan_ika");
             $dataEdit = $this -> tables -> fetch("deleted = 0 AND uid_pelaporan_ika=" . $this -> params("x"));
-            echo json_encode($dataEdit['data'][0]);
+            $row = $dataEdit['data'][0];
+
+            //ocr_result tersimpan sebagai TEXT berisi JSON. Di-decode di sini supaya
+            //sisi view menerima objek dan bisa langsung meneruskannya ke
+            //applyOcrResult() tanpa perlu JSON.parse lagi.
+            //
+            //Perhatikan fungsi ini membaca TABEL DASAR, bukan v_pelaporan_ika, jadi
+            //kolomnya sudah tersedia sejak migrasi tabel — tidak menunggu migrasi view.
+            //
+            //null berarti salah satu dari tiga hal: kolomnya belum ada, belum pernah ada
+            //hasil OCR untuk baris ini, atau isinya gagal di-parse — yang bisa terjadi
+            //bila payload melebihi kapasitas TEXT lalu terpotong diam-diam karena
+            //sql_mode server tanpa STRICT_TRANS_TABLES.
+            if ($row) {
+                $row['ocr_result'] = $this -> _ocrResult(isset($row['ocr_result']) ? $row['ocr_result'] : null);
+            }
+
+            echo json_encode($row);
         }
     }
 
@@ -636,6 +687,29 @@ class ikaController extends Front
         } else {
             echo json_encode(array('statusCode' => 403, 'message' => $this -> message -> access()));
         }
+    }
+
+    private function _ocrResult($json)
+    {// decode kolom ocr_result (TEXT berisi JSON) jadi array siap pakai di template
+        //Di-decode sebagai ARRAY asosiatif, bukan objek, supaya Smarty bisa
+        //mengaksesnya dengan notasi titik: {$v.ocr.lokasi.text},
+        //{$v.ocr.parameters.bod}, dan seterusnya.
+        //
+        //Mengembalikan null untuk tiga keadaan yang semuanya berarti "tidak ada
+        //bacaan OCR yang bisa dipakai":
+        //  - kolomnya belum ada di view (migrasi view belum dijalankan)
+        //  - barisnya memang tidak berasal dari alur OCR (input manual / impor Excel)
+        //  - isinya gagal di-parse, misalnya karena payload melebihi kapasitas TEXT
+        //    lalu terpotong diam-diam (sql_mode server tanpa STRICT_TRANS_TABLES)
+        //Template cukup memeriksa {if $v.ocr} tanpa perlu membedakan ketiganya.
+        if (!$json) {
+            return null;
+        }
+        $decoded = json_decode($json, TRUE);
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+            return null;
+        }
+        return $decoded;
     }
 
     private function _getListExport($totalRow, $limitRow = LIMIT_DOWNLOAD_EXCEL)
@@ -766,6 +840,15 @@ class ikaController extends Front
         $paging	= array("offset"=>$offset, "limit"=>LIMIT_DOWNLOAD_EXCEL);
         $data	= $this->tables->fetch($w, $o, $paging);
         // $this->debug->show($data);
+        //Bacaan mentah OCR untuk kolom "HASIL OCR" di excel.html. String JSON aslinya
+        //dibuang setelah di-decode — dengan LIMIT_DOWNLOAD_EXCEL sebesar 2.500 baris,
+        //membiarkan keduanya berarti dua salinan payload per baris ditahan di memori
+        //sekaligus sepanjang proses render template.
+        foreach ($data['data'] as $key => $value) {
+            $data['data'][$key]['ocr'] = $this->_ocrResult(isset($value['ocr_result']) ? $value['ocr_result'] : null);
+            unset($data['data'][$key]['ocr_result']);
+        }
+
         $this->view->assign("offset", $offset+1);
         $this->view->assign("viewExcel", $data);
 
@@ -2216,15 +2299,33 @@ class ikaController extends Front
 
     private function _getProperties($model)
     {
+        //Kolom yang TIDAK boleh ikut dalam filter keyword. Pemanggil fungsi ini
+        //(getData, dataExcel, dataExcel2, dataExcelStatusMutu) membangun rantai
+        //"LIKE '%kw%' OR" dari SELURUH kolom yang dikembalikan di sini.
+        //
+        //ocr_result berisi payload JSON mentah hasil OCR. Bila ikut disapu, user yang
+        //mencari nama lab bisa mendapat baris yang lab-nya sama sekali lain — hanya
+        //karena nama itu masih tersisa di hasil OCR yang sudah dikoreksi manual. Selain
+        //menyesatkan, LIKE '%...%' pada kolom TEXT tanpa index juga memaksa scan penuh.
+        $excluded = array('ocr_result');
+
         $sql = "SHOW COLUMNS FROM " . $model;
         $result = $this -> db -> fetch($sql);
         //$this->debug->show($result);
         if ($result['total']) {
             $data = array();
             foreach ($result['data'] as $key => $val) {
-                $data[$key] = $val['Field'];
+                if (in_array($val['Field'], $excluded)) {
+                    continue;
+                }
+                $data[] = $val['Field'];
             }
+            //Indeks sengaja dibangun ulang lewat $data[] dan 'total' dihitung dari hasil
+            //akhir, bukan diwarisi dari SHOW COLUMNS. Pemanggilnya mengakses
+            //$properties['data'][$i] secara berurutan 0..total-1, jadi lubang indeks
+            //akibat kolom yang dilewati akan menghasilkan kolom kosong di query.
             $result['data'] = $data;
+            $result['total'] = count($data);
             return $result;
         } else {
             die('Coloums of table ' . $model . ' not found');

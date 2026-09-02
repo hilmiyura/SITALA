@@ -26,7 +26,11 @@
 			<th rowspan="2" bgcolor="#1E9FC4">NAMA DAS</th>
 			<th rowspan="2" bgcolor="#1E9FC4">NAMA SUNGAI</th>
 			<th rowspan="2" bgcolor="#1E9FC4">SHU</th>
-			<th colspan="54" bgcolor="#1E9FC4">NILAI PEMANTAUAN</th>
+			<th colspan="55" bgcolor="#1E9FC4">NILAI PEMANTAUAN</th>
+			<!-- Bacaan mentah model OCR, dipisahkan warnanya supaya jelas ini BUKAN
+			     nilai tersimpan melainkan pembanding untuk penelusuran. Kolom kiri
+			     adalah data yang berlaku; kolom di bawah ini apa yang dibaca model. -->
+			<th colspan="60" bgcolor="#0E7C9B">HASIL OCR (BACAAN MENTAH MODEL)</th>
 		</tr>
 		<tr style="color: white;">
 			<th bgcolor="#1E9FC4">
@@ -159,6 +163,67 @@
 			<th bgcolor="#1E9FC4">RADIOAKTIVITAS G-A <sup>Bq/L</sup> </th>
 			<th bgcolor="#1E9FC4">RADIOAKTIVITAS G-B <sup>Bq/L</sup> </th>
 			<th bgcolor="#1E9FC4">E-COLI <sup>MPN/100ML</sup> </th>
+		
+			<th bgcolor="#0E7C9B">STATUS</th>
+			<th bgcolor="#0E7C9B">LOKASI</th>
+			<th bgcolor="#0E7C9B">LABORATORIUM</th>
+			<th bgcolor="#0E7C9B">KATEGORI</th>
+			<th bgcolor="#0E7C9B">Debit Air (m3/s)</th>
+			<th bgcolor="#0E7C9B">pH (Potential Hydrogen)</th>
+			<th bgcolor="#0E7C9B">BOD (mg/L) (Biological Oxygen Demand)</th>
+			<th bgcolor="#0E7C9B">COD (mg/L) (Chemical Oxygen Demand)</th>
+			<th bgcolor="#0E7C9B">TSS (mg/L) (Total Susppended Solid)</th>
+			<th bgcolor="#0E7C9B">DO (mg/L) (Dissolved Oxygen)</th>
+			<th bgcolor="#0E7C9B">NO3-N (mg/L) (Nitrat)</th>
+			<th bgcolor="#0E7C9B">TOTAL FOSFAT mg/L</th>
+			<th bgcolor="#0E7C9B">FECAL COLIFORMmg/L</th>
+			<th bgcolor="#0E7C9B">KECERAHAN m</th>
+			<th bgcolor="#0E7C9B">KLOROFIL mg/m3</th>
+			<th bgcolor="#0E7C9B">TOTAL COLIFORMMPN/100 mL</th>
+			<th bgcolor="#0E7C9B">TEMPERATUR AIR 0C</th>
+			<th bgcolor="#0E7C9B">TEMPERATUR UDARA 0C</th>
+			<th bgcolor="#0E7C9B">MINYAK LEMAKmg/L</th>
+			<th bgcolor="#0E7C9B">DETERGEN mg/L</th>
+			<th bgcolor="#0E7C9B">FENOL mg/L</th>
+			<th bgcolor="#0E7C9B">TDS (mg/L) (Total Dissolved Solid)</th>
+			<th bgcolor="#0E7C9B">SULFAT mg/L</th>
+			<th bgcolor="#0E7C9B">KLORIDA mg/L</th>
+			<th bgcolor="#0E7C9B">NITRIT mg/L</th>
+			<th bgcolor="#0E7C9B">AMONIAK mg/L</th>
+			<th bgcolor="#0E7C9B">TOTAL N (mg/L) (Total Nitrogen)</th>
+			<th bgcolor="#0E7C9B">FLOURIDA mg/L</th>
+			<th bgcolor="#0E7C9B">BELERANG mg/L</th>
+			<th bgcolor="#0E7C9B">SIANIDA mg/L</th>
+			<th bgcolor="#0E7C9B">KLORIN mg/L</th>
+			<th bgcolor="#0E7C9B">WARNA Pt-Co Unit</th>
+			<th bgcolor="#0E7C9B">SAMPAH -</th>
+			<th bgcolor="#0E7C9B">Ba (mg/L) (Barium)</th>
+			<th bgcolor="#0E7C9B">B mg/L (Boron)</th>
+			<th bgcolor="#0E7C9B">Hg mg/L (Hydrargyrum)</th>
+			<th bgcolor="#0E7C9B">As mg/L (Arsenik)</th>
+			<th bgcolor="#0E7C9B">Se mg/L (Selenium)</th>
+			<th bgcolor="#0E7C9B">Fe mg/L (Ferrum)</th>
+			<th bgcolor="#0E7C9B">Cd mg/L (Kadmium)</th>
+			<th bgcolor="#0E7C9B">Co mg/L (Kobalt)</th>
+			<th bgcolor="#0E7C9B">Mn mg/L (Mangan)</th>
+			<th bgcolor="#0E7C9B">Ni mg/L (Nikel)</th>
+			<th bgcolor="#0E7C9B">Zn mg/L (Zinc)</th>
+			<th bgcolor="#0E7C9B">Cu mg/L (Cuprum)</th>
+			<th bgcolor="#0E7C9B">Pb mg/L (Plumbum)</th>
+			<th bgcolor="#0E7C9B">Cr-6 mg/L (Kromium)</th>
+			<th bgcolor="#0E7C9B">ALDRIN µg/L</th>
+			<th bgcolor="#0E7C9B">BHC (µg/L) (Benzene Hexachloride)</th>
+			<th bgcolor="#0E7C9B">CHLORDANE (µg/L)</th>
+			<th bgcolor="#0E7C9B">DDT (µg/L) (Dichoro Diphenyl Trichlorethane)</th>
+			<th bgcolor="#0E7C9B">ENDRIN µg/L</th>
+			<th bgcolor="#0E7C9B">HEPTACHLOR µg/L</th>
+			<th bgcolor="#0E7C9B">LINDANE µg/L</th>
+			<th bgcolor="#0E7C9B">METHOXYCHLOR µg/L</th>
+			<th bgcolor="#0E7C9B">TOXAPAN µg/L</th>
+			<th bgcolor="#0E7C9B">RADIOAKTIVITAS G-A Bq/L</th>
+			<th bgcolor="#0E7C9B">RADIOAKTIVITAS G-B Bq/L</th>
+			<th bgcolor="#0E7C9B">E-COLI MPN/100ML</th>
+			<th bgcolor="#0E7C9B">TIDAK DIKENALI</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -437,18 +502,18 @@
 				{/if}
 			</td>
 			<td align="center">
-				{if $v.total_nitrogen > 0}
-					{if $v.kategori == 3}
-						{if $v.total_nitrogen > 0.75}
-							<span style="color: red;">'{$v.total_nitrogen}</span>
+				{if $data.total_nitrogen > 0}
+					{if $data.kategori == 3}
+						{if $data.total_nitrogen > 0.75}
+							<span style="color: red;">'{$data.total_nitrogen}</span>
 						{else}
-							'{$v.total_nitrogen}
+							'{$data.total_nitrogen}
 						{/if}
 					{else}
-						{if $v.total_nitrogen > 15}
-							<span style="color: red;">'{$v.total_nitrogen}</span>
+						{if $data.total_nitrogen > 15}
+							<span style="color: red;">'{$data.total_nitrogen}</span>
 						{else}
-							'{$v.total_nitrogen}
+							'{$data.total_nitrogen}
 						{/if}
 					{/if}
 				{else}
@@ -807,10 +872,143 @@
 				-
 				{/if}
 			</td>
+		
+			{if $data.ocr}
+			<td align="center">ADA</td>
+			<td>{$data.ocr.lokasi.text|escape}</td>
+			<td>{$data.ocr.lab.text|escape}</td>
+			<td>{$data.ocr.kategori.text|escape}</td>
+			{* Nilai diuji terhadap null, BUKAN dengan |default, supaya angka 0 yang sah
+			   tidak ikut tersembunyi. Apostrof di depan mengikuti pola kolom di kiri:
+			   memaksa Excel membaca sel sebagai teks agar pemisah desimal tidak diubah
+			   mengikuti locale mesin yang membuka berkasnya. *}
+			<td align="center">{if $data.ocr.parameters.debit !== null}'{$data.ocr.parameters.debit}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.ph !== null}'{$data.ocr.parameters.ph}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.bod !== null}'{$data.ocr.parameters.bod}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.cod !== null}'{$data.ocr.parameters.cod}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.tss !== null}'{$data.ocr.parameters.tss}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.do_p !== null}'{$data.ocr.parameters.do_p}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.no3_n !== null}'{$data.ocr.parameters.no3_n}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.total_phosphat !== null}'{$data.ocr.parameters.total_phosphat}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.fecal_coliform !== null}'{$data.ocr.parameters.fecal_coliform}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.kecerahan !== null}'{$data.ocr.parameters.kecerahan}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.klorofil_a !== null}'{$data.ocr.parameters.klorofil_a}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.total_coliform !== null}'{$data.ocr.parameters.total_coliform}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.temperatur_air !== null}'{$data.ocr.parameters.temperatur_air}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.temperatur_udara !== null}'{$data.ocr.parameters.temperatur_udara}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.minyak_lemak !== null}'{$data.ocr.parameters.minyak_lemak}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.detergen_total !== null}'{$data.ocr.parameters.detergen_total}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.fenol !== null}'{$data.ocr.parameters.fenol}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.tds !== null}'{$data.ocr.parameters.tds}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.sulfat !== null}'{$data.ocr.parameters.sulfat}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.klorida !== null}'{$data.ocr.parameters.klorida}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.nitrit !== null}'{$data.ocr.parameters.nitrit}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.amoniak !== null}'{$data.ocr.parameters.amoniak}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.total_nitrogen !== null}'{$data.ocr.parameters.total_nitrogen}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.florida !== null}'{$data.ocr.parameters.florida}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.belerang_sbg_h2s !== null}'{$data.ocr.parameters.belerang_sbg_h2s}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.sianida !== null}'{$data.ocr.parameters.sianida}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.klorin_bebas !== null}'{$data.ocr.parameters.klorin_bebas}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.warna !== null}'{$data.ocr.parameters.warna}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.sampah !== null}'{$data.ocr.parameters.sampah}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.ba !== null}'{$data.ocr.parameters.ba}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.bo !== null}'{$data.ocr.parameters.bo}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.hg !== null}'{$data.ocr.parameters.hg}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.as_ !== null}'{$data.ocr.parameters.as_}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.se !== null}'{$data.ocr.parameters.se}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.fe !== null}'{$data.ocr.parameters.fe}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.cd !== null}'{$data.ocr.parameters.cd}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.co !== null}'{$data.ocr.parameters.co}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.mn !== null}'{$data.ocr.parameters.mn}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.ni !== null}'{$data.ocr.parameters.ni}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.zn !== null}'{$data.ocr.parameters.zn}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.cu !== null}'{$data.ocr.parameters.cu}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.pb !== null}'{$data.ocr.parameters.pb}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.cr_6 !== null}'{$data.ocr.parameters.cr_6}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.aldrin !== null}'{$data.ocr.parameters.aldrin}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.bhc !== null}'{$data.ocr.parameters.bhc}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.chlordane !== null}'{$data.ocr.parameters.chlordane}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.ddt !== null}'{$data.ocr.parameters.ddt}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.endrin !== null}'{$data.ocr.parameters.endrin}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.heptachlor !== null}'{$data.ocr.parameters.heptachlor}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.lindane !== null}'{$data.ocr.parameters.lindane}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.methoxychlor !== null}'{$data.ocr.parameters.methoxychlor}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.toxapan !== null}'{$data.ocr.parameters.toxapan}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.radioaktivitas_gross_a !== null}'{$data.ocr.parameters.radioaktivitas_gross_a}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.radioaktivitas_gross_b !== null}'{$data.ocr.parameters.radioaktivitas_gross_b}{/if}</td>
+			<td align="center">{if $data.ocr.parameters.e_coli !== null}'{$data.ocr.parameters.e_coli}{/if}</td>
+			{* Parameter yang terbaca model tapi namanya tidak cocok dengan satu pun kolom
+			   di atas. Dirakit dengan foreach, bukan |\@implode, karena urutan argumen
+			   implode(array, glue) sudah deprecated di PHP 7.4 dan hilang di 8.0. *}
+			<td>{foreach from=$data.ocr.unmatched_parameters item=u name=unm}{$u|escape}{if !$smarty.foreach.unm.last}; {/if}{/foreach}</td>
+			{else}
+			{* Sel kosong ditulis terpisah, bukan satu colspan. Sel tergabung membuat
+			   filter dan urutkan bawaan Excel tidak bisa dipakai di kolom itu. *}
+			<td align="center">TIDAK ADA</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			{/if}
 		</tr>
 		{foreachelse}
 		<tr style="color: white;">
-			<td colspan="61" align="center" bgcolor="#FA535D">BELUM ADA DATA</td>
+			<td colspan="130" align="center" bgcolor="#FA535D">BELUM ADA DATA</td>
 		</tr>
 		{/foreach}
 	</tbody>
