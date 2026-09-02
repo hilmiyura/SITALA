@@ -588,28 +588,16 @@ class ikuController extends Front
             $dataEdit = $this -> tables -> fetch("deleted = 0 AND uid_pelaporan_iku=" . $this -> params("x"));
             $row = $dataEdit['data'][0];
 
-            //ocr_result diambil lewat query TERPISAH ke tabel dasar, bukan dengan
-            //menambahkan kolomnya ke v_pelaporan_iku. Alasannya view itu bukan hanya
-            //milik endpoint ini:
+            //ocr_result tersimpan sebagai TEXT berisi JSON. Di-decode di sini supaya
+            //sisi view menerima objek dan bisa langsung meneruskannya ke
+            //applyOcrResult() tanpa perlu JSON.parse lagi.
             //
-            //  1. getData() membangun filter keyword dari SHOW COLUMNS view ini, lalu
-            //     mem-LIKE SEMUA kolomnya. Kalau ocr_result ikut, pencarian akan
-            //     menyisir isi JSON mentah — user mencari nama lab bisa mendapat baris
-            //     yang lab-nya lain, hanya karena nama itu muncul di hasil OCR yang
-            //     sudah dikoreksi manual. Hasil pencarian jadi keliru.
-            //  2. getData() dan ekspor Excel memakai SELECT * dari view ini, sehingga
-            //     tiap baris daftar ikut memikul payload JSON yang tidak dipakai.
-            //
-            //Payload ini bersifat khusus-detail, jadi biayanya ditaruh di sini saja.
-            //
-            //Dikembalikan sudah ter-decode (objek), bukan string JSON, supaya sisi view
-            //bisa langsung meneruskannya ke applyOcrResult() tanpa parse lagi. null
-            //berarti: belum pernah ada hasil OCR, ATAU isinya gagal di-parse — yang bisa
-            //terjadi bila payload melebihi kapasitas TEXT lalu terpotong diam-diam.
+            //null berarti salah satu dari tiga hal: kolomnya belum ada (migrasi view
+            //belum dijalankan), belum pernah ada hasil OCR untuk baris ini, atau isinya
+            //gagal di-parse — yang bisa terjadi bila payload melebihi kapasitas TEXT
+            //lalu terpotong diam-diam karena sql_mode server tanpa STRICT_TRANS_TABLES.
             if ($row) {
-                $ocrRow = $this -> db -> query("SELECT ocr_result FROM pelaporan_iku WHERE uid_pelaporan_iku = " . intval($this -> params("x")));
-                $ocrResult = (isset($ocrRow -> fields['ocr_result']) ? $ocrRow -> fields['ocr_result'] : null);
-
+                $ocrResult = (isset($row['ocr_result']) ? $row['ocr_result'] : null);
                 $row['ocr_result'] = null;
                 if ($ocrResult) {
                     $decoded = json_decode($ocrResult);
@@ -1834,15 +1822,33 @@ class ikuController extends Front
 
     private function _getProperties($model)
     {// function get Coloums in table
+        //Kolom yang TIDAK boleh ikut dalam filter keyword. Pemanggil fungsi ini
+        //(getData, dataExcel, dataExcel2) membangun rantai "LIKE '%kw%' OR" dari
+        //SELURUH kolom yang dikembalikan di sini.
+        //
+        //ocr_result berisi payload JSON mentah hasil OCR. Bila ikut disapu, user yang
+        //mencari nama lab bisa mendapat baris yang lab-nya sama sekali lain — hanya
+        //karena nama itu masih tersisa di hasil OCR yang sudah dikoreksi manual. Selain
+        //menyesatkan, LIKE '%...%' pada kolom TEXT tanpa index juga memaksa scan penuh.
+        $excluded = array('ocr_result');
+
         $sql = "SHOW COLUMNS FROM " . $model;
         $result = $this -> db -> fetch($sql);
         //$this->debug->show($result);
         if ($result['total']) {
             $data = array();
             foreach ($result['data'] as $key => $val) {
-                $data[$key] = $val['Field'];
+                if (in_array($val['Field'], $excluded)) {
+                    continue;
+                }
+                $data[] = $val['Field'];
             }
+            //Indeks sengaja dibangun ulang lewat $data[] dan 'total' dihitung dari hasil
+            //akhir, bukan diwarisi dari SHOW COLUMNS. Pemanggilnya mengakses
+            //$properties['data'][$i] secara berurutan 0..total-1, jadi lubang indeks
+            //akibat kolom yang dilewati akan menghasilkan kolom kosong di query.
             $result['data'] = $data;
+            $result['total'] = count($data);
             return $result;
         } else {
             die('Coloums of table ' . $model . ' not found');
