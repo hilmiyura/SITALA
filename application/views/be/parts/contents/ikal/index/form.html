@@ -274,7 +274,21 @@
   #tambahData #ocr-status.alert-warning { border-left-color: #f0ad4e; background: #fff8ec; color: #8a5a00; }
   #tambahData #ocr-status.alert-danger { border-left-color: #dc3545; background: #fdeeee; color: #a71d2a; }
 
-  /* ---- FE criteria-check badges (koordinat, DO, ...) ---- */
+  /* ---- FE criteria check: koordinat SHU vs terdaftar (sama seperti IKU) ---- */
+  #tambahData [id^="cek-koordinat"] {
+    border: none;
+    border-left: 4px solid;
+    border-radius: 8px;
+    font-size: .8rem;
+    padding: .55rem .85rem !important;
+    margin-top: .5rem;
+  }
+  #tambahData [id^="cek-koordinat"].alert-info { border-left-color: #2f80e0; background: #eef6ff; color: #1c5fa8; }
+  #tambahData [id^="cek-koordinat"].alert-success { border-left-color: #28a745; background: #eefaf1; color: #1e7e34; }
+  #tambahData [id^="cek-koordinat"].alert-warning { border-left-color: #f0ad4e; background: #fff8ec; color: #8a5a00; }
+  #tambahData [id^="cek-koordinat"].alert-danger { border-left-color: #dc3545; background: #fdeeee; color: #a71d2a; }
+
+  /* ---- FE criteria-check badge (DO) ---- */
   #tambahData .badge-kriteria {
     display: inline-block;
     font-size: .74rem;
@@ -486,7 +500,7 @@
               <input type="text" class="form-control position-relative" readonly name="form[longitude]" id="longitude" placeholder="Longitude" value="" required="" />
             </div>
             <div class="col-md-12">
-              <span class="badge-kriteria" id="cek-koordinat" style="display:none;"></span>
+              <div class="alert mb-0" id="cek-koordinat" style="display:none;"></div>
             </div>
           </div>
           <h4 class="form-section"><i class="ft-edit"></i>Pemantauan</h4>
@@ -583,7 +597,7 @@
               <input type="text" class="form-control position-relative" readonly id="longitude" placeholder="Longitude" value="" />
             </div>
             <div class="col-md-12">
-              <span class="badge-kriteria" id="cek-koordinat" style="display:none;"></span>
+              <div class="alert mb-0" id="cek-koordinat" style="display:none;"></div>
             </div>
           </div>
           <h4 class="form-section"><i class="ft-edit"></i>Pemantauan</h4>

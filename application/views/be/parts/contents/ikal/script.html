@@ -5,8 +5,9 @@
   var ocrOptions = [];
   var ocrMode = null; //null|"single"|"all"
 
-  //FE-only criteria checks (mockup) on OCR results — koordinat SHU vs lokasi terdaftar, dan batas nilai DO
-  var COORD_TOLERANCE_METERS = 100;
+  //FE criteria checks on OCR results — koordinat SHU vs lokasi terdaftar (logika & tampilan sama seperti IKU), dan batas nilai DO
+  var KOORDINAT_TOLERANSI_OK_M = 50;
+  var KOORDINAT_TOLERANSI_WARN_M = 100;
   var DO_MAX_VALUE = 8.5;
 
   function haversineMeters(lat1, lng1, lat2, lng2) {
@@ -19,27 +20,55 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  function formatJarak(meters) {
-    return meters >= 1000 ? (meters / 1000).toFixed(2) + " km" : Math.round(meters) + " m";
+  function setBoxStatus($box, type, html) {
+    $box.removeClass("alert-info alert-success alert-warning alert-danger")
+      .addClass("alert-" + type)
+      .html(html)
+      .show();
   }
 
   //sfx = "" for the single block, "_r0", "_r1", ... for repeater rows
   function renderKoordinatCheck(sfx, ocrLat, ocrLng, regLat, regLng) {
-    var $badge = $("#cek-koordinat" + sfx);
-    var lat1 = parseFloat(ocrLat), lng1 = parseFloat(ocrLng);
-    var lat2 = parseFloat(regLat), lng2 = parseFloat(regLng);
-    if (isNaN(lat1) || isNaN(lng1) || isNaN(lat2) || isNaN(lng2)) {
-      $badge.hide();
+    var $box = $("#cek-koordinat" + sfx);
+    ocrLat = parseFloat(ocrLat);
+    ocrLng = parseFloat(ocrLng);
+    regLat = parseFloat(regLat);
+    regLng = parseFloat(regLng);
+
+    if (isNaN(ocrLat) || isNaN(ocrLng) || isNaN(regLat) || isNaN(regLng)) {
+      $box.hide().html("");
       return;
     }
-    var jarak = haversineMeters(lat1, lng1, lat2, lng2);
-    if (jarak <= COORD_TOLERANCE_METERS) {
-      $badge.removeClass("badge-kriteria-warn").addClass("badge-kriteria-ok")
-        .text("✓ Koordinat SHU sesuai lokasi terdaftar (±" + formatJarak(jarak) + ")").show();
-    } else {
-      $badge.removeClass("badge-kriteria-ok").addClass("badge-kriteria-warn")
-        .text("⚠ Koordinat SHU berbeda ~" + formatJarak(jarak) + " dari lokasi terdaftar, mohon periksa").show();
+
+    var jarakLangsung = Math.round(haversineMeters(ocrLat, ocrLng, regLat, regLng));
+    //sejumlah lokasi terdaftar diketahui punya kolom latitude/longitude tertukar (data entry lama) —
+    //cek juga jarak seandainya keduanya ditukar, supaya tidak menampilkan selisih raksasa yang
+    //menyesatkan padahal sebenarnya cuma tertukar (sama seperti IKU)
+    var jarakTertukar = Math.round(haversineMeters(ocrLat, ocrLng, regLng, regLat));
+    var koordDasar = "Koordinat SHU: " + ocrLat + ", " + ocrLng + " &middot; Terdaftar: " + regLat + ", " + regLng;
+
+    if (jarakTertukar <= KOORDINAT_TOLERANSI_WARN_M && jarakTertukar < jarakLangsung * 0.5) {
+      setBoxStatus($box, "warning", "<b>Latitude/Longitude lokasi terdaftar kemungkinan tertukar</b> &middot; " + koordDasar
+        + " &middot; Selisih langsung ~" + jarakLangsung + " m, setelah ditukar ~" + jarakTertukar + " m"
+        + " &middot; Mohon periksa &amp; perbaiki data Lokasi Pemantauan.");
+      return;
     }
+
+    var jarak = Math.min(jarakLangsung, jarakTertukar);
+    var type = "danger";
+    var label = "Koordinat SHU tidak sesuai lokasi terdaftar";
+    if (jarak <= KOORDINAT_TOLERANSI_OK_M) {
+      type = "success";
+      label = "Koordinat SHU sesuai lokasi terdaftar";
+    } else if (jarak <= KOORDINAT_TOLERANSI_WARN_M) {
+      type = "warning";
+      label = "Koordinat SHU perlu diperiksa";
+    }
+    var catatanTertukar = (jarakTertukar < jarakLangsung)
+      ? " &middot; (jarak setelah ditukar lebih dekat: ~" + jarakTertukar + " m, kemungkinan lat/long lokasi terdaftar tertukar)"
+      : "";
+
+    setBoxStatus($box, type, "<b>" + label + "</b> &middot; " + koordDasar + " &middot; Selisih ~" + jarak + " m" + catatanTertukar);
   }
 
   function updateDoBadge(sfx) {

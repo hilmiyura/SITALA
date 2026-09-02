@@ -75,6 +75,72 @@
       .show();
   }
 
+  function setBoxStatus($box, type, html) {
+    $box.removeClass("alert-info alert-success alert-warning alert-danger")
+      .addClass("alert-" + type)
+      .html(html)
+      .show();
+  }
+
+  //===== koordinat SHU (OCR) vs koordinat lokasi terdaftar, dengan toleransi jarak (sama seperti IKU) =====
+  var KOORDINAT_TOLERANSI_OK_M = 50;
+  var KOORDINAT_TOLERANSI_WARN_M = 100;
+
+  function haversineMeters(lat1, lon1, lat2, lon2) {
+    var R = 6371000; //radius bumi, meter
+    var toRad = function(d) { return d * Math.PI / 180; };
+    var dLat = toRad(lat2 - lat1);
+    var dLon = toRad(lon2 - lon1);
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+      + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  //sfx = "" for the single/default fields, "_r0", "_r1", ... for cloned repeater rows
+  function renderKoordinatCheck(sfx, ocrLat, ocrLng, regLat, regLng) {
+    var $box = $("#koordinat-check" + sfx);
+    ocrLat = parseFloat(ocrLat);
+    ocrLng = parseFloat(ocrLng);
+    regLat = parseFloat(regLat);
+    regLng = parseFloat(regLng);
+
+    if (isNaN(ocrLat) || isNaN(ocrLng) || isNaN(regLat) || isNaN(regLng)) {
+      $box.hide().html("");
+      return;
+    }
+
+    var jarakLangsung = Math.round(haversineMeters(ocrLat, ocrLng, regLat, regLng));
+    //sejumlah lokasi terdaftar diketahui punya kolom latitude/longitude tertukar (data entry lama) —
+    //cek juga jarak seandainya keduanya ditukar, supaya tidak menampilkan selisih raksasa yang
+    //menyesatkan padahal sebenarnya cuma tertukar (sama seperti IKU)
+    var jarakTertukar = Math.round(haversineMeters(ocrLat, ocrLng, regLng, regLat));
+    var koordDasar = "Koordinat SHU: " + ocrLat + ", " + ocrLng + " &middot; Terdaftar: " + regLat + ", " + regLng;
+
+    if (jarakTertukar <= KOORDINAT_TOLERANSI_WARN_M && jarakTertukar < jarakLangsung * 0.5) {
+      setBoxStatus($box, "warning", "<b>Latitude/Longitude lokasi terdaftar kemungkinan tertukar</b> &middot; " + koordDasar
+        + " &middot; Selisih langsung ~" + jarakLangsung + " m, setelah ditukar ~" + jarakTertukar + " m"
+        + " &middot; Mohon periksa &amp; perbaiki data Lokasi Pemantauan.");
+      return;
+    }
+
+    var jarak = Math.min(jarakLangsung, jarakTertukar);
+    var type = "danger";
+    var label = "Koordinat SHU tidak sesuai lokasi terdaftar";
+    if (jarak <= KOORDINAT_TOLERANSI_OK_M) {
+      type = "success";
+      label = "Koordinat SHU sesuai lokasi terdaftar";
+    } else if (jarak <= KOORDINAT_TOLERANSI_WARN_M) {
+      type = "warning";
+      label = "Koordinat SHU perlu diperiksa";
+    }
+    var catatanTertukar = (jarakTertukar < jarakLangsung)
+      ? " &middot; (jarak setelah ditukar lebih dekat: ~" + jarakTertukar + " m, kemungkinan lat/long lokasi terdaftar tertukar)"
+      : "";
+
+    setBoxStatus($box, type, "<b>" + label + "</b> &middot; " + koordDasar + " &middot; Selisih ~" + jarak + " m" + catatanTertukar);
+  }
+
   function toggleKategoriFields($scope, val) {
     var $fields = $scope.find(".danau_parameter");
     if (val == 3) {
@@ -116,6 +182,7 @@
               $("#alamat_detail" + sfx).val(val.alamat_detail);
               $("#latitude" + sfx).val(val.latitude);
               $("#longitude" + sfx).val(val.longitude);
+              renderKoordinatCheck(sfx, data.latitude, data.longitude, val.latitude, val.longitude);
               if (!sfx) {
                 id_kabkota = val.uid_kabkota;
                 $("#uid_provinsi").val(val.uid_provinsi).trigger("change");
@@ -124,6 +191,8 @@
                 }, 1000);
               }
             });
+          } else {
+            $("#koordinat-check" + sfx).hide();
           }
           $("#uid_lokasi_pemantauan" + sfx).html(htmls);
           lokasiDone();
@@ -131,6 +200,7 @@
         error: lokasiDone
       });
     } else {
+      $("#koordinat-check" + sfx).hide();
       if (data.lokasi && data.lokasi.text) {
         unmatched.push("Lokasi Pemantauan (\"" + data.lokasi.text + "\")");
       }
@@ -212,6 +282,7 @@
           $("#alamat_detail" + sfx).val("");
           $("#latitude" + sfx).val("");
           $("#longitude" + sfx).val("");
+          $("#koordinat-check" + sfx).hide().html("");
           return;
         }
         $.ajax({
@@ -224,6 +295,7 @@
                 $("#alamat_detail" + sfx).val(val.alamat_detail);
                 $("#latitude" + sfx).val(val.latitude);
                 $("#longitude" + sfx).val(val.longitude);
+                renderKoordinatCheck(sfx, opt.latitude, opt.longitude, val.latitude, val.longitude);
               });
             }
           }
@@ -582,6 +654,7 @@
     $("#alamat_detail").val("");
     $("#latitude").val("");
     $("#longitude").val("");
+    $("#koordinat-check").hide().html("");
     $("#uid_lokasi_pemantauan").val("").trigger("change");
     $("#periode_pemantauan").val("").trigger("change");
     $("#uid_provinsi").val("").trigger("change");
