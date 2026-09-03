@@ -135,6 +135,7 @@
   function applySharedFields(data) {
     if (data.tanggal) {
       $("#tanggal").val(data.tanggal).trigger("change");
+      $('input[name="form[tanggal]_submit"]').val(data.tanggal);
     }
     if (data.periode_pemantauan) {
       $("#periode_pemantauan").val(data.periode_pemantauan).trigger("change");
@@ -227,6 +228,7 @@
       ocrMode = "single";
       $("#ocr-repeater-rows").hide().empty();
       $("#ocr-single-block").show();
+      $("#ocr_result_payload").val(JSON.stringify(ocrOptions[val]));
       var unmatched = applyOcrResult(ocrOptions[val]);
       var msg = "Lokasi \"" + (ocrOptions[val].label || "") + "\" diisikan ke form. Lokasi Pemantauan tetap bisa diganti manual di bawah.";
       if (unmatched.length) {
@@ -262,6 +264,7 @@
       var fd = new FormData(formEl);
       fd.set("submit", "1");
       //.set() replaces whatever the (hidden) single block's same-named fields captured
+      fd.set("form[ocr_result]", JSON.stringify(ocrOptions[idx] || {}));
       fd.set("form[uid_lokasi_pemantauan]", $("#uid_lokasi_pemantauan" + sfx).val() || "");
       fd.set("form[uid_rf_peruntukan]", $("#uid_rf_peruntukan" + sfx).val() || "");
       fd.set("form[tss]", $("#tss" + sfx).val() || "");
@@ -344,6 +347,7 @@
           if (res.data && res.data.multi) {
             ocrOptions = res.data.options || [];
             applySharedFields(ocrOptions[0] || {});
+            $("#ocr_result_payload").val(JSON.stringify(res.data));
 
             var pickerHtml = '<option value="">--PILIH LOKASI--</option><option value="all">PILIH SEMUA</option>';
             jQuery.each(ocrOptions, function(i, opt) {
@@ -367,6 +371,7 @@
             ocrMode = null;
             applySharedFields(res.data);
             var unmatched = applyOcrResult(res.data);
+            $("#ocr_result_payload").val(JSON.stringify(res.data));
             var msg = "Dokumen berhasil dibaca, form terisi otomatis. Mohon periksa kembali sebelum menyimpan. "
               + "Catatan: parameter kualitas air (TSS/DO/Minyak &amp; Lemak/Amonia/Ortofosfat) belum didukung "
               + "OCR untuk IKAL, mohon isi manual.";
@@ -512,6 +517,7 @@
     $(".shu-download").hide();
     $("#uid_lab").val("").trigger("change");
     $("#shu").val("");
+    $("#ocr_result_payload").val("");
     $("#ocr-status").hide().html("");
     ocrOptions = [];
     ocrMode = null;
@@ -596,6 +602,10 @@
               resetDropzone();
             }
             $("#uid_lab").val(req.uid_lab? req.uid_lab.split(',') : '').trigger("change");
+            if (req.ocr_result) {
+              $("#ocr_result_payload").val(JSON.stringify(req.ocr_result));
+              setOcrStatus("info", "Data ini pernah diisi via OCR. Hasil bacaan tersimpan sebagai referensi.");
+            }
           }
         },
       });
