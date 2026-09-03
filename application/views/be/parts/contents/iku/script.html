@@ -327,6 +327,7 @@
 	function applySharedFields(data) {
 		if (data.tanggal) {
 			$("#tanggal").val(data.tanggal).trigger("change");
+			$('input[name="form[tanggal]_submit"]').val(data.tanggal);
 		}
 		if (data.periode_pemantauan) {
 			$("#periode_pemantauan").val(data.periode_pemantauan).trigger("change");
