@@ -619,6 +619,66 @@ class ikuController extends Front
         }
     }
 
+    //Nilai PM2.5 satelit acuan untuk satu kabupaten/kota pada satu tahun, diambil dari
+    //rf_nilai_pelengkap_iklh. Dipanggil lewat AJAX dari form pelaporan:
+    //
+    //  GET /iku/pm25Satelit/x/<uid_provinsi>/y/<uid_kabkota>/z/<tahun>
+    //
+    //Angka ini BUKAN hasil pengukuran laboratorium melainkan data acuan tahunan, sehingga
+    //tidak pernah muncul di dokumen SHU dan tidak bisa diisi oleh alur OCR — metode
+    //"Satelit" (rf_metode_pemantauan uid 17) memang tidak terjangkau matchMetode() yang
+    //hanya mengenal kata kunci aktif/pasif/otomatis. Endpoint inilah penggantinya.
+    //
+    //Kolom yang sama sudah ikut terbawa view sebagai v_pelaporan_iku.pm25_np_satelit lewat
+    //join ke rf_nilai_pelengkap_iklh; endpoint ini menyediakannya SEBELUM baris pelaporan
+    //tersimpan, yaitu saat user baru memilih lokasi dan tahun di form.
+    //
+    //Responsnya memakai amplop {statusCode, message, data} seperti endpoint JSON baru
+    //lainnya. Kombinasi (uid_provinsi, uid_kabkota, tahun) UNIK di tabel itu — sudah
+    //diperiksa, nol duplikat dari 514 baris aktif — jadi "data" berupa SATU objek baris,
+    //bukan array.
+    //
+    //data bernilai null BUKAN galat: itu berarti daerah/tahun tersebut memang belum punya
+    //nilai acuan, dan statusCode-nya tetap 200. Bedakan dari 400, yang berarti parameternya
+    //sendiri tidak sah. Tanpa pembedaan itu, salah ketik parameter akan tampak sama persis
+    //dengan "belum ada datanya".
+    public function pm25Satelit()
+    {
+        header("Content-Type: application/json; charset=UTF-8");
+
+        $uidProvinsi = (int) $this -> params("x");
+        $uidKabkota  = (int) $this -> params("y");
+        $tahun       = (int) $this -> params("z");
+
+        //Ketiganya wajib > 0. Di tabel acuan tidak ada satu pun baris ber-uid_provinsi
+        //atau uid_kabkota 0, jadi nilai 0 pasti berarti parameternya hilang atau bukan
+        //angka — bukan permintaan yang sah.
+        if ($uidProvinsi <= 0 || $uidKabkota <= 0 || $tahun <= 0) {
+            echo json_encode(array(
+                'statusCode' => 400,
+                'message' => "Parameter x (uid_provinsi), y (uid_kabkota), dan z (tahun) wajib diisi dan harus angka lebih besar dari 0",
+                'data' => null
+            ));
+            return;
+        }
+
+        $this -> tables -> set("rf_nilai_pelengkap_iklh", "uid_nilai_pelengkap_iklh");
+        $rf = $this -> tables -> fetch(
+            "deleted = 0 AND uid_provinsi = " . $uidProvinsi .
+            " AND uid_kabkota = " . $uidKabkota .
+            " AND tahun = " . $tahun
+        );
+        $row = isset($rf['data'][0]) ? $rf['data'][0] : null;
+
+        echo json_encode(array(
+            'statusCode' => 200,
+            'message' => ($row
+                ? "Nilai PM2.5 satelit tahun " . $tahun . " ditemukan"
+                : "Belum ada nilai PM2.5 satelit untuk daerah dan tahun tersebut"),
+            'data' => $row
+        ));
+    }
+
     public function deletedData()
     {// function deleted data pelaporan iku
         $post = $this -> post();
