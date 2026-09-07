@@ -11,6 +11,9 @@ class ocrController extends Front
         //LOAD MODELS
         $this -> loadModel("tables");
         $this -> loadModel("openrouter");
+        //utils dipakai untuk jarak antar-koordinat (distanceMeters) dan pembacaan
+        //ambang dari config_parameters (configInt) — lihat mergeSameLocationEntries()
+        $this -> loadModel("utils");
 
         //GLOBAL VAR
         $this -> me = $this -> session -> get('memberIKLH');
@@ -28,6 +31,16 @@ class ocrController extends Front
         }
 
         $result = $this -> openrouter -> extractIku($file['tmp_name'], $file['mime']);
+
+        //Prompt iku.md sengaja meminta model TIDAK menggabungkan sertifikat dari lab
+        //berbeda untuk lokasi yang sama — pekerjaan itu diserahkan ke sini, di mana
+        //aturannya bisa diuji dan dijamin konsisten. Dijalankan pada lokasi_list MENTAH,
+        //sebelum pencocokan ke master, supaya penggabungan bekerja pada koordinat dan
+        //nilai apa adanya dari dokumen.
+        if ($result['success'] && isset($result['data']['lokasi_list']) && is_array($result['data']['lokasi_list'])) {
+            $result['data']['lokasi_list'] = $this -> mergeSameLocationEntries($result['data']['lokasi_list']);
+        }
+
         $this -> respondExtract($result, "matchFieldsIku");
     }
 
@@ -156,6 +169,23 @@ class ocrController extends Front
     {
         $out = $this -> matchFieldsBase($shared, $entry, 1);
         $out['peruntukan'] = $this -> matchPeruntukan(isset($entry['peruntukan_text']) ? $entry['peruntukan_text'] : null, 1);
+
+        //"lab" untuk IKU berupa ARRAY, berbeda dari matchFieldsBase() yang mengembalikan
+        //satu objek dan tetap dipakai apa adanya oleh IKA/IKAL. Sebabnya satu lokasi bisa
+        //dilayani lebih dari satu lab (lihat mergeSameLocationEntries()), dan kolom
+        //pelaporan_iku.uid_lab memang menyimpannya sebagai CSV — bentuk array di sini
+        //memungkinkan FE meng-preselect multi-select #uid_lab dengan beberapa lab sekaligus.
+        $labTexts = array();
+        $primaryLabText = !empty($entry['laboratorium_text']) ? $entry['laboratorium_text'] : $shared['laboratorium_text'];
+        if (!empty($primaryLabText)) {
+            $labTexts[] = $primaryLabText;
+        }
+        //_lab_texts hanya ada pada entri hasil penggabungan — field internal, bukan
+        //bagian skema prompt (lihat mergeEntryGroup())
+        if (!empty($entry['_lab_texts']) && is_array($entry['_lab_texts'])) {
+            $labTexts = array_merge($labTexts, $entry['_lab_texts']);
+        }
+        $out['lab'] = $this -> matchLabMulti($labTexts);
 
         //Parameter dikelompokkan di bawah key "parameters" supaya sebentuk dengan respons
         //IKA dan IKAL. Perhatikan isinya TIDAK sama: di sini tiap parameter berupa objek
@@ -432,6 +462,192 @@ class ocrController extends Front
             $result['uid'] = $rows[0]['uid'];
         }
         return $result;
+    }
+
+    //$texts: daftar nama lab, bisa lebih dari satu bila entri lokasi ini hasil penggabungan
+    //beberapa sertifikat (lihat mergeSameLocationEntries()). Selalu mengembalikan ARRAY,
+    //boleh kosong; tiap elemen {uid, text} hasil matchLab() apa adanya — entri dengan uid
+    //null tetap disertakan supaya FE bisa menampilkan nama lab yang tidak ketemu di rf_lab,
+    //konsisten dengan pola unmatched di field lain.
+    //
+    //Duplikat dibuang di dua tingkat: teks yang sama setelah dinormalkan, dan dua teks
+    //berbeda yang ternyata menunjuk uid rf_lab yang sama (mis. "PT Mutuagung Lestari" dan
+    //"Mutu International" di dua sertifikat) — kalau lolos, uid_lab CSV akan memuat angka
+    //kembar dan multi-select di FE ikut janggal.
+    private function matchLabMulti($texts)
+    {
+        $results = array();
+        $seenUid = array();
+        $seenText = array();
+
+        foreach ($texts as $text) {
+            if (!$text) {
+                continue;
+            }
+
+            $norm = $this -> normalize($text);
+            if (isset($seenText[$norm])) {
+                continue;
+            }
+            $seenText[$norm] = true;
+
+            $result = $this -> matchLab($text);
+            if ($result['uid'] !== null) {
+                if (isset($seenUid[$result['uid']])) {
+                    continue;
+                }
+                $seenUid[$result['uid']] = true;
+            }
+
+            $results[] = $result;
+        }
+
+        return $results;
+    }
+
+    //Cadangan bila baris LOCATION_MERGE_RADIUS_M belum ada di config_parameters.
+    //Nilai yang sebenarnya berlaku ada di tabel itu.
+    const MERGE_RADIUS_FALLBACK_M = 500;
+
+    //Menggabungkan entri lokasi_list MENTAH yang sebenarnya menunjuk satu titik fisik,
+    //untuk kasus satu berkas berisi sertifikat dari beberapa lab (lab A mengukur NO2+SO2,
+    //lab B mengukur PM2.5) yang oleh model ditulis sebagai entri terpisah.
+    //
+    //Dua entri disatukan HANYA bila kedua syarat terpenuhi:
+    //  (a) jaraknya <= LOCATION_MERGE_RADIUS_M, dan
+    //  (b) cakupan parameternya saling melengkapi — lihat entriesComplementary()
+    //
+    //Union-find dipakai, bukan sekadar membandingkan berpasangan, karena satu lokasi bisa
+    //muncul di lebih dari dua sertifikat sehingga penggabungannya berantai.
+    //
+    //Entri tanpa koordinat TIDAK PERNAH digabung. Itu disengaja: tanpa koordinat, satu-satunya
+    //petunjuk tersisa adalah kemiripan teks lokasi, yang tidak cukup kuat untuk mempertaruhkan
+    //penggabungan dua titik berbeda menjadi satu baris pelaporan.
+    private function mergeSameLocationEntries($lokasiList)
+    {
+        $n = count($lokasiList);
+        if ($n < 2) {
+            return $lokasiList;
+        }
+
+        $radius = $this -> utils -> configInt('LOCATION_MERGE_RADIUS_M', self::MERGE_RADIUS_FALLBACK_M);
+
+        $parent = range(0, $n - 1);
+        $find = function ($x) use (&$parent, &$find) {
+            while ($parent[$x] !== $x) {
+                $parent[$x] = $parent[$parent[$x]]; //path halving
+                $x = $parent[$x];
+            }
+            return $x;
+        };
+
+        for ($i = 0; $i < $n; $i++) {
+            if (!$this -> entryHasCoordinates($lokasiList[$i])) {
+                continue;
+            }
+            for ($j = $i + 1; $j < $n; $j++) {
+                if (!$this -> entryHasCoordinates($lokasiList[$j])) {
+                    continue;
+                }
+
+                $dist = $this -> utils -> distanceMeters(
+                    $lokasiList[$i]['latitude'], $lokasiList[$i]['longitude'],
+                    $lokasiList[$j]['latitude'], $lokasiList[$j]['longitude']
+                );
+                if ($dist > $radius) {
+                    continue;
+                }
+                if (!$this -> entriesComplementary($lokasiList[$i], $lokasiList[$j])) {
+                    continue;
+                }
+
+                $ri = $find($i);
+                $rj = $find($j);
+                if ($ri !== $rj) {
+                    $parent[$rj] = $ri;
+                }
+            }
+        }
+
+        $groups = array();
+        for ($i = 0; $i < $n; $i++) {
+            $groups[$find($i)][] = $i;
+        }
+
+        $merged = array();
+        foreach ($groups as $indexes) {
+            if (count($indexes) === 1) {
+                $merged[] = $lokasiList[$indexes[0]];
+                continue;
+            }
+            $entries = array();
+            foreach ($indexes as $idx) {
+                $entries[] = $lokasiList[$idx];
+            }
+            $merged[] = $this -> mergeEntryGroup($entries);
+        }
+
+        return $merged;
+    }
+
+    private function entryHasCoordinates($entry)
+    {
+        return isset($entry['latitude']) && isset($entry['longitude'])
+            && is_numeric($entry['latitude']) && is_numeric($entry['longitude']);
+    }
+
+    //Dua entri disebut saling melengkapi bila TIDAK ADA satu pun parameter yang sama-sama
+    //terisi. Ini penjaga terpenting dalam penggabungan: kalau keduanya sama-sama punya nilai
+    //NO2, itu pertanda dua lokasi fisik berbeda yang kebetulan berdekatan — bukan satu lokasi
+    //dua lab. Lebih baik gagal menggabungkan (user menggabungkan sendiri lewat form) daripada
+    //mencampur hasil uji dua titik jadi satu baris pelaporan yang tidak bisa ditelusuri lagi.
+    private function entriesComplementary($a, $b)
+    {
+        foreach (array('no2', 'so2', 'pm25') as $param) {
+            $av = isset($a[$param]['nilai']) ? $a[$param]['nilai'] : null;
+            $bv = isset($b[$param]['nilai']) ? $b[$param]['nilai'] : null;
+            if ($av !== null && $bv !== null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //Menyatukan satu kelompok entri jadi satu. Entri pertama jadi dasar; tiap parameter yang
+    //masih kosong diisi dari entri lain yang punya nilai — aman karena entriesComplementary()
+    //sudah memastikan tidak ada yang tumpang tindih. Objek parameternya disalin UTUH (nilai,
+    //metode_text, durasi_pemantauan) supaya metode dan durasi tetap milik lab yang benar-benar
+    //mengukurnya, bukan milik lab pada entri dasar.
+    private function mergeEntryGroup($entries)
+    {
+        $out = $entries[0];
+        $labTexts = array();
+
+        foreach ($entries as $e) {
+            if (!empty($e['laboratorium_text'])) {
+                $labTexts[] = $e['laboratorium_text'];
+            }
+
+            foreach (array('no2', 'so2', 'pm25') as $param) {
+                $v = isset($e[$param]['nilai']) ? $e[$param]['nilai'] : null;
+                $curr = isset($out[$param]['nilai']) ? $out[$param]['nilai'] : null;
+                if ($curr === null && $v !== null) {
+                    $out[$param] = $e[$param];
+                }
+            }
+
+            if (empty($out['peruntukan_text']) && !empty($e['peruntukan_text'])) {
+                $out['peruntukan_text'] = $e['peruntukan_text'];
+            }
+            if (empty($out['lokasi_text']) && !empty($e['lokasi_text'])) {
+                $out['lokasi_text'] = $e['lokasi_text'];
+            }
+        }
+
+        //Field internal, dibaca matchFieldsIku() lalu tidak ikut ke respons
+        $out['_lab_texts'] = array_values(array_unique($labTexts));
+
+        return $out;
     }
 
     private function matchMetode($text, $matrikSampelText = null)

@@ -91,7 +91,11 @@
 			{if $data.ocr}
 			<td align="center">ADA</td>
 			<td>{$data.ocr.lokasi.text|escape}</td>
-			<td>{$data.ocr.lab.text|escape}</td>
+			{* "lab" adalah LIST, bisa lebih dari satu bila dokumennya gabungan sertifikat
+			   beberapa lab untuk satu lokasi. Payload lama yang berbentuk objek tunggal
+			   sudah diseragamkan jadi list di ikuController::_ocrResult(), jadi di sini
+			   cukup satu perlakuan. *}
+			<td>{foreach from=$data.ocr.lab item=l name=lab}{$l.text|escape}{if !$smarty.foreach.lab.last}; {/if}{/foreach}</td>
 			<td>{$data.ocr.peruntukan.text|escape}</td>
 			{* Nilai diuji terhadap null, BUKAN dengan |default, supaya angka 0 yang sah
 			   tidak ikut tersembunyi. Apostrof di depan mengikuti pola kolom di kiri:

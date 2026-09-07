@@ -654,6 +654,21 @@ class ikuController extends Front
         if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
             return null;
         }
+
+        //Bentuk "lab" berubah sejak OCR IKU mendukung multi-lab: dulu SATU objek
+        //{uid, text}, sekarang ARRAY objek karena satu lokasi bisa dilayani beberapa
+        //lab — sejalan dengan pelaporan_iku.uid_lab yang memang CSV.
+        //
+        //Baris yang sudah tersimpan sebelum perubahan itu tetap berbentuk objek. Kedua
+        //bentuk diseragamkan jadi LIST di sini supaya template cukup mem-foreach tanpa
+        //perlu tahu kapan barisnya dibuat. Tanpa penyeragaman ini, {$v.ocr.lab.text}
+        //pada payload baru menghasilkan sel kosong tanpa error — salah diam-diam.
+        if (!isset($decoded['lab']) || !is_array($decoded['lab'])) {
+            $decoded['lab'] = array();
+        } elseif (array_key_exists('uid', $decoded['lab']) || array_key_exists('text', $decoded['lab'])) {
+            $decoded['lab'] = array($decoded['lab']);
+        }
+
         return $decoded;
     }
 
