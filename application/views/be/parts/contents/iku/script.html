@@ -209,6 +209,8 @@
 		$("#pm25-dp-pasif").hide();
 		$("#pm25-faktor-koreksi").hide();
 		$(".durasi-pasif-warning").hide().text("");
+		$("#catatan-ocr-panel").hide();
+		$("#catatan-ocr-body").html("");
 		$("#alamat").val("");
 		$("#alamat_detail").val("");
 		$("#latitude").val("");
@@ -825,6 +827,36 @@
 						if (req.ocr_result) {
 							$("#ocr_result_payload").val(JSON.stringify(req.ocr_result));
 							setOcrStatus("info", "Data ini pernah diisi via OCR. Hasil bacaan tersimpan sebagai referensi.");
+						}
+
+						if (req.catatan_ocr) {
+							var html = "";
+							var labelParam = { no2: "NO₂", so2: "SO₂", pm25: "PM₂.₅" };
+							if (req.catatan_ocr.lokasi && req.catatan_ocr.lokasi.length) {
+								html += "<p class='mb-1'><strong>Lokasi</strong></p><ul class='mb-2'>";
+								$.each(req.catatan_ocr.lokasi, function(i, v) {
+									html += "<li><small>" + v + "</small></li>";
+								});
+								html += "</ul>";
+							}
+							if (req.catatan_ocr.parameters) {
+								$.each(req.catatan_ocr.parameters, function(param, notes) {
+									if (notes && notes.length) {
+										html += "<p class='mb-1'><strong>" + (labelParam[param] || param) + "</strong></p><ul class='mb-2'>";
+										$.each(notes, function(i, v) {
+											html += "<li><small>" + v + "</small></li>";
+										});
+										html += "</ul>";
+									}
+								});
+							}
+							if (html) {
+								$("#catatan-ocr-body").html(html);
+								$("#catatan-ocr-panel").show();
+							}
+						} else {
+							$("#catatan-ocr-panel").hide();
+							$("#catatan-ocr-body").html("");
 						}
 					}
 				}
