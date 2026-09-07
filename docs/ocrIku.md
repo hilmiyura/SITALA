@@ -683,8 +683,9 @@ Bagaimana teks metode pengujian dipetakan menjadi `rf_metode_pemantauan.uid_meto
 
 | Peran | Lokasi |
 |---|---|
-| Pencocokan | `application/controllers/ocrController.php` → `matchMetode()` :432 |
-| Pemanggil | `matchFieldsIku()` :165 — **tiga kali per lokasi** |
+| Pencocokan | `application/controllers/ocrController.php` → `matchMetode()` :653 |
+| Penerjemah kode SNI | `ocrController.php` → `sniMethodKeyword()` :743 |
+| Pemanggil | `matchFieldsIku()` :168 — **tiga kali per lokasi** |
 | Instruksi ekstraksi | `application/prompts/iku.md` :14 dan :18 |
 | Master data | tabel `rf_metode_pemantauan` — PK `uid_metode_pemantauan` |
 
@@ -710,9 +711,11 @@ matchMetode($metode_text, $shared['matrik_sampel_text'])
    │
    ├─ [0] metode_text kosong → langsung kembali {uid:null, text:null}
    │
-   ├─ [1] Tentukan teks acuan
-   │        metode_text mengandung salah satu kata kunci?  → pakai metode_text
-   │        tidak, dan matrik_sampel_text ada?             → FALLBACK ke matrik_sampel_text
+   ├─ [1] Tentukan teks acuan — tiga tingkat, yang di atas menang
+   │        (a) metode_text mengandung salah satu kata kunci? → pakai metode_text
+   │        (b) metode_text berupa kode SNI 7119 yang dikenal? → pakai hasil
+   │            sniMethodKeyword(), yaitu 'pasif' atau 'aktif'
+   │        (c) matrik_sampel_text ada? → FALLBACK ke matrik_sampel_text
    │
    ├─ [2] Cari grup kata kunci yang ada di teks acuan (urut, yang pertama menang)
    │        grup 1: aktif, active
@@ -727,9 +730,39 @@ sampler sama sekali. Karena itu prompt juga meminta `matrik_sampel_text` di leve
 (field "Matrik Sampel"/"Sample Matrix", mis. `Passive Sampler`, `Active Sampler`, `AQMS`),
 yang dipakai sebagai cadangan ketika teks metode per-parameter tidak informatif.
 
+## Penerjemahan kode SNI — tingkat (b)
+
+Kode SNI keluarga 7119 (udara ambien) sudah menentukan jenis sampler secara pasti. Nomor
+bagian setelah `7119` menandakan **parameter sekaligus jenis samplernya**, jadi
+`sniMethodKeyword()` tidak perlu tahu sedang dipanggil untuk parameter apa:
+
+| Parameter | Aktif | Pasif |
+|---|---|---|
+| Sulfur Dioksida | `SNI 7119.7:2017` | `SNI 7119-16:2023` |
+| Nitrogen Dioksida | `SNI 7119.2:2017` | `SNI 7119-17:2023` |
+| Partikel Debu | `SNI 7119.14:2017` | **tidak ada** |
+
+Yang diperiksa hanya nomor bagiannya (`2`, `7`, `14` → aktif; `16`, `17` → pasif), bukan
+tahunnya, supaya revisi standar tidak membuat pencocokan berhenti bekerja. Titik dan strip
+diperlakukan sama, dan format lama seperti `SNI 19-7119.7-2005` ikut tertangkap. Nomor
+bagian di luar daftar mengembalikan `null` sehingga penentuan turun ke tingkat (c) —
+degradasi yang aman bila kelak ada bagian baru.
+
+**Mengapa tingkat (b) mengalahkan (c).** `matrik_sampel_text` hanya **satu nilai untuk
+seluruh dokumen**, lalu diterapkan ke ketiga parameter. Padahal satu dokumen lazim mencampur
+metode: gas diukur pasif, partikulat wajib ditarik pompa. Pada data produksi, NO₂ dan PM2.5
+berbeda metode di **5.857 baris** (dari 31.665), sedangkan NO₂ dan SO₂ hanya berbeda di 3
+baris. Tanpa tingkat (b), dokumen ber-Matrik `Passive Sampler` akan menstempel PM2.5 sebagai
+`Manual Passive` — padahal metode pasif untuk partikulat tidak ada sama sekali. Nilai yang
+salah diam-diam, yang lebih buruk daripada kolom kosong.
+
+Konsekuensinya perlu disadari: bila laboratorium salah menyalin kode SNI, kesalahan itu
+sekarang menang atas Matrik Sampel.
+
 ## Hasil pengujian nyata
 
-Logika direplikasi persis dan dijalankan terhadap keempat baris master:
+Dijalankan terhadap keempat baris master. Kolom `matrik_sampel_text` pada baris ber-kode SNI
+sengaja diisi nilai yang **bertentangan**, untuk membuktikan tingkat (b) yang menang:
 
 | `metode_text` | `matrik_sampel_text` | `uid` | Jalur |
 |---|---|---|---|
@@ -737,8 +770,14 @@ Logika direplikasi persis dan dijalankan terhadap keempat baris master:
 | `Active Sampler` | — | 1 | kata kunci → `Manual Aktif` |
 | `AQMS` | — | 3 | kata kunci → `Otomatis (AQMS)` |
 | `Metode Pasif` | — | 2 | kata kunci → `Manual Passive` |
-| `SNI 7119.2:2017` | `Passive Sampler` | 2 | **fallback** → `Manual Passive` |
-| `SNI 7119.2:2017` | — | `null` | tanpa kata kunci, tanpa cadangan |
+| `SNI 7119.7:2017` | `Passive Sampler` | 1 | **kode SNI** → `Manual Aktif` |
+| `SNI 7119-16:2023` | `Active Sampler` | 2 | **kode SNI** → `Manual Passive` |
+| `SNI 7119.2:2017` | `Passive Sampler` | 1 | **kode SNI** → `Manual Aktif` |
+| `SNI 7119-17:2023` | `Active Sampler` | 2 | **kode SNI** → `Manual Passive` |
+| `SNI 7119.14:2017` | `Passive Sampler` | 1 | **kode SNI** → `Manual Aktif` |
+| `SNI 19-7119.7-2005` | — | 1 | kode SNI format lama → `Manual Aktif` |
+| `Griess Saltzman` | `Active Sampler` | 1 | **fallback** → `Manual Aktif` |
+| `Griess Saltzman` | — | `null` | tanpa kata kunci, bukan kode SNI, tanpa cadangan |
 | `null` | `Passive Sampler` | **`null`** | ❌ **early return — fallback dilewati** |
 | `Impinger` | `Impinger 24 jam` | `null` | fallback jalan, tapi tak ada grup cocok |
 

@@ -664,8 +664,18 @@ class ocrController extends Front
             array('otomatis', 'aqms', 'automatic'),
         );
 
-        //Method codes like "SNI 7119.xx:2023" don't state sampler type themselves;
-        //fall back to the document-level "Matrik Sampel"/"Sample Matrix" text when present.
+        //Kode metode seperti "SNI 7119.2:2017" tidak menyebut jenis sampler sama sekali,
+        //jadi urutan penentuannya:
+        //  (1) kata kunci eksplisit di teks metode itu sendiri;
+        //  (2) kode SNI 7119 yang dikenal — deterministik per parameter, lihat sniMethodKeyword();
+        //  (3) fallback ke "Matrik Sampel"/"Sample Matrix" di level dokumen.
+        //
+        //Tingkat (2) sengaja MENGALAHKAN (3). Alasannya: matrik_sampel_text hanya SATU nilai
+        //untuk seluruh dokumen, sedangkan satu dokumen lazim mencampur metode antar-parameter
+        //— gas diukur pasif, partikulat wajib ditarik pompa. Di data produksi, NO2 dan PM2.5
+        //berbeda metode pada 5.857 baris. Tanpa tingkat (2), dokumen ber-Matrik "Passive
+        //Sampler" akan menstempel PM2.5 sebagai Manual Passive, padahal metode pasif untuk
+        //partikulat memang tidak ada — salah diam-diam, lebih buruk daripada kolom kosong.
         $hasKeyword = false;
         foreach ($keywordGroups as $keywords) {
             foreach ($keywords as $kw) {
@@ -675,7 +685,16 @@ class ocrController extends Front
                 }
             }
         }
-        $matchNeedle = (!$hasKeyword && $matrikSampelText) ? strtolower($matrikSampelText) : $needle;
+
+        if ($hasKeyword) {
+            $matchNeedle = $needle;
+        } elseif ($sniKeyword = $this -> sniMethodKeyword($needle)) {
+            $matchNeedle = $sniKeyword;
+        } elseif ($matrikSampelText) {
+            $matchNeedle = strtolower($matrikSampelText);
+        } else {
+            $matchNeedle = $needle;
+        }
 
         $this -> tables -> set("rf_metode_pemantauan", "uid_metode_pemantauan");
         $rows = $this -> tables -> fetch("deleted = 0")['data'];
@@ -703,6 +722,44 @@ class ocrController extends Front
             }
         }
         return $result;
+    }
+
+    //Kode SNI keluarga 7119 (udara ambien) sudah menentukan jenis sampler secara pasti, walau
+    //teksnya tidak menyebut "pasif/aktif". Nomor bagian setelah "7119" menandakan parameter
+    //SEKALIGUS jenis samplernya, jadi fungsi ini tidak perlu tahu sedang dipanggil untuk
+    //parameter apa:
+    //
+    //  Sulfur Dioksida    aktif: SNI 7119.7:2017    pasif: SNI 7119-16:2023
+    //  Nitrogen Dioksida  aktif: SNI 7119.2:2017    pasif: SNI 7119-17:2023
+    //  Partikel Debu      aktif: SNI 7119.14:2017   pasif: TIDAK ADA
+    //
+    //Tahun tidak ikut diperiksa — hanya nomor bagiannya — supaya revisi standar tidak
+    //membuat pencocokan ini berhenti bekerja.
+    //
+    //Pemisah titik dan strip diperlakukan sama ("7119.17" == "7119-17"), dan format lama
+    //seperti "SNI 19-7119.7-2005" ikut tertangkap. Nomor bagian di luar daftar ini
+    //mengembalikan null, sehingga penentuan jatuh ke fallback matrik_sampel_text seperti
+    //sebelumnya — degradasi yang aman bila kelak ada bagian baru.
+    private function sniMethodKeyword($needle)
+    {
+        if (strpos($needle, '7119') === false) {
+            return null;
+        }
+        if (!preg_match('/7119[\s._-]*(\d{1,2})/', $needle, $m)) {
+            return null;
+        }
+
+        $part = (int) $m[1];
+        $pasif = array(16, 17);
+        $aktif = array(2, 7, 14);
+
+        if (in_array($part, $pasif, true)) {
+            return 'pasif';
+        }
+        if (in_array($part, $aktif, true)) {
+            return 'aktif';
+        }
+        return null;
     }
 
     private function normalize($text)
