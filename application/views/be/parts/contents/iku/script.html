@@ -208,6 +208,7 @@
 		$("#pm25-dp-manual-aktif").hide();
 		$("#pm25-dp-pasif").hide();
 		$("#pm25-faktor-koreksi").hide();
+		$(".durasi-pasif-warning").hide().text("");
 		$("#alamat").val("");
 		$("#alamat_detail").val("");
 		$("#latitude").val("");
@@ -242,6 +243,36 @@
 			.html(html)
 			.show();
 	}
+
+	//===== Kriteria: durasi pemantauan Manual Pasif harus 13/14/15 hari =====
+	var METODE_MANUAL_PASIF = 2;
+	var DURASI_PASIF_ALLOWED_DAYS = [13, 14, 15];
+
+	function checkDurasiPasif(param, sfx) {
+		sfx = sfx || "";
+		var $warn = $("#" + param + "-durasi-pasif-warning" + sfx);
+		var metodeId = $("#" + param + "_uid_metode_pemantauan" + sfx).val();
+		if (metodeId != METODE_MANUAL_PASIF) {
+			$warn.hide().text("");
+			return;
+		}
+		var val = parseInt($("#" + param + "_durasi_pemantauan_pasif" + sfx).val(), 10);
+		if (!val) {
+			$warn.hide().text("");
+			return;
+		}
+		if (DURASI_PASIF_ALLOWED_DAYS.indexOf(val) === -1) {
+			$warn.text("Pemantauan Manual Pasif idealnya berlangsung 13-15 hari (saat ini " + val + " hari).").show();
+		} else {
+			$warn.hide().text("");
+		}
+	}
+
+	$(document).on("input change", ".durasi-pasif-input", function() {
+		var param = $(this).data("param");
+		var sfx = this.id.replace(param + "_durasi_pemantauan_pasif", "");
+		checkDurasiPasif(param, sfx);
+	});
 
 	//sfx = "" for the single/default fields, "_r0", "_r1", ... for cloned repeater rows
 	function applyOcrResult(data, opts) {
@@ -315,6 +346,7 @@
 				} else if (p.durasi_pemantauan) {
 					$("#" + param + "_durasi_pemantauan_pasif" + sfx).val(p.durasi_pemantauan);
 				}
+				checkDurasiPasif(param, sfx);
 			} else if (p.metode && p.metode.text) {
 				unmatched.push("Metode " + labelMap[param] + " (\"" + p.metode.text + "\")");
 			}
@@ -426,6 +458,7 @@
 				$("#" + param + "-faktor-koreksi" + sfx).hide();
 				$("#" + param + "_uid_metode_pemantauan" + sfx).on("change", function() {
 					toggleDurasiPemantauan(param, sfx, $(this).val());
+					checkDurasiPasif(param, sfx);
 				});
 			});
 
@@ -654,14 +687,17 @@
 
 	$("#no2_uid_metode_pemantauan").on("change", function() {
 		toggleDurasiPemantauan("no2", "", $(this).val());
+		checkDurasiPasif("no2", "");
 	});
 
 	$("#so2_uid_metode_pemantauan").on("change", function() {
 		toggleDurasiPemantauan("so2", "", $(this).val());
+		checkDurasiPasif("so2", "");
 	});
 
 	$("#pm25_uid_metode_pemantauan").on("change", function() {
 		toggleDurasiPemantauan("pm25", "", $(this).val());
+		checkDurasiPasif("pm25", "");
 	});
 
 	function checkAllSelected3() {
@@ -723,6 +759,7 @@
 							$("#no2-dp-pasif").show();
 							$("#no2_durasi_pemantauan_pasif").val(req.no2_durasi_pemantauan_pasif);
 						}
+						checkDurasiPasif("no2", "");
 						$("#no2_faktor_koreksi").val(req.no2_faktor_koreksi);
 						if (req.no2_faktor_koreksi != 0) {
 							$("#no2-faktor-koreksi").show();
@@ -737,6 +774,7 @@
 							$("#so2-dp-pasif").show();
 							$("#so2_durasi_pemantauan_pasif").val(req.so2_durasi_pemantauan_pasif);
 						}
+						checkDurasiPasif("so2", "");
 						$("#so2_faktor_koreksi").val(req.so2_faktor_koreksi);
 						if (req.so2_faktor_koreksi != 0) {
 							$("#so2-faktor-koreksi").show();
@@ -751,6 +789,7 @@
 							$("#pm25-dp-pasif").show();
 							$("#pm25_durasi_pemantauan_pasif").val(req.pm25_durasi_pemantauan_pasif);
 						}
+						checkDurasiPasif("pm25", "");
 						$("#pm25_faktor_koreksi").val(req.pm25_faktor_koreksi);
 						if (req.pm25_faktor_koreksi != 0) {
 							$("#pm25-faktor-koreksi").show();

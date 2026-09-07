@@ -283,6 +283,12 @@
   #tambahData #ocr-status.alert-warning { border-left-color: #f0ad4e; background: #fff8ec; color: #8a5a00; }
   #tambahData #ocr-status.alert-danger { border-left-color: #dc3545; background: #fdeeee; color: #a71d2a; }
 
+  /* ---- durasi pemantauan pasif warning ---- */
+  #tambahData .durasi-pasif-warning {
+    display: block;
+    margin-top: .35rem;
+  }
+
   /* ---- document preview ---- */
   #tambahData #doc-preview-wrapper,
   #tambahData #doc-preview {
@@ -594,11 +600,12 @@
             <div class="col-md-4" id="no2-dp-pasif">
               <label for="durasi_pemantauan">Durasi Pemantauan (Hari)</label>
               <div class="input-group">
-                <input type="number" class="form-control" placeholder="Nilai" id="no2_durasi_pemantauan_pasif" name="form[no2_durasi_pemantauan_pasif]" />
+                <input type="number" class="form-control durasi-pasif-input" data-param="no2" placeholder="Nilai" id="no2_durasi_pemantauan_pasif" name="form[no2_durasi_pemantauan_pasif]" />
                 <div class="input-group-append">
                   <span class="input-group-text">Hari</span>
                 </div>
               </div>
+              <small class="durasi-pasif-warning text-warning" id="no2-durasi-pasif-warning" style="display:none;"></small>
             </div>
             <div class="col-md-4 mb-1" id="no2-faktor-koreksi">
               <label for="name">Faktor Koreksi NO<sub class="black">2</sub> <span>(Nitrogen Dioksida)</span> </label>
@@ -648,11 +655,12 @@
             <div class="col-md-4" id="so2-dp-pasif">
               <label for="durasi_pemantauan">Durasi Pemantauan (Hari)</label>
               <div class="input-group">
-                <input type="number" class="form-control" placeholder="Nilai" id="so2_durasi_pemantauan_pasif" name="form[so2_durasi_pemantauan_pasif]" />
+                <input type="number" class="form-control durasi-pasif-input" data-param="so2" placeholder="Nilai" id="so2_durasi_pemantauan_pasif" name="form[so2_durasi_pemantauan_pasif]" />
                 <div class="input-group-append">
                   <span class="input-group-text">Hari</span>
                 </div>
               </div>
+              <small class="durasi-pasif-warning text-warning" id="so2-durasi-pasif-warning" style="display:none;"></small>
             </div>
             <div class="col-md-4 mb-1" id="so2-faktor-koreksi">
               <label for="name">Faktor Koreksi SO<sub class="black">2</sub> <span>(Sulfur Dioksida)</span> </label>
@@ -702,11 +710,12 @@
             <div class="col-md-4" id="pm25-dp-pasif">
               <label for="durasi_pemantauan">Durasi Pemantauan (Hari)</label>
               <div class="input-group">
-                <input type="number" class="form-control" placeholder="Nilai" id="pm25_durasi_pemantauan_pasif" name="form[pm25_durasi_pemantauan_pasif]" />
+                <input type="number" class="form-control durasi-pasif-input" data-param="pm25" placeholder="Nilai" id="pm25_durasi_pemantauan_pasif" name="form[pm25_durasi_pemantauan_pasif]" />
                 <div class="input-group-append">
                   <span class="input-group-text">Hari</span>
                 </div>
               </div>
+              <small class="durasi-pasif-warning text-warning" id="pm25-durasi-pasif-warning" style="display:none;"></small>
             </div>
             <div class="col-md-4 mb-1" id="pm25-faktor-koreksi">
               <label for="name">Faktor Koreksi PM<sub class="black">2.5</sub> <span>(Partikulat)</span> </label>
@@ -881,11 +890,12 @@
             <div class="col-md-4" id="no2-dp-pasif">
               <label for="durasi_pemantauan">Durasi Pemantauan (Hari)</label>
               <div class="input-group">
-                <input type="number" class="form-control" placeholder="Nilai" id="no2_durasi_pemantauan_pasif" name="form[no2_durasi_pemantauan_pasif]" />
+                <input type="number" class="form-control durasi-pasif-input" data-param="no2" placeholder="Nilai" id="no2_durasi_pemantauan_pasif" name="form[no2_durasi_pemantauan_pasif]" />
                 <div class="input-group-append">
                   <span class="input-group-text">Hari</span>
                 </div>
               </div>
+              <small class="durasi-pasif-warning text-warning" id="no2-durasi-pasif-warning" style="display:none;"></small>
             </div>
             <div class="col-md-4 mb-1" id="no2-faktor-koreksi">
               <label for="name">Faktor Koreksi NO<sub class="black">2</sub> <span>(Nitrogen Dioksida)</span> </label>
@@ -935,11 +945,12 @@
             <div class="col-md-4" id="so2-dp-pasif">
               <label for="durasi_pemantauan">Durasi Pemantauan (Hari)</label>
               <div class="input-group">
-                <input type="number" class="form-control" placeholder="Nilai" id="so2_durasi_pemantauan_pasif" name="form[so2_durasi_pemantauan_pasif]" />
+                <input type="number" class="form-control durasi-pasif-input" data-param="so2" placeholder="Nilai" id="so2_durasi_pemantauan_pasif" name="form[so2_durasi_pemantauan_pasif]" />
                 <div class="input-group-append">
                   <span class="input-group-text">Hari</span>
                 </div>
               </div>
+              <small class="durasi-pasif-warning text-warning" id="so2-durasi-pasif-warning" style="display:none;"></small>
             </div>
             <div class="col-md-4 mb-1" id="so2-faktor-koreksi">
               <label for="name">Faktor Koreksi SO<sub class="black">2</sub> <span>(Sulfur Dioksida)</span> </label>
@@ -989,11 +1000,12 @@
             <div class="col-md-4" id="pm25-dp-pasif">
               <label for="durasi_pemantauan">Durasi Pemantauan (Hari)</label>
               <div class="input-group">
-                <input type="number" class="form-control" placeholder="Nilai" id="pm25_durasi_pemantauan_pasif" name="form[pm25_durasi_pemantauan_pasif]" />
+                <input type="number" class="form-control durasi-pasif-input" data-param="pm25" placeholder="Nilai" id="pm25_durasi_pemantauan_pasif" name="form[pm25_durasi_pemantauan_pasif]" />
                 <div class="input-group-append">
                   <span class="input-group-text">Hari</span>
                 </div>
               </div>
+              <small class="durasi-pasif-warning text-warning" id="pm25-durasi-pasif-warning" style="display:none;"></small>
             </div>
             <div class="col-md-4 mb-1" id="pm25-faktor-koreksi">
               <label for="name">Faktor Koreksi PM<sub class="black">2.5</sub> <span>(Partikulat)</span> </label>
