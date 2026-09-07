@@ -102,9 +102,12 @@ class ikuController extends Front
                 $post['form']['shu'] = $fileUpload;
             }
 
-            //Payload OCR mentah (JSON) dari /ocr/ikuExtract, dikirim form lewat field
-            //tersembunyi form[ocr_result]. Disimpan sebagai jejak audit: dokumen sumbernya
-            //sendiri tidak ikut disimpan, jadi ini satu-satunya rekaman apa yang dibaca model.
+            //Dua kolom JSON yang dikirim form lewat field tersembunyi:
+            //  ocr_result  -- payload OCR mentah dari /ocr/ikuExtract. Jejak audit: dokumen
+            //                 sumbernya sendiri tidak ikut disimpan, jadi ini satu-satunya
+            //                 rekaman apa yang dibaca model.
+            //  catatan_ocr -- catatan terstruktur yang menyertai bacaan itu.
+            //Keduanya diperlakukan sama persis, jadi ditangani satu lingkaran.
             //
             //Kolomnya SENGAJA dibuang dari payload bila nilainya kosong atau bukan JSON valid.
             //Alasannya: tables::post() meneruskan seluruh $post['form'] ke AutoExecute, sehingga
@@ -118,13 +121,16 @@ class ikuController extends Front
             //
             //JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES dipakai agar nama lokasi
             //dan URL tidak membengkak jadi "\uXXXX" / "\/" yang memakan byte percuma.
-            if (isset($post['form']['ocr_result'])) {
-                $ocrResult = trim($post['form']['ocr_result']);
-                $ocrDecoded = json_decode($ocrResult);
-                if ($ocrResult !== '' && json_last_error() === JSON_ERROR_NONE) {
-                    $post['form']['ocr_result'] = json_encode($ocrDecoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            foreach (array('ocr_result', 'catatan_ocr') as $jsonField) {
+                if (!isset($post['form'][$jsonField])) {
+                    continue;
+                }
+                $jsonRaw = trim($post['form'][$jsonField]);
+                $jsonDecoded = json_decode($jsonRaw);
+                if ($jsonRaw !== '' && json_last_error() === JSON_ERROR_NONE) {
+                    $post['form'][$jsonField] = json_encode($jsonDecoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 } else {
-                    unset($post['form']['ocr_result']);
+                    unset($post['form'][$jsonField]);
                 }
             }
 
@@ -575,6 +581,12 @@ class ikuController extends Front
           //memakainya, sedangkan membiarkannya berarti tiap baris membawa dua salinan
           //payload yang sama ke Smarty.
           unset($data['data'][$key]['ocr_result']);
+
+          //Catatan OCR, tersedia untuk template sebagai $v.catatan_ocr. Di-decode DI
+          //TEMPATNYA — tidak seperti ocr_result yang pindah ke kunci $v.ocr — karena
+          //tidak ada bentuk lama yang perlu diseragamkan, jadi tidak ada gunanya
+          //memakai nama kunci yang berbeda dari nama kolomnya.
+          $data['data'][$key]['catatan_ocr'] = $this->_catatanOcr(isset($value['catatan_ocr']) ? $value['catatan_ocr'] : null);
         }
 
         $this -> view -> pagination($this -> view, $totalRow, $offset + 1, $limit, $urlVar);
@@ -596,21 +608,27 @@ class ikuController extends Front
             $dataEdit = $this -> tables -> fetch("deleted = 0 AND uid_pelaporan_iku=" . $this -> params("x"));
             $row = $dataEdit['data'][0];
 
-            //ocr_result tersimpan sebagai TEXT berisi JSON. Di-decode di sini supaya
-            //sisi view menerima objek dan bisa langsung meneruskannya ke
+            //ocr_result dan catatan_ocr tersimpan sebagai TEXT berisi JSON. Di-decode di
+            //sini supaya sisi view menerima objek dan bisa langsung meneruskannya ke
             //applyOcrResult() tanpa perlu JSON.parse lagi.
             //
             //null berarti salah satu dari tiga hal: kolomnya belum ada (migrasi view
             //belum dijalankan), belum pernah ada hasil OCR untuk baris ini, atau isinya
             //gagal di-parse — yang bisa terjadi bila payload melebihi kapasitas TEXT
             //lalu terpotong diam-diam karena sql_mode server tanpa STRICT_TRANS_TABLES.
+            //
+            //Kuncinya SELALU ada di respons meski kolomnya belum ada di database, supaya
+            //sisi JS cukup memeriksa nilainya dan tidak perlu membedakan "kolom belum
+            //dimigrasi" dari "baris ini memang tidak punya catatan".
             if ($row) {
-                $ocrResult = (isset($row['ocr_result']) ? $row['ocr_result'] : null);
-                $row['ocr_result'] = null;
-                if ($ocrResult) {
-                    $decoded = json_decode($ocrResult);
-                    if (json_last_error() === JSON_ERROR_NONE) {
-                        $row['ocr_result'] = $decoded;
+                foreach (array('ocr_result', 'catatan_ocr') as $jsonField) {
+                    $jsonRaw = (isset($row[$jsonField]) ? $row[$jsonField] : null);
+                    $row[$jsonField] = null;
+                    if ($jsonRaw) {
+                        $decoded = json_decode($jsonRaw);
+                        if (json_last_error() === JSON_ERROR_NONE) {
+                            $row[$jsonField] = $decoded;
+                        }
                     }
                 }
             }
@@ -727,6 +745,34 @@ class ikuController extends Front
             $decoded['lab'] = array();
         } elseif (array_key_exists('uid', $decoded['lab']) || array_key_exists('text', $decoded['lab'])) {
             $decoded['lab'] = array($decoded['lab']);
+        }
+
+        return $decoded;
+    }
+
+    private function _catatanOcr($json)
+    {// decode kolom catatan_ocr (TEXT berisi JSON) jadi array siap pakai di template
+        //Seperti _ocrResult(), di-decode sebagai ARRAY asosiatif supaya Smarty bisa
+        //mengaksesnya dengan notasi titik.
+        //
+        //Sengaja TIDAK ikut _ocrResult(): fungsi itu menyeragamkan bentuk "lab" yang
+        //khas payload OCR IKU, sedangkan catatan_ocr bentuknya bebas. Menyatukan
+        //keduanya berarti menambahkan kunci "lab" kosong ke setiap catatan.
+        //
+        //Mengembalikan null untuk semua keadaan yang berarti "tidak ada catatan yang
+        //bisa dipakai": kolom belum ada di view, barisnya memang tanpa catatan, atau
+        //isinya gagal di-parse. Template cukup memeriksa {if $v.catatan_ocr}.
+        //
+        //is_array() ikut diperiksa karena json_decode("123") dan json_decode("\"teks\"")
+        //adalah JSON yang SAH tapi menghasilkan skalar. Tanpa penjagaan ini, kolom yang
+        //terlanjur terisi teks biasa akan lolos ke template dan {$v.catatan_ocr.apa_pun}
+        //menghasilkan sel kosong tanpa error — salah diam-diam.
+        if (!$json) {
+            return null;
+        }
+        $decoded = json_decode($json, TRUE);
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+            return null;
         }
 
         return $decoded;
@@ -1945,7 +1991,12 @@ class ikuController extends Front
         //mencari nama lab bisa mendapat baris yang lab-nya sama sekali lain — hanya
         //karena nama itu masih tersisa di hasil OCR yang sudah dikoreksi manual. Selain
         //menyesatkan, LIKE '%...%' pada kolom TEXT tanpa index juga memaksa scan penuh.
-        $excluded = array('ocr_result');
+        //
+        //catatan_ocr dikecualikan dengan alasan yang sama, ditambah satu: isinya JSON,
+        //sehingga nama kunci ("lokasi", "lab", "status") ikut tersapu sebagai teks biasa
+        //dan kata-kata umum semacam itu akan mencocoki hampir semua baris yang punya
+        //catatan.
+        $excluded = array('ocr_result', 'catatan_ocr');
 
         $sql = "SHOW COLUMNS FROM " . $model;
         $result = $this -> db -> fetch($sql);
