@@ -175,6 +175,9 @@
               $("#uid_provinsi").val(val.uid_provinsi).trigger("change");
               id_kabkota = val.uid_kabkota;
               $("#uid_kabkota").val(val.uid_kabkota).trigger("change");
+              if (typeof validateLocation === "function") {
+                validateLocation(valId, val.latitude, val.longitude);
+              }
             });
           }
         }
@@ -184,6 +187,7 @@
       $("#latitude").val("");
       $("#longitude").val("");
       $("#uid_provinsi").val("").trigger("change");
+      $("#location-validation-result").hide().html("").removeClass("alert alert-success alert-warning alert-danger");
       // $("#uid_kabkota").html("--PILIH KAB/KOTA--");
     }
   });
