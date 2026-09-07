@@ -332,8 +332,27 @@
 		if (data.periode_pemantauan) {
 			$("#periode_pemantauan").val(data.periode_pemantauan).trigger("change");
 		}
-		if (data.lab && data.lab.uid) {
-			$("#uid_lab").val([String(data.lab.uid)]).trigger("change");
+		//data.lab untuk IKU berupa ARRAY sejak OCR menggabungkan sertifikat dari beberapa
+		//lab untuk satu lokasi — sejalan dengan #uid_lab yang memang multi-select dan
+		//kolom pelaporan_iku.uid_lab yang disimpan sebagai CSV.
+		//
+		//Bentuk objek tunggal tetap diterima: respons IKA/IKAL masih memakainya, dan
+		//hasil OCR lama yang tersimpan di ocr_result juga berbentuk itu.
+		var labs = [];
+		if (data.lab) {
+			labs = $.isArray(data.lab) ? data.lab : [data.lab];
+		}
+		var labUids = [];
+		$.each(labs, function(i, l) {
+			//lab yang tidak ketemu di rf_lab tetap dikirim dengan uid null — dilewati
+			//di sini, tapi sengaja tetap ada di respons supaya bisa ditampilkan sebagai
+			//catatan "tidak dikenali" seperti field lain
+			if (l && l.uid) {
+				labUids.push(String(l.uid));
+			}
+		});
+		if (labUids.length) {
+			$("#uid_lab").val(labUids).trigger("change");
 		}
 	}
 
