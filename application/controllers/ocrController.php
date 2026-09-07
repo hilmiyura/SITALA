@@ -41,7 +41,7 @@ class ocrController extends Front
             $result['data']['lokasi_list'] = $this -> mergeSameLocationEntries($result['data']['lokasi_list']);
         }
 
-        $this -> respondExtract($result, "matchFieldsIku");
+        $this -> respondExtract($result, "matchFieldsIku", "iku-ocr");
     }
 
     //OCR auto-fill for "Tambah Data IKA" form (uses application/prompts/ika.md — see matchFieldsIka())
@@ -56,7 +56,7 @@ class ocrController extends Front
         }
 
         $result = $this -> openrouter -> extractIka($file['tmp_name'], $file['mime']);
-        $this -> respondExtract($result, "matchFieldsIka");
+        $this -> respondExtract($result, "matchFieldsIka", "ika-ocr");
     }
 
     //OCR auto-fill for "Tambah Data IKAL" form
@@ -72,7 +72,7 @@ class ocrController extends Front
         }
 
         $result = $this -> openrouter -> extractIkal($file['tmp_name'], $file['mime']);
-        $this -> respondExtract($result, "matchFieldsIkal");
+        $this -> respondExtract($result, "matchFieldsIkal", "ikal-ocr");
     }
 
     //Validates $_FILES['file'], returns ["tmp_name"=>..., "mime"=>...] on success,
@@ -108,10 +108,23 @@ class ocrController extends Front
     //extractX() result into the statusCode/data JSON payload the frontend expects,
     //using $matchMethod (one of matchFieldsIku/matchFieldsIka/matchFieldsIkal) to
     //resolve each detected location's free text into DB uids.
-    private function respondExtract($result, $matchMethod)
+    //$service labels the call in ai_token_usage (iku-ocr, ika-ocr, ikal-ocr, ...).
+    private function respondExtract($result, $matchMethod, $service)
     {
+        //Pemakaian token disertakan di SETIAP cabang, termasuk yang gagal. Sekali
+        //dokumen dikirim ke model, tokennya sudah ditagih -- terbaca atau tidak.
+        //Justru cabang gagal yang paling perlu dilaporkan: dokumen yang sulit dibaca
+        //biasanya diulang beberapa kali, dan tanpa angka di sini biaya percobaan
+        //ulang itu tidak muncul di mana pun.
+        //
+        //null berarti responsnya memang tidak memuat usage -- praktisnya hanya terjadi
+        //bila permintaannya gagal sebelum sampai ke model (mis. koneksi putus), yang
+        //berarti tidak ada yang ditagih.
+        $usage = isset($result['usage']) ? $result['usage'] : null;
+        $this -> logTokenUsage($service, $usage);
+
         if (!$result['success']) {
-            echo json_encode(array("statusCode" => 500, "message" => "OCR gagal dibaca: " . $result['error']));
+            echo json_encode(array("statusCode" => 500, "message" => "OCR gagal dibaca: " . $result['error'], "usage" => $usage));
             return;
         }
 
@@ -119,7 +132,7 @@ class ocrController extends Front
         $lokasiList = isset($ocr['lokasi_list']) && is_array($ocr['lokasi_list']) ? $ocr['lokasi_list'] : array();
 
         if (!count($lokasiList)) {
-            echo json_encode(array("statusCode" => 500, "message" => "Tidak ada lokasi pemantauan yang terbaca dari dokumen"));
+            echo json_encode(array("statusCode" => 500, "message" => "Tidak ada lokasi pemantauan yang terbaca dari dokumen", "usage" => $usage));
             return;
         }
 
@@ -135,15 +148,101 @@ class ocrController extends Front
             $options[] = $this -> $matchMethod($shared, $entry);
         }
 
+        //usage ditaruh SEJAJAR dengan data, bukan di dalamnya. Bentuk `data` berbeda
+        //antara hasil tunggal dan multi-lokasi, sedangkan biaya adalah milik satu
+        //panggilan OCR secara keseluruhan -- satu dokumen, satu tagihan, berapa pun
+        //lokasi yang terbaca di dalamnya. Dengan begini sisi frontend membacanya di
+        //tempat yang sama untuk kedua bentuk.
         if (count($options) == 1) {
-            echo json_encode(array("statusCode" => 200, "data" => $options[0]));
+            echo json_encode(array("statusCode" => 200, "data" => $options[0], "usage" => $usage));
             return;
         }
 
         echo json_encode(array("statusCode" => 200, "data" => array(
             "multi" => true,
             "options" => $options,
-        )));
+        ), "usage" => $usage));
+    }
+
+    //Mencatat satu baris pemakaian token ke ai_token_usage.
+    //
+    //Dipanggil untuk SETIAP panggilan ke model, berhasil maupun gagal — tokennya
+    //sudah ditagih begitu dokumen dikirim, jadi mencatat yang sukses saja akan
+    //melaporkan biaya lebih kecil dari yang sebenarnya.
+    //
+    //Kegagalan mencatat SENGAJA didiamkan. Ini pekerjaan sampingan: bila tabelnya
+    //belum dimigrasi atau database sedang bermasalah, hasil OCR yang sudah terlanjur
+    //dibayar tetap harus sampai ke user.
+    private function logTokenUsage($service, $usage)
+    {
+        //null berarti panggilannya tidak pernah sampai ke model (mis. koneksi putus),
+        //sehingga tidak ada yang ditagih dan tidak ada yang perlu dicatat.
+        if (!is_array($usage)) {
+            return;
+        }
+
+        $cols = array("service");
+        $vals = array("'" . $this -> sqlToken($service, 64) . "'");
+
+        //NULL diteruskan sebagai NULL, bukan 0: kolomnya dirancang membedakan
+        //"tidak dilaporkan provider" dari "dilaporkan dan memang nol", supaya SUM()
+        //tidak diam-diam mengecilkan total.
+        foreach (array("prompt_tokens", "completion_tokens", "total_tokens", "cached_tokens", "reasoning_tokens") as $f) {
+            $cols[] = $f;
+            $vals[] = (isset($usage[$f]) && $usage[$f] !== null) ? (int) $usage[$f] : "NULL";
+        }
+
+        //number_format, bukan sekadar dirangkai sebagai float. PHP menuliskan angka
+        //sekecil 7.2e-5 dalam notasi eksponen, dan MySQL membaca literal semacam itu
+        //sebagai DOUBLE lalu membulatkannya saat masuk kolom DECIMAL — persis galat
+        //presisi yang ingin dihindari kolom DECIMAL itu.
+        $cols[] = "cost";
+        $vals[] = (isset($usage['cost']) && $usage['cost'] !== null)
+            ? number_format((float) $usage['cost'], 10, ".", "")
+            : "NULL";
+
+        foreach (array("model" => 128, "generation_id" => 128) as $f => $len) {
+            $cols[] = $f;
+            $vals[] = (isset($usage[$f]) && $usage[$f] !== null)
+                ? "'" . $this -> sqlToken($usage[$f], $len) . "'"
+                : "NULL";
+        }
+
+        $cols[] = "crdate";
+        $vals[] = time();
+
+        $cols[] = "cruser";
+        $vals[] = isset($this -> me['uid_users']) ? (int) $this -> me['uid_users'] : "NULL";
+
+        $sql = "INSERT INTO ai_token_usage (" . implode(", ", $cols) . ")"
+             . " VALUES (" . implode(", ", $vals) . ")";
+
+        //Dijalankan lewat db->fetch(), BUKAN tables->post(). Adodb::insert() memanggil
+        //die() bila query gagal, yang berarti tabel yang belum dimigrasi akan memutus
+        //respons OCR di tengah jalan dan meninggalkan JSON rusak di browser.
+        //Adodb::fetch() menjalankan query lewat Execute() yang sama tapi hanya
+        //mengembalikan array kosong bila gagal — satu-satunya jalur non-fatal yang
+        //tersedia di lapisan ini.
+        $this -> db -> fetch($sql);
+    }
+
+    //Membersihkan nilai yang dirangkai ke dalam literal SQL di logTokenUsage().
+    //
+    //service, model, dan generation_id semuanya PENGENAL, bukan teks bebas:
+    //"iku-ocr", "google/gemini-2.5-flash", "gen-1788773797-qDSiswMRhsoXcUv6SyP1".
+    //Karena itu karakter di luar alfabet pengenal DIBUANG, bukan di-escape — lebih
+    //mudah dipastikan benar daripada memilih fungsi escape yang tepat, dan tidak ada
+    //yang hilang sebab nilai yang sah memang tidak pernah memuat karakter lain.
+    //Yang penting: kutip tunggal termasuk yang dibuang, sehingga nilai dari OpenRouter
+    //tidak bisa keluar dari literalnya.
+    //
+    //Panjangnya dipotong agar muat kolomnya. sql_mode server ini tanpa
+    //STRICT_TRANS_TABLES, jadi kelebihan panjang akan dipotong DIAM-DIAM di sisi
+    //MySQL — lebih baik dipotong di sini di tempat yang terlihat.
+    private function sqlToken($value, $maxLength)
+    {
+        $value = preg_replace('/[^A-Za-z0-9._:\/@-]/', '', (string) $value);
+        return substr($value, 0, $maxLength);
     }
 
     //Fields common to every module: date/period, lokasi, lab, coordinates, a display label.

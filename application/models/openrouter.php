@@ -9,6 +9,14 @@
 				"model" => OPENROUTER_OCR_MODEL,
 				"messages" => $messages,
 				"response_format" => array("type" => "json_object"),
+				//Meminta OpenRouter menyertakan RINCIAN pemakaian beserta biayanya.
+				//Tanpa flag ini responsnya tetap memuat cacah token, tapi TIDAK memuat
+				//`cost` -- sehingga biaya harus dihitung sendiri dari daftar harga per
+				//model. Itu rapuh: harga bisa berubah tanpa pemberitahuan, berbeda antara
+				//token masukan dan keluaran, dan bisa berbeda lagi tergantung provider
+				//mana yang kebetulan melayani permintaan. Angka dari OpenRouter adalah
+				//yang benar-benar ditagihkan.
+				"usage" => array("include" => true),
 			), $extra);
 
 			$headers = array(
@@ -92,21 +100,77 @@
 
 			$result = $this->chatCompletion($messages, $extra);
 
+			//Pemakaian diambil SEBELUM percabangan galat, dan ikut dikembalikan di semua
+			//cabang. Panggilan yang hasilnya tidak terpakai -- konten kosong, JSON gagal
+			//di-parse -- tetap ditagih penuh. Bila hanya jalur sukses yang melaporkannya,
+			//justru percobaan yang paling boros (dokumen sulit, model mengarang, diulang
+			//berkali-kali) yang biayanya tidak terlihat sama sekali.
+			$usage = $this->normalizeUsage($result);
+
 			if (isset($result['error'])) {
-				return array("success" => false, "error" => is_array($result['error']) ? json_encode($result['error']) : $result['error'], "raw" => $result);
+				return array("success" => false, "error" => is_array($result['error']) ? json_encode($result['error']) : $result['error'], "usage" => $usage, "raw" => $result);
 			}
 			if (!isset($result['choices'][0]['message']['content'])) {
-				return array("success" => false, "error" => "Response OpenRouter tidak berisi konten", "raw" => $result);
+				return array("success" => false, "error" => "Response OpenRouter tidak berisi konten", "usage" => $usage, "raw" => $result);
 			}
 
 			$content = $result['choices'][0]['message']['content'];
 			$data = $this->extractJson($content);
 
 			if ($data === null) {
-				return array("success" => false, "error" => "Gagal parsing JSON dari hasil OCR", "raw" => $content);
+				return array("success" => false, "error" => "Gagal parsing JSON dari hasil OCR", "usage" => $usage, "raw" => $content);
 			}
 
-			return array("success" => true, "data" => $data, "raw" => $content);
+			return array("success" => true, "data" => $data, "usage" => $usage, "raw" => $content);
+		}
+
+		/**
+		 * Meratakan blok `usage` OpenRouter jadi satu bentuk tetap.
+		 *
+		 * Bentuk aslinya bersarang dan tidak seragam: cached_tokens ada di
+		 * prompt_tokens_details, reasoning_tokens di completion_tokens_details, dan
+		 * kunci-kunci itu hanya muncul bila providernya melaporkannya. Diratakan di
+		 * sini supaya sisi pemanggil tidak perlu menjaga isset() bertingkat, dan supaya
+		 * bentuk yang dijanjikan ke frontend tidak ikut berubah kalau provider di balik
+		 * layar berganti.
+		 *
+		 * Kuncinya SELALU lengkap, bernilai null bila tidak dilaporkan. Null di sini
+		 * berarti "tidak diketahui", BUKAN nol -- membedakan keduanya penting saat
+		 * angka-angka ini dijumlahkan jadi laporan biaya.
+		 *
+		 * model dan generation_id ikut dibawa karena keduanya yang membuat angka biaya
+		 * bisa ditelusuri: model yang benar-benar melayani bisa berbeda dari yang diminta
+		 * (OpenRouter merutekan ulang), dan generation_id bisa dicari di dasbor OpenRouter
+		 * bila suatu tagihan dipertanyakan.
+		 *
+		 * @return array|null null bila responsnya memang tidak memuat usage sama sekali
+		 */
+		private function normalizeUsage($result){
+			if (!is_array($result) || !isset($result['usage']) || !is_array($result['usage'])) {
+				return null;
+			}
+
+			$u = $result['usage'];
+
+			return array(
+				"prompt_tokens" 	=> isset($u['prompt_tokens']) ? (int) $u['prompt_tokens'] : null,
+				"completion_tokens" => isset($u['completion_tokens']) ? (int) $u['completion_tokens'] : null,
+				"total_tokens" 		=> isset($u['total_tokens']) ? (int) $u['total_tokens'] : null,
+				//Token masukan yang dilayani dari cache. Ditagih lebih murah, jadi kalau
+				//angka ini besar, biaya tidak naik sebanding dengan prompt_tokens.
+				"cached_tokens" 	=> isset($u['prompt_tokens_details']['cached_tokens']) ? (int) $u['prompt_tokens_details']['cached_tokens'] : null,
+				//Selalu 0 untuk model non-reasoning. Disertakan supaya lonjakan biaya
+				//masih bisa dijelaskan bila model OCR-nya kelak diganti.
+				"reasoning_tokens" 	=> isset($u['completion_tokens_details']['reasoning_tokens']) ? (int) $u['completion_tokens_details']['reasoning_tokens'] : null,
+				//Biaya dalam USD, langsung dari OpenRouter. Angkanya sangat kecil
+				//(orde 1e-4), jadi json_encode menuliskannya dalam notasi eksponen
+				//seperti 7.2e-5 -- itu JSON yang sah dan JSON.parse membacanya sebagai
+				//number biasa. JANGAN dibulatkan di sini: pembulatan dua desimal
+				//menjadikan seluruh biaya per dokumen bernilai 0.
+				"cost" 				=> isset($u['cost']) ? (float) $u['cost'] : null,
+				"model" 			=> isset($result['model']) ? $result['model'] : null,
+				"generation_id" 	=> isset($result['id']) ? $result['id'] : null,
+			);
 		}
 
 		private function buildFilePart($base64Data, $mimeType){
