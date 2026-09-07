@@ -36,6 +36,17 @@
 		 * bentuk respons. Pada jalur galat 'shift_m' bernilai null -- berbeda dari 0,
 		 * yang berarti koordinatnya benar-benar berimpit.
 		 *
+		 * 'data' juga memuat kedua titik yang dibandingkan:
+		 *   lokasi_input  -- koordinat yang dilaporkan, dikembalikan apa adanya
+		 *   lokasi_sumber -- titik acuan dari master lokasi_pemantauan
+		 *
+		 * Keduanya disertakan supaya pemanggil bisa menampilkan "bergeser sekian meter
+		 * dari <kode_lokasi>" tanpa query susulan, dan supaya operator bisa langsung
+		 * melihat apakah lokasi yang tercocok memang yang dimaksud -- pergeseran besar
+		 * lebih sering berarti salah cocok lokasi ketimbang salah koordinat. Masing-masing
+		 * bernilai null bila memang belum sempat terbentuk: lokasi_input saat koordinatnya
+		 * bukan angka, lokasi_sumber saat uid-nya tidak sah atau barisnya tidak ditemukan.
+		 *
 		 * @param  mixed $uid        uid_lokasi_pemantauan yang dijadikan acuan
 		 * @param  mixed $latitude   lintang yang dilaporkan
 		 * @param  mixed $longitude  bujur yang dilaporkan
@@ -56,16 +67,17 @@
 
 			$latitude 	= (float) $latitude;
 			$longitude 	= (float) $longitude;
+			$input 		= $this->inputPayload($latitude, $longitude);
 			if($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180){
-				return $this->invalidLocation(400, "latitude harus di rentang -90..90 dan longitude di rentang -180..180");
+				return $this->invalidLocation(400, "latitude harus di rentang -90..90 dan longitude di rentang -180..180", $input);
 			}
 
-			$row = $this->query("SELECT uid_lokasi_pemantauan, kode_lokasi, latitude, longitude
+			$row = $this->query("SELECT uid_lokasi_pemantauan, kode_lokasi, alamat, alamat_detail, latitude, longitude
 									FROM lokasi_pemantauan
 									WHERE deleted = 0 AND uid_lokasi_pemantauan = " . $uid);
 			$row = isset($row['data'][0]) ? $row['data'][0] : null;
 			if(!$row){
-				return $this->invalidLocation(404, "Lokasi pemantauan uid " . $uid . " tidak ditemukan atau sudah dihapus");
+				return $this->invalidLocation(404, "Lokasi pemantauan uid " . $uid . " tidak ditemukan atau sudah dihapus", $input);
 			}
 
 			//Sebagian kecil baris master memang belum berkoordinat. Nilai 0/0 ikut
@@ -73,7 +85,7 @@
 			//sebagai lokasi pemantauan di Indonesia dan pasti berarti data belum diisi.
 			if(!is_numeric($row['latitude']) || !is_numeric($row['longitude'])
 				|| ((float) $row['latitude'] == 0 && (float) $row['longitude'] == 0)){
-				return $this->invalidLocation(422, "Koordinat master lokasi " . $row['kode_lokasi'] . " belum diisi, pergeseran tidak bisa dihitung");
+				return $this->invalidLocation(422, "Koordinat master lokasi " . $row['kode_lokasi'] . " belum diisi, pergeseran tidak bisa dihitung", $input, $row);
 			}
 
 			list($okM, $warnM) = $this->shiftThresholds();
@@ -99,8 +111,61 @@
 					'status' 		=> $status,
 					'shift_m' 		=> $shift,
 					'shift_ok_m' 	=> $okM,
-					'shift_warn_m' 	=> $warnM
+					'shift_warn_m' 	=> $warnM,
+					'lokasi_input' 	=> $input,
+					'lokasi_sumber' => $this->sourcePayload($row)
 				)
+			);
+		}
+
+		/**
+		 * Koordinat yang dilaporkan, dikembalikan sebagai float.
+		 *
+		 * Sengaja float dan bukan string masukan aslinya: pemanggil yang menggambar
+		 * peta perbandingan butuh angka, dan nilai inilah yang benar-benar dipakai
+		 * menghitung jarak -- jadi apa yang tampil di respons sama persis dengan apa
+		 * yang dihitung.
+		 *
+		 * @return array
+		 */
+		private function inputPayload($latitude, $longitude){
+			return array(
+				'latitude' 	=> (float) $latitude,
+				'longitude' => (float) $longitude
+			);
+		}
+
+		/**
+		 * Titik acuan dari master lokasi_pemantauan.
+		 *
+		 * alamat dan alamat_detail dua-duanya disertakan karena isinya berbeda: alamat
+		 * lazimnya nama pendek titik pantau (mis. "KKS1"), alamat_detail keterangan
+		 * lengkapnya. Yang mana yang enak ditampilkan bergantung pada tempatnya, jadi
+		 * pilihan itu diserahkan ke pemanggil.
+		 *
+		 * Koordinat dikembalikan null bila kolomnya kosong ATAU bernilai 0/0, memakai
+		 * penilaian "belum diisi" yang sama persis dengan validasinya di atas. Kalau
+		 * 0/0 diteruskan apa adanya, respons 422 yang berbunyi "koordinat master belum
+		 * diisi" justru akan menyertakan sepasang angka yang tampak sah -- titik di
+		 * lepas pantai Teluk Guinea -- dan pemanggil bisa terlanjur memetakannya.
+		 *
+		 * @return array|null
+		 */
+		private function sourcePayload($row){
+			if(!$row){
+				return NULL;
+			}
+
+			$hasCoordinate = is_numeric($row['latitude']) && is_numeric($row['longitude'])
+								&& !((float) $row['latitude'] == 0 && (float) $row['longitude'] == 0);
+
+			return array(
+				'uid_lokasi_pemantauan' => (int) $row['uid_lokasi_pemantauan'],
+				'kode_lokasi' 			=> $row['kode_lokasi'],
+				'alamat' 				=> $row['alamat'],
+				'alamat_detail' 		=> $row['alamat_detail'],
+				'latitude' 				=> $hasCoordinate ? (float) $row['latitude'] : NULL,
+				'longitude' 			=> $hasCoordinate ? (float) $row['longitude'] : NULL
 			);
 		}
 
@@ -209,7 +274,17 @@
 			return $this->configCache;
 		}
 
-		private function invalidLocation($statusCode, $message){
+		/**
+		 * Bentuk kembalian untuk semua jalur yang tidak sampai menghitung jarak.
+		 *
+		 * $input dan $row diteruskan sejauh sudah diketahui saat galatnya terjadi,
+		 * lalu sisanya null. Jadi pada kasus 422 -- koordinat master belum diisi --
+		 * pemanggil tetap menerima lokasi_sumber lengkap dengan kode dan alamatnya,
+		 * yang justru dibutuhkan untuk tahu baris master mana yang harus dilengkapi.
+		 *
+		 * @return array
+		 */
+		private function invalidLocation($statusCode, $message, $input = NULL, $row = NULL){
 			list($okM, $warnM) = $this->shiftThresholds();
 
 			return array(
@@ -219,7 +294,9 @@
 					'status' 		=> "invalid",
 					'shift_m' 		=> NULL,
 					'shift_ok_m' 	=> $okM,
-					'shift_warn_m' 	=> $warnM
+					'shift_warn_m' 	=> $warnM,
+					'lokasi_input' 	=> $input,
+					'lokasi_sumber' => $this->sourcePayload($row)
 				)
 			);
 		}

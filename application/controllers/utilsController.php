@@ -24,10 +24,17 @@ class utilsController extends Front
     //  {"uid_lokasi_pemantauan": 36421, "latitude": -6.16039, "longitude": 106.64251}
     //
     //  {"statusCode":200,"message":"...",
-    //   "data":{"status":"ok","shift_m":12.47,"shift_ok_m":50,"shift_warn_m":100}}
+    //   "data":{"status":"ok","shift_m":12.47,"shift_ok_m":50,"shift_warn_m":100,
+    //           "lokasi_input":{"latitude":-6.16039,"longitude":106.64251},
+    //           "lokasi_sumber":{"uid_lokasi_pemantauan":36421,"kode_lokasi":"...",
+    //                            "alamat":"...","alamat_detail":"...",
+    //                            "latitude":-6.16028,"longitude":106.64252}}}
     //
     //status bernilai "ok" / "warn" / "invalid", mengikuti ambang di tabel
     //config_parameters (LOCATION_SHIFT_OK_M dan LOCATION_SHIFT_WARN_M).
+    //
+    //lokasi_input dan lokasi_sumber adalah dua titik yang dibandingkan, disertakan
+    //supaya hasilnya bisa langsung ditampilkan tanpa query susulan ke lokasi_pemantauan.
     public function validateLocationPelaporan()
     {
         header("Content-Type: application/json; charset=UTF-8");
