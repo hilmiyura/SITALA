@@ -75,6 +75,709 @@ class ocrController extends Front
         $this -> respondExtract($result, "matchFieldsIkal", "ikal-ocr");
     }
 
+    //Satu hari AQMS terdiri dari 48 pembacaan, satu per interval 30 menit.
+    //Dipakai sebagai pengali saat menghitung berapa data yang SEHARUSNYA ada.
+    const AQMS_SLOTS_PER_DAY = 48;
+
+    //Pelaporan IKU hanya memakai bulan 1-11. Halaman Desember, kalau ada di dokumen,
+    //tidak diminta dan tidak ikut jadi penyebut persentase.
+    const AQMS_MONTH_FIRST = 1;
+    const AQMS_MONTH_LAST  = 11;
+
+    //Sebuah hari dihitung VALID bila kelengkapan datanya minimal 75% -- yaitu 36 dari 48
+    //pembacaan. Disimpan sebagai rasio, bukan angka 36, supaya hubungannya dengan jumlah
+    //slot tetap terlihat kalau kelak alatnya berubah interval.
+    const AQMS_DAY_VALID_RATIO = 0.75;
+
+    //Anggaran waktu seluruh aksi, dalam detik. Diukur: satu panggilan halaman bulanan
+    //memakan 50-60 detik, dan satu dokumen bisa berisi 22-33 halaman yang dijalankan
+    //belasan sekaligus.
+    const AQMS_TIME_LIMIT = 900;
+
+    //Sisa waktu setelah panggilan terakhir: merakit respons, mencocokkan lokasi ke
+    //master, dan mencatat pemakaian token.
+    const AQMS_TIME_RESERVE = 30;
+
+    /**
+     * OCR auto-fill jalur laporan bulanan AQMS (bukan SHU).
+     *
+     * Berjalan dua langkah:
+     *
+     *   1. satu panggilan "rangka" (prompts/iku_aqms.md) membaca kop, footer tiap halaman
+     *      bulanan, dan halaman rekap tahunan. Murah dan cepat (~21 detik, ~$0,005), dan
+     *      dari sinilah diketahui bulan mana saja yang benar-benar ada -- sehingga dokumen
+     *      berisi enam bulan tidak ditagih 33 panggilan;
+     *   2. satu panggilan per parameter-bulan (prompts/iku_aqms_harian.md) mengambil baris
+     *      ringkasan harian, dijalankan berbarengan.
+     *
+     * Dipecah per bulan karena batas KETELITIAN: satu panggilan berisi 11 bulan sekaligus
+     * terbukti bergeser ~2 hari mulai hari ke-11 dan kehilangan min/mean/max pada hari
+     * 23-30, dengan struktur JSON yang tetap tampak sehat.
+     *
+     * Angka resmi (hari valid, data valid, rata-rata, persentase) dihitung dari baris
+     * harian. Angka footer TIDAK dipakai sebagai sumber, hanya sebagai pembanding --
+     * lihat catatan akurasi di aqmsHitung().
+     */
+    public function ikuAqmsExtract()
+    {
+        header("Content-Type: application/json; charset=UTF-8");
+
+        $mulai = microtime(TRUE);
+
+        //Server pengembangan (`php -S`) berjalan di SAPI CLI, yang max_execution_time
+        //bawaannya 0 alias TANPA BATAS. Jadi baris ini bukan menaikkan batas melainkan
+        //MEMBUAT batas -- disengaja, supaya proses berhenti pada waktu yang kita tentukan
+        //dan sempat melaporkan diri, bukan menggantung tanpa ujung. Diawali @ karena
+        //set_time_limit ditolak di sebagian konfigurasi FastCGI.
+        @set_time_limit(self::AQMS_TIME_LIMIT);
+
+        $file = $this -> readUploadedFile();
+        if (isset($file['error'])) {
+            echo json_encode($file);
+            return;
+        }
+
+        //Pemakaian dicatat PER TAHAP, bukan sekali di akhir. Satu dokumen bisa berarti
+        //puluhan panggilan berbayar; kalau pencatatannya menunggu akhir, proses yang mati
+        //di tengah jalan menghapus jejak biaya yang sudah terlanjur keluar.
+        $usages = array();
+
+        $rangka = $this -> openrouter -> extractIkuAqms($file['tmp_name'], $file['mime']);
+        $usages[] = isset($rangka['usage']) ? $rangka['usage'] : null;
+        $this -> logTokenUsage("ikuaqms-ocr", isset($rangka['usage']) ? $rangka['usage'] : null);
+
+        if (!$rangka['success']) {
+            echo $this -> aqmsJson(array(
+                "statusCode" => 500,
+                "message" => "OCR gagal dibaca: " . $rangka['error'],
+                "data" => null,
+                "usage" => $this -> sumUsage($usages),
+            ));
+            return;
+        }
+
+        $jobs = $this -> aqmsJobs($rangka['data']);
+        if (!count($jobs)) {
+            echo $this -> aqmsJson(array(
+                "statusCode" => 500,
+                "message" => "Tidak ada halaman bulanan AQMS yang terbaca dari dokumen",
+                "data" => null,
+                "usage" => $this -> sumUsage($usages),
+            ));
+            return;
+        }
+
+        //Batas MEMULAI panggilan baru. Disisakan satu TIMEOUT_HARIAN penuh supaya
+        //panggilan yang berangkat paling akhir masih sempat selesai, ditambah cadangan
+        //untuk merakit respons dan mencatat ke database.
+        $deadline = $mulai + self::AQMS_TIME_LIMIT - openrouter::TIMEOUT_HARIAN - self::AQMS_TIME_RESERVE;
+
+        $harian = $this -> openrouter -> extractIkuAqmsHarian(
+            $file['tmp_name'], $file['mime'], $jobs, $deadline
+        );
+
+        foreach ($harian as $r) {
+            $u = isset($r['usage']) ? $r['usage'] : null;
+            $usages[] = $u;
+            $this -> logTokenUsage("ikuaqms-ocr", $u);
+        }
+
+        $data = $this -> matchFieldsIkuAqms($rangka['data'], $harian);
+        $data['durasi_detik'] = round(microtime(TRUE) - $mulai, 1);
+
+        echo $this -> aqmsJson(array(
+            "statusCode" => 200,
+            "message" => "Dokumen AQMS selesai diproses",
+            "data" => $data,
+            "usage" => $this -> sumUsage($usages),
+        ));
+    }
+
+    //Menyusun daftar panggilan harian dari hasil langkah rangka: satu pekerjaan per
+    //parameter per bulan yang benar-benar ADA di dokumen.
+    //
+    //Kuncinya "<parameter>-<bulan>" sekaligus membuang duplikat bila model menyebut satu
+    //bulan dua kali.
+    private function aqmsJobs($ocr)
+    {
+        $jobs = array();
+
+        foreach (array('no2', 'so2', 'pm25') as $param) {
+            $p = isset($ocr[$param]) && is_array($ocr[$param]) ? $ocr[$param] : null;
+            if (!$p || !isset($p['bulanan']) || !is_array($p['bulanan'])) {
+                continue;
+            }
+
+            foreach ($p['bulanan'] as $b) {
+                if (!is_array($b) || !isset($b['bulan'])) {
+                    continue;
+                }
+                $bulan = (int) $b['bulan'];
+                if ($bulan < self::AQMS_MONTH_FIRST || $bulan > self::AQMS_MONTH_LAST) {
+                    continue;
+                }
+                $jobs[$param . '-' . $bulan] = array('parameter' => $param, 'bulan' => $bulan);
+            }
+        }
+
+        return $jobs;
+    }
+
+    //Menjumlahkan pemakaian seluruh panggilan jadi satu angka untuk respons.
+    //
+    //Sisi pemanggil butuh "berapa biaya dokumen ini", bukan daftar puluhan baris.
+    //generation_id sengaja TIDAK ikut: tidak ada satu id yang mewakili gabungan, dan
+    //menyertakan salah satunya saja akan menyesatkan saat ditelusuri.
+    private function sumUsage($usages)
+    {
+        $total = array(
+            'panggilan' => 0, 'prompt_tokens' => 0, 'completion_tokens' => 0,
+            'total_tokens' => 0, 'cached_tokens' => 0, 'reasoning_tokens' => 0,
+            'cost' => 0.0, 'model' => NULL,
+        );
+        $ada = FALSE;
+
+        foreach ($usages as $usage) {
+            if (!is_array($usage)) {
+                continue;
+            }
+            $ada = TRUE;
+            $total['panggilan']++;
+
+            foreach (array('prompt_tokens', 'completion_tokens', 'total_tokens', 'cached_tokens', 'reasoning_tokens') as $k) {
+                if (isset($usage[$k]) && $usage[$k] !== null) {
+                    $total[$k] += (int) $usage[$k];
+                }
+            }
+            if (isset($usage['cost']) && $usage['cost'] !== null) {
+                $total['cost'] += (float) $usage['cost'];
+            }
+            if (!$total['model'] && !empty($usage['model'])) {
+                $total['model'] = $usage['model'];
+            }
+        }
+
+        return $ada ? $total : NULL;
+    }
+
+    /**
+     * Menserialkan respons AQMS dengan aman.
+     *
+     * json_encode() mengembalikan FALSE, TANPA warning apa pun, bila datanya memuat byte
+     * yang bukan UTF-8 sah -- dan `echo FALSE` mencetak string kosong. Satu karakter rusak
+     * dari hasil bacaan model cukup untuk membuat seluruh respons hilang tanpa jejak, yang
+     * nyaris mustahil didiagnosis dari sisi pemanggil (gejalanya: "no content", tanpa
+     * error di log mana pun).
+     *
+     * Nama stasiun hasil OCR adalah sumber paling mungkin: PDF laporan kerap memakai
+     * pengodean Latin-1 untuk simbol derajat dan sejenisnya. INF/NAN memicu kegagalan yang
+     * sama.
+     *
+     * @return string selalu string, tidak pernah FALSE
+     */
+    private function aqmsJson($payload)
+    {
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($json !== FALSE) {
+            return $json;
+        }
+
+        $alasan = json_last_error_msg();
+
+        //Percobaan kedua: byte rusak diganti U+FFFD daripada seluruh respons hilang.
+        $json = json_encode(
+            $payload,
+            JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
+        );
+        if ($json !== FALSE) {
+            return $json;
+        }
+
+        return '{"statusCode":500,"message":' . json_encode("Respons gagal diserialkan ke JSON: " . $alasan)
+             . ',"data":null,"usage":null}';
+    }
+
+    //Merakit respons akhir: hasil perhitungan AQMS di bawah kunci "aqms", lalu field-field
+    //berbentuk SAMA dengan OCR IKU biasa supaya applyOcrResult() di frontend bisa
+    //memakainya tanpa perubahan.
+    private function matchFieldsIkuAqms($ocr, $harian)
+    {
+        //Hasil panggilan harian dikelompokkan per parameter-bulan, dan yang gagal/salah
+        //halaman dicatat terpisah supaya sisi pemanggil tahu hasilnya tidak utuh.
+        $harianByParam = array();
+        $gagal = array();
+        $dilewati = array();
+        $salahHalaman = array();
+
+        foreach ($harian as $r) {
+            $job = $r['job'];
+
+            if (!$r['success']) {
+                //"dilewati" berarti permintaannya tidak pernah dikirim karena anggaran
+                //waktu habis: tidak ada biaya yang keluar dan mengulangnya masuk akal.
+                //"gagal" berarti sudah dikirim dan sudah ditagih.
+                $catatan = array(
+                    'parameter' => $job['parameter'],
+                    'bulan' => $job['bulan'],
+                    'alasan' => $r['error'],
+                );
+                if (!empty($r['dilewati'])) {
+                    $dilewati[] = $catatan;
+                } else {
+                    $gagal[] = $catatan;
+                }
+                continue;
+            }
+
+            //Model diminta melaporkan kop halaman yang BENAR-BENAR ia baca (kop_terbaca),
+            //terpisah dari parameter/bulan yang diminta. Dokumen bisa puluhan halaman,
+            //dan model terbukti kadang salah menemukan halaman yang dimaksud -- gejalanya
+            //tidak terlihat dari bentuk JSON-nya (tetap sah), hanya dari ISINYA (rentang
+            //nilai yang tidak masuk akal untuk parameter itu). kop_terbaca adalah satu-
+            //satunya sinyal yang bisa diperiksa tanpa tahu nilai yang "benar" lebih dulu.
+            $cocok = $this -> aqmsKopCocok($job, isset($r['data']['kop_terbaca']) ? $r['data']['kop_terbaca'] : null);
+
+            if ($cocok === FALSE) {
+                //TIDAK ikut dihitung. Halaman yang salah terbaca mengotori jumlah tahunan
+                //tanpa jejak apa pun bila tetap diikutkan -- lebih baik bulan itu hilang
+                //dari total (dan terlihat sebagai kelengkapan berkurang) daripada mengotori
+                //bulan lain yang sebenarnya benar.
+                $salahHalaman[] = array(
+                    'parameter' => $job['parameter'],
+                    'bulan' => $job['bulan'],
+                    'kop_terbaca' => isset($r['data']['kop_terbaca']) ? $r['data']['kop_terbaca'] : null,
+                );
+                continue;
+            }
+
+            $harianByParam[$job['parameter']][$job['bulan']] = $r['data'];
+        }
+
+        $out = array('aqms' => array(), 'parameters' => array());
+        $labels = array();
+
+        foreach (array('no2', 'so2', 'pm25') as $param) {
+            $p = isset($ocr[$param]) && is_array($ocr[$param]) ? $ocr[$param] : null;
+            if (!$p) {
+                $out['aqms'][$param] = null;
+                $out['parameters'][$param] = null;
+                continue;
+            }
+
+            $tahun  = (isset($p['tahun']) && $p['tahun']) ? (int) $p['tahun'] : null;
+            $rekap  = (isset($p['rekap_tahunan']) && is_array($p['rekap_tahunan'])) ? $p['rekap_tahunan'] : null;
+            $hitung = $this -> aqmsHitung(
+                isset($harianByParam[$param]) ? $harianByParam[$param] : array(),
+                isset($p['bulanan']) && is_array($p['bulanan']) ? $p['bulanan'] : array(),
+                $rekap,
+                $tahun
+            );
+
+            $out['aqms'][$param] = array(
+                'lokasi_text' => isset($p['lokasi_text']) ? $p['lokasi_text'] : null,
+                'tahun' => $tahun,
+                'bulanan' => $hitung['bulanan'],
+                'ringkasan' => $hitung['ringkasan'],
+                'ringkasan_sumber' => $hitung['ringkasan_sumber'],
+                //Angka yang TERCETAK di halaman rekap, apa adanya. Disertakan sebagai
+                //pembanding, bukan sebagai sumber.
+                'rekap_dokumen' => $rekap,
+                'integritas' => $hitung['integritas'],
+                'dasar' => $hitung['dasar'],
+            );
+
+            $out['parameters'][$param] = array(
+                'nilai' => $hitung['ringkasan']['rata_rata'],
+                //AQMS mengukur kontinu sepanjang tahun; tidak ada "durasi pemantauan"
+                //dalam pengertian SHU (lama satu kali pengambilan sampel).
+                'durasi_pemantauan' => null,
+                //Dicari lewat matchMetode(), bukan uid 3 yang ditulis langsung, supaya
+                //tetap benar bila isi rf_metode_pemantauan berubah.
+                'metode' => $this -> matchMetode('otomatis'),
+            );
+
+            if (!empty($p['lokasi_text'])) {
+                $labels[$param] = $p['lokasi_text'];
+            }
+        }
+
+        //Satu dokumen AQMS = satu stasiun, jadi tidak ada lokasi_list dan tidak ada mode
+        //multi seperti jalur SHU. Label pertama yang terisi dipakai untuk pencocokan.
+        $primaryLabel = null;
+        foreach (array('no2', 'so2', 'pm25') as $param) {
+            if (!empty($labels[$param])) {
+                $primaryLabel = $labels[$param];
+                break;
+            }
+        }
+
+        $out['lokasi'] = $this -> matchLokasi($primaryLabel, 1);
+        $out['labels'] = $labels;
+
+        //Field sisanya dikirim kosong supaya bentuk respons tetap sama dengan OCR IKU
+        //biasa. Dokumen AQMS memang tidak memuat laboratorium maupun peruntukan, dan
+        //tanggalnya sengaja TIDAK ditebak: laporan ini mencakup satu tahun sedangkan form
+        //meminta satu tanggal pemantauan. Membiarkannya kosong memaksa operator mengisi
+        //secara sadar, alih-alih menerima tebakan yang tampak meyakinkan.
+        $out['peruntukan'] = array('uid' => null, 'text' => null);
+        $out['lab'] = array();
+        $out['tanggal'] = null;
+        $out['periode_pemantauan'] = null;
+        $out['label'] = $primaryLabel;
+
+        //Tiga alasan berbeda hasilnya tidak utuh, dilaporkan terpisah karena tindak
+        //lanjutnya berbeda: gagal/dilewati layak diulang, salah_halaman butuh perbaikan
+        //cara memilih halaman (di luar cakupan sekarang -- lihat catatan di
+        //aqmsKopCocok()) sebelum diulang dengan cara yang sama.
+        $out['gagal'] = $gagal;
+        $out['dilewati'] = $dilewati;
+        $out['salah_halaman'] = $salahHalaman;
+        $out['utuh'] = (count($gagal) === 0 && count($dilewati) === 0 && count($salahHalaman) === 0);
+
+        return $out;
+    }
+
+    /**
+     * Memeriksa apakah kop halaman yang BENAR-BENAR dibaca model (kop_terbaca) cocok
+     * dengan parameter-bulan yang diminta.
+     *
+     * Ada karena diagnosis nyata: pemanggilan satu-halaman-per-permintaan (perlu, sebab
+     * satu panggilan berisi 11 bulan sekaligus terbukti bergeser dan kehilangan data --
+     * lihat aqmsHitung()) TERNYATA membuat model kadang salah menemukan halaman yang
+     * dimaksud di antara puluhan halaman dokumen. Gejalanya tidak terlihat dari BENTUK
+     * JSON-nya -- tetap valid, tetap 31 hari, tetap ada mean/min/max -- hanya dari ISINYA:
+     * pada dokumen uji, NO2 bulan Maret mengembalikan rentang nilai ~20 (mestinya ~4-8),
+     * persis rentang SO2. Memeriksa NILAI memerlukan tahu jawaban yang benar lebih dulu;
+     * memeriksa KOP yang dilaporkan model tidak.
+     *
+     * Ini pemeriksaan STRUKTURAL, bukan perbaikan akurasi pembacaan halaman itu sendiri --
+     * itu di luar cakupan saat ini. Yang dikerjakan di sini hanya mencegah halaman yang
+     * terbukti salah ikut mengotori total tahunan tanpa jejak.
+     *
+     * @return bool|null TRUE cocok, FALSE tidak cocok, NULL tidak bisa diperiksa (model
+     *                    tidak melaporkan kop_terbaca -- respons lama/tidak lengkap)
+     */
+    private function aqmsKopCocok($job, $kopTerbaca)
+    {
+        if (!is_array($kopTerbaca) || empty($kopTerbaca['parameter_teks'])) {
+            return NULL;
+        }
+
+        //Sinonim yang sama dipakai matchMetode()-adjacent di modul lain: parameter bisa
+        //ditulis dengan subscript unicode, koma sebagai pemisah desimal, atau embel-embel
+        //"Dioksida"/"Dioxide". Dinormalisasi ke bentuk polos sebelum dibandingkan.
+        $sinonim = array(
+            'no2' => array('no2', 'no₂', 'nitrogendioksida', 'nitrogendioxide'),
+            'so2' => array('so2', 'so₂', 'sulfurdioksida', 'sulfurdioxide'),
+            'pm25' => array('pm25', 'pm2.5', 'pm2,5', 'pm₂.₅', 'pm₂,₅'),
+        );
+
+        $bersih = strtolower(preg_replace('/[^a-z0-9,.₂₅]/i', '', (string) $kopTerbaca['parameter_teks']));
+        $bersih = str_replace(array(',', '.'), '', $bersih);
+
+        $diminta = isset($sinonim[$job['parameter']]) ? $sinonim[$job['parameter']] : array($job['parameter']);
+        foreach ($diminta as $s) {
+            if (str_replace(array(',', '.'), '', $s) === $bersih) {
+                return TRUE;
+            }
+        }
+
+        return FALSE;
+    }
+
+    /**
+     * Menghitung ringkasan tahunan satu parameter DARI BARIS HARIAN.
+     *
+     *   hari valid  -> hari dengan kelengkapan >= 75% (>= 36 dari 48 pembacaan)
+     *   data valid  -> jumlah seluruh pembacaan sah
+     *   rata-rata   -> SUM(mean hari x cacah pembacaan hari) / SUM(cacah) -- rata-rata
+     *                  tertimbang, yang secara matematis sama dengan "jumlah semua data
+     *                  valid dibagi banyaknya data valid"
+     *   persentase  -> terhadap KALENDER bulan 1-11, bukan terhadap bulan yang kebetulan
+     *                  ada di dokumen
+     *
+     * Penyebut kalender disengaja: dokumen yang kehilangan halaman Maret harus terlihat
+     * sebagai kelengkapan yang berkurang, bukan tetap 100% karena Maret ikut hilang dari
+     * pembaginya.
+     *
+     * CATATAN AKURASI YANG PENTING
+     * Angka footer ("Hari Valid"/"Data Valid" di tiap halaman) TIDAK dipakai sebagai
+     * sumber, hanya sebagai pembanding di 'integritas'. Pengukuran pada dokumen uji
+     * menunjukkan keduanya bisa berbeda: pada Juni, turunan harian memberi 27 hari valid
+     * sedangkan footer mencetak 22 -- sementara jumlah seluruh footer terbukti cocok
+     * sampai digit terakhir dengan rekap tahunan dokumen. Jadi bila 'integritas' menandai
+     * selisih, yang lebih mungkin keliru adalah pembacaan barisan hariannya. Selisih itu
+     * sengaja DITAMPILKAN, bukan disembunyikan atau dikoreksi diam-diam.
+     *
+     * @param  array $harianByMonth dipetakan bulan => hasil panggilan harian bulan itu
+     * @param  array $footer daftar {bulan, hari_valid, data_valid} dari langkah rangka
+     * @param  array|null $rekap angka rekap tahunan yang tercetak
+     * @param  int|null $tahun dibutuhkan untuk menentukan panjang Februari
+     * @return array
+     */
+    private function aqmsHitung($harianByMonth, $footer, $rekap, $tahun)
+    {
+        //Footer diindeks per bulan supaya bisa dipasangkan sebagai pembanding.
+        $footerByMonth = array();
+        foreach ($footer as $b) {
+            if (is_array($b) && isset($b['bulan'])) {
+                $footerByMonth[(int) $b['bulan']] = $b;
+            }
+        }
+
+        $ambang = (int) ceil(self::AQMS_SLOTS_PER_DAY * self::AQMS_DAY_VALID_RATIO);
+
+        $bulanan        = array();
+        $totalHariValid = 0;
+        $totalDataValid = 0;
+        $totalNilai     = 0.0;
+        $totalBobot     = 0;
+
+        for ($bulan = self::AQMS_MONTH_FIRST; $bulan <= self::AQMS_MONTH_LAST; $bulan++) {
+            if (!isset($harianByMonth[$bulan])) {
+                continue;
+            }
+
+            $isi    = $harianByMonth[$bulan];
+            $harian = (isset($isi['harian']) && is_array($isi['harian'])) ? $isi['harian'] : array();
+            if (!count($harian)) {
+                continue;
+            }
+
+            $hariDalamBulan = $this -> aqmsJumlahHari($tahun, $bulan);
+            $persen = $this -> aqmsSatuanPersen($isi, $harian);
+
+            $hariValid = 0;
+            $dataValid = 0;
+            $sudah     = array();
+
+            foreach ($harian as $h) {
+                if (!is_array($h) || !isset($h['hari'])) {
+                    continue;
+                }
+                $hari = (int) $h['hari'];
+
+                //KALENDER yang menentukan hari mana yang dihitung, bukan jumlah kolom di
+                //tabel. Dokumen bisa menggambar 31 kolom untuk semua bulan (tanggal yang
+                //tidak ada dikosongkan dengan Jumlah Data 0), bisa juga sepanjang bulan
+                //saja. Satu aturan ini benar untuk keduanya tanpa perlu mendeteksi
+                //bentuknya, dan tetap membuang nilai bukan-nol yang salah tercetak di
+                //kolom yang seharusnya tidak ada.
+                if ($hari < 1 || $hari > $hariDalamBulan || isset($sudah[$hari])) {
+                    continue;
+                }
+                $sudah[$hari] = TRUE;
+
+                //jumlah_data 0 adalah nilai SAH yang berarti tidak ada data hari itu --
+                //bukan penanda rusak. Hari seperti itu bercacah 0, tidak valid, dan tidak
+                //menyumbang bobot apa pun ke rata-rata.
+                $jd = (isset($h['jumlah_data']) && is_numeric($h['jumlah_data'])) ? (float) $h['jumlah_data'] : 0;
+                $n  = $persen
+                    ? (int) round($jd / 100 * self::AQMS_SLOTS_PER_DAY)
+                    : (int) round($jd);
+                $n = max(0, min(self::AQMS_SLOTS_PER_DAY, $n));
+
+                $dataValid += $n;
+                if ($n >= $ambang) {
+                    $hariValid++;
+                }
+                if ($n > 0 && isset($h['mean']) && is_numeric($h['mean'])) {
+                    $totalNilai += (float) $h['mean'] * $n;
+                    $totalBobot += $n;
+                }
+            }
+
+            $f = isset($footerByMonth[$bulan]) ? $footerByMonth[$bulan] : null;
+
+            $bulanan[] = array(
+                'bulan' => $bulan,
+                'hari_valid' => $hariValid,
+                'data_valid' => $dataValid,
+                'hari_dalam_bulan' => $hariDalamBulan,
+                'hari_terbaca' => count($sudah),
+                'jumlah_data_satuan' => $persen ? 'persen' : 'cacah',
+                //Angka footer halaman itu, apa adanya, untuk dibandingkan.
+                'footer_dokumen' => $f ? array(
+                    'hari_valid' => (isset($f['hari_valid']) && is_numeric($f['hari_valid'])) ? (int) $f['hari_valid'] : NULL,
+                    'data_valid' => (isset($f['data_valid']) && is_numeric($f['data_valid'])) ? (int) $f['data_valid'] : NULL,
+                ) : NULL,
+                'selisih_footer' => $f ? array(
+                    'hari_valid' => (isset($f['hari_valid']) && is_numeric($f['hari_valid'])) ? $hariValid - (int) $f['hari_valid'] : NULL,
+                    'data_valid' => (isset($f['data_valid']) && is_numeric($f['data_valid'])) ? $dataValid - (int) $f['data_valid'] : NULL,
+                ) : NULL,
+                'harian' => $harian,
+            );
+
+            $totalHariValid += $hariValid;
+            $totalDataValid += $dataValid;
+        }
+
+        $hariSeharusnya = $this -> aqmsHariSeharusnya($tahun);
+        $dataSeharusnya = $hariSeharusnya * self::AQMS_SLOTS_PER_DAY;
+
+        return array(
+            'bulanan' => $bulanan,
+            'ringkasan' => array(
+                'jumlah_hari_valid' => $totalHariValid,
+                'jumlah_data_valid' => $totalDataValid,
+                //null, bukan 0, bila tidak ada satu pun data: "tidak ada bacaan" berbeda
+                //dari "rata-ratanya nol".
+                'rata_rata' => $totalBobot ? round($totalNilai / $totalBobot, 2) : NULL,
+                'persentase_data' => $dataSeharusnya ? round($totalDataValid / $dataSeharusnya * 100, 2) : NULL,
+                'persentase_hari' => $hariSeharusnya ? round($totalHariValid / $hariSeharusnya * 100, 2) : NULL,
+            ),
+            'ringkasan_sumber' => array(
+                'jumlah_hari_valid' => 'dihitung dari baris harian (kelengkapan >= 75%)',
+                'jumlah_data_valid' => 'dihitung dari baris harian',
+                'rata_rata' => 'dihitung dari baris harian (rata-rata tertimbang)',
+                'persentase_data' => 'dihitung terhadap kalender bulan 1-11',
+                'persentase_hari' => 'dihitung terhadap kalender bulan 1-11',
+            ),
+            //Uji integritas: hasil hitung dibandingkan terhadap jumlah footer bulanan DAN
+            //terhadap rekap tahunan tercetak. Ketiganya dicetak/diturunkan dari tempat
+            //berbeda, jadi kecocokannya bukti kuat dan ketidakcocokannya menandai halaman
+            //yang tertukar, terlewat, atau salah baca.
+            'integritas' => $this -> aqmsIntegritas(
+                array('jumlah_hari_valid' => $totalHariValid, 'jumlah_data_valid' => $totalDataValid),
+                $footerByMonth,
+                $rekap
+            ),
+            //Penyebut yang dipakai, disertakan supaya persentase di atas bisa ditelusuri
+            //tanpa harus tahu aturannya lebih dulu.
+            'dasar' => array(
+                'bulan_terbaca' => count($bulanan),
+                'hari_seharusnya' => $hariSeharusnya,
+                'data_seharusnya' => $dataSeharusnya,
+                'slot_per_hari' => self::AQMS_SLOTS_PER_DAY,
+                'ambang_hari_valid' => $ambang,
+            ),
+        );
+    }
+
+    /**
+     * Menentukan apakah kolom "Jumlah Data" berisi persentase (0-100) atau cacah (0-48).
+     *
+     * Pernyataan model dipakai lebih dulu bila ada. Bila tidak, disimpulkan dari data:
+     * nilai di atas 48 hanya mungkin bila satuannya persen.
+     *
+     * Bila seluruh nilainya <= 48 dan model tidak menyatakan apa-apa, dianggap CACAH.
+     * Itu tafsir yang lebih aman: menganggapnya persen akan mengubah, misalnya, 40 (dari
+     * 48 pembacaan, sudah valid) menjadi 40% (19 pembacaan, tidak valid) -- membuang hari
+     * yang sebenarnya sah.
+     */
+    private function aqmsSatuanPersen($isi, $harian)
+    {
+        if (isset($isi['jumlah_data_satuan'])) {
+            $s = strtolower(trim((string) $isi['jumlah_data_satuan']));
+            if ($s === 'persen') { return TRUE; }
+            if ($s === 'cacah')  { return FALSE; }
+        }
+
+        foreach ($harian as $h) {
+            if (is_array($h) && isset($h['jumlah_data']) && is_numeric($h['jumlah_data'])
+                && (float) $h['jumlah_data'] > self::AQMS_SLOTS_PER_DAY) {
+                return TRUE;
+            }
+        }
+
+        return FALSE;
+    }
+
+    /**
+     * Membandingkan hasil hitung terhadap DUA sumber tercetak yang berbeda:
+     * jumlah footer bulanan, dan rekap tahunan.
+     *
+     * Ketiganya berasal dari tempat berbeda di dokumen yang sama. Bila hitungan kita
+     * cocok dengan keduanya, hampir pasti benar. Bila hitungan kita menyimpang sementara
+     * kedua sumber tercetak itu saling cocok, yang keliru kemungkinan besar pembacaan
+     * baris hariannya -- itulah pola yang teramati pada dokumen uji.
+     *
+     * 'cocok' bernilai null bila sisi pembandingnya tidak ada. "Tidak bisa dibandingkan"
+     * sengaja tidak disamarkan jadi "cocok".
+     */
+    private function aqmsIntegritas($jumlah, $footerByMonth, $rekap)
+    {
+        //Jumlahkan footer bulanan sebagai sumber pembanding pertama.
+        $footerTotal = array('jumlah_hari_valid' => 0, 'jumlah_data_valid' => 0);
+        $adaFooter = FALSE;
+        foreach ($footerByMonth as $bulan => $f) {
+            if ($bulan < self::AQMS_MONTH_FIRST || $bulan > self::AQMS_MONTH_LAST) {
+                continue;
+            }
+            if (isset($f['hari_valid']) && is_numeric($f['hari_valid'])) {
+                $footerTotal['jumlah_hari_valid'] += (int) $f['hari_valid'];
+                $adaFooter = TRUE;
+            }
+            if (isset($f['data_valid']) && is_numeric($f['data_valid'])) {
+                $footerTotal['jumlah_data_valid'] += (int) $f['data_valid'];
+                $adaFooter = TRUE;
+            }
+        }
+
+        $out = array('cocok' => NULL);
+        $semua = array();
+
+        foreach (array('jumlah_hari_valid', 'jumlah_data_valid') as $k) {
+            $a  = $jumlah[$k];
+            $bf = $adaFooter ? (float) $footerTotal[$k] : NULL;
+            $br = (isset($rekap[$k]) && is_numeric($rekap[$k])) ? (float) $rekap[$k] : NULL;
+
+            $cocokFooter = ($bf === NULL) ? NULL : (abs($a - $bf) < 0.5);
+            $cocokRekap  = ($br === NULL) ? NULL : (abs($a - $br) < 0.5);
+
+            $out[$k] = array(
+                'hitung' => $a,
+                'jumlah_footer' => $bf,
+                'rekap_dokumen' => $br,
+                'selisih_footer' => ($bf === NULL) ? NULL : round($a - $bf, 2),
+                'selisih_rekap' => ($br === NULL) ? NULL : round($a - $br, 2),
+                'cocok_footer' => $cocokFooter,
+                'cocok_rekap' => $cocokRekap,
+                //Apakah kedua sumber TERCETAK itu saling cocok. Bila ya sedangkan hasil
+                //hitung menyimpang, dokumennya konsisten dan pembacaan hariannya yang
+                //patut dicurigai.
+                'sumber_cetak_konsisten' => ($bf === NULL || $br === NULL) ? NULL : (abs($bf - $br) < 0.5),
+            );
+            $semua[] = $cocokFooter;
+            $semua[] = $cocokRekap;
+        }
+
+        $terbanding = array_filter($semua, function ($v) { return $v !== NULL; });
+        if (count($terbanding)) {
+            $out['cocok'] = !in_array(FALSE, $terbanding, TRUE);
+        }
+
+        return $out;
+    }
+
+    //Jumlah hari satu bulan, sudah memperhitungkan kabisat.
+    //
+    //date('t') dipakai, bukan cal_days_in_month(), karena extension calendar TIDAK
+    //dipasang di image ini (lihat daftar extension di Dockerfile) -- memanggilnya akan
+    //fatal error. date() juga menerapkan aturan abad dengan benar: 2000 kabisat, 1900
+    //tidak.
+    //
+    //Bila tahunnya tidak terbaca dari dokumen, dipakai tahun non-kabisat supaya Februari
+    //dihitung 28 hari. Itu pilihan konservatif: penyebutnya jadi sedikit lebih kecil,
+    //sehingga persentase tidak terlihat lebih buruk dari kenyataannya.
+    private function aqmsJumlahHari($tahun, $bulan)
+    {
+        $tahun = $tahun ? (int) $tahun : 2001;
+
+        return (int) date('t', mktime(0, 0, 0, (int) $bulan, 1, $tahun));
+    }
+
+    //Total hari bulan 1-11 menurut kalender: 334 hari, atau 335 pada tahun kabisat.
+    private function aqmsHariSeharusnya($tahun)
+    {
+        $total = 0;
+        for ($bulan = self::AQMS_MONTH_FIRST; $bulan <= self::AQMS_MONTH_LAST; $bulan++) {
+            $total += $this -> aqmsJumlahHari($tahun, $bulan);
+        }
+
+        return $total;
+    }
+
     //Validates $_FILES['file'], returns ["tmp_name"=>..., "mime"=>...] on success,
     //or ["error"=>true, "statusCode"=>..., "message"=>...] (json_encode-ready as-is) on failure
     private function readUploadedFile()
@@ -496,10 +1199,17 @@ class ocrController extends Front
         }
 
         $w = "deleted = 0 AND uid_rf_component = " . (int) $component;
-        if ($this -> me['role_user'] == 3) {
-            $w .= " AND uid_kabkota = " . (int) $this -> me['uid_kabkota'];
-        } elseif ($this -> me['role_user'] == 2) {
-            $w .= " AND uid_provinsi = " . (int) $this -> me['uid_provinsi'];
+        //is_array() diperiksa lebih dulu karena $this->me TIDAK selalu array: bila sesi
+        //tidak ada, init() menyimpan apa pun kembalian session->get(). Tanpa penjagaan
+        //ini, log dibanjiri "Trying to access array offset on value of type int" yang
+        //menenggelamkan galat sesungguhnya. Tanpa sesi, pencarian memang tidak
+        //disempitkan ke wilayah mana pun.
+        $me = is_array($this -> me) ? $this -> me : array();
+        $role = isset($me['role_user']) ? $me['role_user'] : null;
+        if ($role == 3) {
+            $w .= " AND uid_kabkota = " . (int) $me['uid_kabkota'];
+        } elseif ($role == 2) {
+            $w .= " AND uid_provinsi = " . (int) $me['uid_provinsi'];
         }
 
         $this -> tables -> set("lokasi_pemantauan", "uid_lokasi_pemantauan");
