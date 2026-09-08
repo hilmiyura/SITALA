@@ -84,6 +84,44 @@
     }
   }
 
+  //===== Validasi pergeseran koordinat lokasi =====
+  function showLocationValidation(result, $container) {
+    $container = $container || $("#location-validation-result");
+    if (!result || !result.data) {
+      $container.hide().html("");
+      return;
+    }
+    var status = result.data.status;
+    var styleMap = {
+      ok:      { cls: "alert-success", icon: "ft-check-circle" },
+      warn:    { cls: "alert-warning",  icon: "ft-alert-triangle" },
+      invalid: { cls: "alert-danger",   icon: "ft-alert-octagon" }
+    };
+    var s = styleMap[status] || styleMap["warn"];
+    $container.removeClass("alert-success alert-warning alert-danger")
+      .addClass("alert " + s.cls)
+      .html('<i class="' + s.icon + '"></i> ' + result.message)
+      .show();
+  }
+
+  function validateLocation(uid, latitude, longitude, $container) {
+    $container = $container || $("#location-validation-result");
+    if (!uid || latitude == null || longitude == null) {
+      $container.hide().html("").removeClass("alert alert-success alert-warning alert-danger");
+      return;
+    }
+    $.ajax({
+      url: baseUrl + "utils/validateLocationPelaporan",
+      method: "POST",
+      data: JSON.stringify({ uid_lokasi_pemantauan: parseInt(uid), latitude: parseFloat(latitude), longitude: parseFloat(longitude) }),
+      contentType: "application/json",
+      success: function(res) {
+        try { res = (typeof res === "string") ? JSON.parse(res) : res; } catch(e) {}
+        showLocationValidation(res, $container);
+      }
+    });
+  }
+
   //sfx = "" for the single/default fields, "_r0", "_r1", ... for cloned repeater rows.
   //Unlike IKU/IKAL, IKA's OCR result carries tanggal PER LOCATION (not document-level), so it's
   //set here per-suffix rather than via applySharedFields.
@@ -126,6 +164,9 @@
             });
           }
           $("#uid_lokasi_pemantauan" + sfx).html(htmls);
+          if (!sfx && data.latitude && data.longitude) {
+            validateLocation(data.lokasi.uid, data.latitude, data.longitude);
+          }
           lokasiDone();
         },
         error: lokasiDone
@@ -201,6 +242,17 @@
       $row.append($header).append($content);
       $("#ocr-repeater-rows").append($row);
 
+      // insert validation container per-row sebelum section Pemantauan
+      var $validRow = $('<div class="location-validation-result-row mb-2" style="display:none;"></div>');
+      $row.find("h4.form-section").filter(function() {
+        return $(this).find(".ft-edit").length > 0;
+      }).before($validRow);
+
+      // validasi koordinat OCR awal untuk row ini
+      if (opt.lokasi && opt.lokasi.uid && opt.latitude != null && opt.longitude != null) {
+        validateLocation(opt.lokasi.uid, opt.latitude, opt.longitude, $validRow);
+      }
+
       $row.find(".select2").each(function() {
         $(this).select2({ dropdownParent: $(this).parent() });
       });
@@ -212,6 +264,7 @@
           $("#alamat_detail" + sfx).val("");
           $("#latitude" + sfx).val("");
           $("#longitude" + sfx).val("");
+          $validRow.hide().html("").removeClass("alert alert-success alert-warning alert-danger");
           return;
         }
         $.ajax({
@@ -226,6 +279,8 @@
                 $("#longitude" + sfx).val(val.longitude);
               });
             }
+            // clear validasi saat user ganti lokasi manual (tidak ada koordinat OCR lagi)
+            $validRow.hide().html("").removeClass("alert alert-success alert-warning alert-danger");
           }
         });
       });
@@ -418,6 +473,10 @@
   });
 
   $(document).ready(function() {
+    // insert container validasi lokasi sebelum section Pemantauan di #ocr-single-block
+    $('<div id="location-validation-result" style="display:none;"></div>')
+      .insertBefore("#ocr-single-block h4.form-section:has(.ft-edit)");
+
     $('#exportTitik').on("click", function(){
       TableToExcel.convert(document.getElementById("titik"), {
         name: "Titik.xlsx",
@@ -587,6 +646,7 @@
     $("#latitude").val("");
     $("#longitude").val("");
     $("#uid_lokasi_pemantauan").val("").trigger("change");
+    $("#location-validation-result").hide().html("").removeClass("alert alert-success alert-warning alert-danger");
     $("#periode_pemantauan").val("").trigger("change");
     $("#uid_provinsi").val("").trigger("change");
     id_kabkota = "";
@@ -650,8 +710,10 @@
               method: "GET",
               success: function(req) {
                 var htmls = "<option value=''>--PILIH LOKASI PEMANTAUAN--</option>";
+                var capturedVal = null;
                 if (req.total) {
                   jQuery.each(req.data, function(i, val) {
+                    capturedVal = val;
                     htmls += "<option value='" + val.uid_lokasi_pemantauan + "' selected>" + val.kode_lokasi + " - " + val.alamat + " - " + val.alamat_detail + "</option>";
                     $("#alamat").val(val.alamat);
                     $("#alamat_detail").val(val.alamat_detail);
@@ -660,6 +722,9 @@
                   });
                 }
                 $("#uid_lokasi_pemantauan").html(htmls);
+                if (capturedVal) {
+                  validateLocation(capturedVal.uid_lokasi_pemantauan, capturedVal.latitude, capturedVal.longitude);
+                }
               }
             });
             // $("#uid_lokasi_pemantauan").val(req.uid_lokasi_pemantauan).trigger("change");
