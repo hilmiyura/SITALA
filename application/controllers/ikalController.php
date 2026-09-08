@@ -1394,6 +1394,16 @@ class ikalController extends Front
         $this -> view -> assign("viewp_idx", base64_encode(implode(",",array_column($provinsi["data"],"uid_indeks_ikal"))));
     }
 
+    public function lokasiPemantauan()
+    {
+        require_once CONTROLLERS . "lokasiPemantauanController.php";
+        $c = new lokasiPemantauanController();
+        $c->init();
+        $c->setCtrlAct("lokasiPemantauan", "index");
+        $c->setComponentFilter(5);
+        $c->index();
+    }
+
     public function verifikasi()
     {//index verification menu
         $this -> getData();

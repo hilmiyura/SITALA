@@ -748,6 +748,18 @@
 			}
 		}
 
+		public function setCtrlAct($ctrl, $act) {
+			$this->ctrl = $ctrl;
+			$this->act  = $act;
+			$this->url  = $ctrl . '/' . $act;
+			$this->view->assign("ctrl", $ctrl);
+			$this->view->assign("act", $act);
+		}
+
+		public function setComponentFilter($uidRfComponent) {
+			$this->where .= " AND uid_rf_component = " . (int) $uidRfComponent;
+		}
+
 
  	}
 ?>

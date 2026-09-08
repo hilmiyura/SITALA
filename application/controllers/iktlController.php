@@ -1517,6 +1517,16 @@ class iktlController extends Front
         }
     }
 
+    public function lokasiPemantauan()
+    {
+        require_once CONTROLLERS . "lokasiPemantauanController.php";
+        $c = new lokasiPemantauanController();
+        $c->init();
+        $c->setCtrlAct("lokasiPemantauan", "index");
+        $c->setComponentFilter(3);
+        $c->index();
+    }
+
     public function verifikasi()
     {//index verification menu
         $message = $this->submitExcelRevisiRTHRHL();

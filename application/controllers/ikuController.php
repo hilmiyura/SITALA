@@ -1787,6 +1787,16 @@ class ikuController extends Front
         $this -> view -> assign("lab", $rf['data']);
     }
 
+    public function lokasiPemantauan()
+    {
+        require_once CONTROLLERS . "lokasiPemantauanController.php";
+        $c = new lokasiPemantauanController();
+        $c->init();
+        $c->setCtrlAct("lokasiPemantauan", "index");
+        $c->setComponentFilter(1);
+        $c->index();
+    }
+
     public function verifikasi()
     {//index verification menu
         $this -> getData();

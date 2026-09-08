@@ -2090,6 +2090,16 @@ class ikaController extends Front
         }
     }
 
+    public function lokasiPemantauan()
+    {
+        require_once CONTROLLERS . "lokasiPemantauanController.php";
+        $c = new lokasiPemantauanController();
+        $c->init();
+        $c->setCtrlAct("lokasiPemantauan", "index");
+        $c->setComponentFilter(2);
+        $c->index();
+    }
+
     public function verifikasi()
     {//index verification menu
         $this -> getData();

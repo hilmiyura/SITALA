@@ -66,6 +66,33 @@
           </div>
         </ul>
       </li>
+      <li class="dropdown nav-item" data-menu="dropdown">
+        <a class="dropdown-toggle nav-link" href="javascript:void();" data-toggle="dropdown"><i class="la la-map-marker"></i><span>Lokasi Pemantauan</span></a>
+        <ul class="dropdown-menu">
+          <div class="arrow_box">
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKU") || $me.role_user == 2 || $me.role_user == 3 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}iku/lokasiPemantauan" data-toggle="dropdown">INDEKS KUALITAS UDARA (IKU)</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKA" || $me.komponen == "DIR-RPDM") || $me.role_user == 2 || $me.role_user == 3 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}ika/lokasiPemantauan" data-toggle="dropdown">INDEKS KUALITAS AIR (IKA)</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKL" || $me.komponen == "PKG") || $me.role_user == 2 || $me.role_user == 3 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}iktl/lokasiPemantauan" data-toggle="dropdown">INDEKS KUALITAS LAHAN (IKL)</a>
+            </li>
+            {/if}
+            {if $me.role_user == 0 || ($me.role_user == 1 && $me.komponen == NULL || $me.komponen == "IKAL" || $me.komponen == "DIR-RPDM") || $me.role_user == 2 || $me.role_user == 4 || $me.role_user == 5 || $me.role_user == 6}
+            <li data-menu="">
+              <a class="dropdown-item" href="{$baseUrl}ikal/lokasiPemantauan" data-toggle="dropdown">INDEKS KUALITAS AIR LAUT (IKAL)</a>
+            </li>
+            {/if}
+          </div>
+        </ul>
+      </li>
       <li class="dropdown nav-item {$indeksActive}" data-menu="dropdown">
         <a class="dropdown-toggle nav-link" href="javascript:void();" data-toggle="dropdown"><i class="la la-calculator"></i><span>Perhitungan</span></a>
         <ul class="dropdown-menu">
@@ -201,9 +228,6 @@
               <a class="dropdown-item" href="{$baseUrl}refSungai" data-toggle="dropdown">Sungai</a>
             </li>
             {/if}
-            <li data-menu="">
-              <a class="dropdown-item" href="{$baseUrl}lokasiPemantauan" data-toggle="dropdown">Lokasi Pemantauan</a>
-            </li>
             <li data-menu="">
               <a class="dropdown-item" href="{$baseUrl}monitoringLok/iku" data-toggle="dropdown">Monitoring Lokasi
                 Pemantauan</a>
