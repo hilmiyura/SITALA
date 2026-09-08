@@ -240,6 +240,7 @@
 		$("#iku-repeater-rows").hide().empty();
 		$("#iku-single-block").show();
 		$("#btn-simpan-iku").prop("disabled", false).text("Simpan");
+		$("#jenis-dokumen-manual").prop("checked", true);
 		clearDocPreview();
 		resetDropzone();
 	}
@@ -336,7 +337,7 @@
 			.show();
 	}
 
-	function checkAndFillPm25(data, lokasiRow, sfx) {
+	function checkAndFillPm25(data, lokasiRow, sfx, source) {
 		sfx = sfx || "";
 		var params = data.parameters || {};
 		var pm25 = params.pm25 || {};
@@ -391,6 +392,12 @@
 					"NO2 dan SO2 menggunakan metode manual aktif. PM2.5 harus tersedia — nilai tidak ditemukan di dokumen. Isi PM2.5 secara manual.",
 					"danger", sfx
 				);
+			} else if (source === "aqms") {
+				// Kondisi 4: AQMS flow, PM2.5 tidak ada di dokumen
+				showPm25Msg(
+					"Data PM2.5 tidak ditemukan di dokumen AQMS. Isi PM2.5 secara manual.",
+					"warning", sfx
+				);
 			}
 		} else {
 			if (bothPasif) {
@@ -409,6 +416,7 @@
 		opts = opts || {};
 		var sfx = opts.suffix || "";
 		var done = opts.done;
+		var source = opts.source || "manual";
 		var unmatched = [];
 
 		var hasLokasiUid = !!(data.lokasi && data.lokasi.uid);
@@ -446,12 +454,18 @@
 					$("#uid_lokasi_pemantauan" + sfx).html(htmls);
 					if (!sfx && data.latitude && data.longitude) {
 						validateLocation(data.lokasi.uid, data.latitude, data.longitude);
+					} else if (!sfx && source === "aqms" && capturedVal) {
+						var $locVal = $("#location-validation-result");
+						$locVal.removeClass("alert alert-success alert-warning alert-danger")
+							.addClass("alert alert-info")
+							.html('<i class="ft-info"></i> Lokasi dicocokkan berdasarkan nama stasiun AQMS.')
+							.show();
 					}
-					checkAndFillPm25(data, capturedVal, sfx);
+					checkAndFillPm25(data, capturedVal, sfx, source);
 					lokasiDone();
 				},
 				error: function() {
-					checkAndFillPm25(data, null, sfx);
+					checkAndFillPm25(data, null, sfx, source);
 					lokasiDone();
 				}
 			});
@@ -494,7 +508,7 @@
 
 		// For the no-lokasi-uid case, params loop has now run so PM2.5 check is safe
 		if (!hasLokasiUid) {
-			checkAndFillPm25(data, null, sfx);
+			checkAndFillPm25(data, null, sfx, source);
 			lokasiDone();
 		}
 
@@ -743,11 +757,14 @@
 		var fd = new FormData();
 		fd.append("file", file);
 
+		var jenisDokumen = $('input[name="jenis_dokumen"]:checked').val();
+		var ocrEndpoint = (jenisDokumen === "aqms") ? "ocr/ikuAqmsExtract" : "ocr/ikuExtract";
+
 		setOcrStatus("info", "Membaca dokumen, mohon tunggu...");
 		$("#btn-simpan-iku").prop("disabled", true).text("Membaca dokumen...");
 
 		$.ajax({
-			url: baseUrl + "ocr/ikuExtract",
+			url: baseUrl + ocrEndpoint,
 			method: "POST",
 			data: fd,
 			processData: false,
@@ -785,7 +802,7 @@
 						ocrOptions = [];
 						ocrMode = null;
 						applySharedFields(res.data);
-						var unmatched = applyOcrResult(res.data);
+						var unmatched = applyOcrResult(res.data, { source: jenisDokumen });
 						$("#ocr_result_payload").val(JSON.stringify(res.data));
 						var msg = "Dokumen berhasil dibaca, form terisi otomatis. Mohon periksa kembali sebelum menyimpan.";
 						if (unmatched.length) {

@@ -372,8 +372,21 @@
           <div class="row no-gutters iku-modal-body">
             <div class="col-lg-5 iku-preview-pane border-right">
               <h4 class="form-section mt-0">
-                <i class="ft-magic"></i>Unggah Dokumen (Isi Otomatis via OCR)
+                <i class="la la-magic"></i>Unggah Dokumen (Isi Otomatis via OCR)
               </h4>
+              <div class="form-group mb-1">
+                <label class="mb-1"><strong>Jenis Dokumen</strong></label>
+                <div class="d-flex flex-wrap" style="gap:12px;">
+                  <label style="display:flex;align-items:center;gap:6px;margin:0;font-weight:normal;cursor:pointer;">
+                    <input type="radio" id="jenis-dokumen-manual" name="jenis_dokumen" value="manual" checked style="margin:0;" />
+                    SHU / LHP Manual
+                  </label>
+                  <label style="display:flex;align-items:center;gap:6px;margin:0;font-weight:normal;cursor:pointer;">
+                    <input type="radio" id="jenis-dokumen-aqms" name="jenis_dokumen" value="aqms" style="margin:0;" />
+                    Laporan Bulanan AQMS (Otomatis)
+                  </label>
+                </div>
+              </div>
               <div class="ocr-dropzone" id="ocr-dropzone">
                 <input type="file" id="shu" name="shu" accept=".pdf,.jpg,.jpeg,.png" class="ocr-dropzone-input" />
                 <div id="ocr-dropzone-placeholder">
