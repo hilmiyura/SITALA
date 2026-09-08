@@ -212,6 +212,7 @@
 		$("#pm25-dp-manual-aktif").hide();
 		$("#pm25-dp-pasif").hide();
 		$("#pm25-faktor-koreksi").hide();
+		$("#pm25-info-msg").hide().html("");
 		$(".durasi-pasif-warning").hide().text("");
 		$("#catatan-ocr-panel").hide();
 		$("#catatan-ocr-body").html("");
@@ -291,6 +292,8 @@
 
 	//===== Kriteria: durasi pemantauan Manual Pasif harus 13/14/15 hari =====
 	var METODE_MANUAL_PASIF = 2;
+	var METODE_MANUAL_AKTIF = 1;
+	var METODE_SATELIT = 17;
 	var DURASI_PASIF_ALLOWED_DAYS = [13, 14, 15];
 
 	function checkDurasiPasif(param, sfx) {
@@ -319,6 +322,88 @@
 		checkDurasiPasif(param, sfx);
 	});
 
+	function showPm25Msg(msg, type, sfx) {
+		sfx = sfx || "";
+		var $el = $("#pm25-info-msg" + sfx);
+		if (!msg) {
+			$el.hide().html("");
+			return;
+		}
+		var iconMap = { info: "ft-info", success: "ft-check-circle", warning: "ft-alert-triangle", danger: "ft-alert-octagon" };
+		$el.removeClass("alert-info alert-success alert-warning alert-danger")
+			.addClass("alert alert-" + type)
+			.html('<i class="' + (iconMap[type] || "ft-info") + '"></i> ' + msg)
+			.show();
+	}
+
+	function checkAndFillPm25(data, lokasiRow, sfx) {
+		sfx = sfx || "";
+		var params = data.parameters || {};
+		var pm25 = params.pm25 || {};
+		var no2 = params.no2 || {};
+		var so2 = params.so2 || {};
+
+		var pm25Nilai = pm25.nilai;
+		var no2MetodeUid = no2.metode && no2.metode.uid;
+		var so2MetodeUid = so2.metode && so2.metode.uid;
+
+		var bothPasif = (no2MetodeUid == METODE_MANUAL_PASIF && so2MetodeUid == METODE_MANUAL_PASIF);
+		var bothAktif = (no2MetodeUid == METODE_MANUAL_AKTIF && so2MetodeUid == METODE_MANUAL_AKTIF);
+
+		if (pm25Nilai === null || pm25Nilai === undefined || pm25Nilai === "") {
+			if (bothPasif) {
+				// Kondisi 1: NO2 & SO2 pasif, PM2.5 tidak ada → ambil dari data satelit
+				if (lokasiRow && lokasiRow.uid_provinsi && lokasiRow.uid_kabkota && data.tanggal) {
+					var tahun = String(data.tanggal).substring(0, 4);
+					showPm25Msg("Mengambil data PM2.5 satelit...", "info", sfx);
+					$.ajax({
+						url: baseUrl + "iku/pm25Satelit/x/" + lokasiRow.uid_provinsi + "/y/" + lokasiRow.uid_kabkota + "/z/" + tahun,
+						method: "GET",
+						success: function(res) {
+							try { res = (typeof res === "string") ? JSON.parse(res) : res; } catch(e) {}
+							if (res.statusCode == 200 && res.data && res.data.iku_pm25_satelit != null) {
+								$("#pm25" + sfx).val(res.data.iku_pm25_satelit);
+								$("#pm25_uid_metode_pemantauan" + sfx).val(METODE_SATELIT).trigger("change");
+								showPm25Msg(
+									"PM2.5 diisi otomatis dari data satelit (" + res.data.iku_pm25_satelit + " µg/m³) karena NO2 dan SO2 menggunakan metode manual pasif.",
+									"info", sfx
+								);
+							} else {
+								showPm25Msg(
+									"Data PM2.5 satelit tidak tersedia untuk lokasi dan tahun ini. Isi PM2.5 secara manual.",
+									"warning", sfx
+								);
+							}
+						},
+						error: function() {
+							showPm25Msg("Gagal mengambil data PM2.5 satelit. Isi PM2.5 secara manual.", "warning", sfx);
+						}
+					});
+				} else {
+					showPm25Msg(
+						"NO2 dan SO2 menggunakan metode manual pasif, PM2.5 perlu diambil dari data satelit. Pilih lokasi terlebih dahulu.",
+						"warning", sfx
+					);
+				}
+			} else if (bothAktif) {
+				// Kondisi 3: NO2 & SO2 aktif tapi PM2.5 tidak ada
+				showPm25Msg(
+					"NO2 dan SO2 menggunakan metode manual aktif. PM2.5 harus tersedia — nilai tidak ditemukan di dokumen. Isi PM2.5 secara manual.",
+					"danger", sfx
+				);
+			}
+		} else {
+			if (bothPasif) {
+				// Kondisi 2: NO2 & SO2 pasif, PM2.5 ada di OCR → paksa metode manual aktif
+				$("#pm25_uid_metode_pemantauan" + sfx).val(METODE_MANUAL_AKTIF).trigger("change");
+				showPm25Msg(
+					"NO2 dan SO2 menggunakan metode manual pasif, namun PM2.5 ditemukan di dokumen. Metode PM2.5 diset ke Manual Aktif.",
+					"info", sfx
+				);
+			}
+		}
+	}
+
 	//sfx = "" for the single/default fields, "_r0", "_r1", ... for cloned repeater rows
 	function applyOcrResult(data, opts) {
 		opts = opts || {};
@@ -326,20 +411,24 @@
 		var done = opts.done;
 		var unmatched = [];
 
+		var hasLokasiUid = !!(data.lokasi && data.lokasi.uid);
+
 		var lokasiDone = function() {
 			if (typeof done === "function") {
 				done();
 			}
 		};
 
-		if (data.lokasi && data.lokasi.uid) {
+		if (hasLokasiUid) {
 			$.ajax({
 				url: baseUrl + "ajax/lokasiById/x/" + data.lokasi.uid,
 				method: "GET",
 				success: function(r) {
 					var htmls = "<option value=''>--PILIH LOKASI PEMANTAUAN--</option>";
+					var capturedVal = null;
 					if (r.total) {
 						jQuery.each(r.data, function(i, val) {
+							capturedVal = val;
 							htmls += "<option value='" + val.uid_lokasi_pemantauan + "' selected>" + val.kode_lokasi + " - " + val.alamat + " - " + val.alamat_detail + "</option>";
 							$("#alamat" + sfx).val(val.alamat);
 							$("#alamat_detail" + sfx).val(val.alamat_detail);
@@ -358,15 +447,18 @@
 					if (!sfx && data.latitude && data.longitude) {
 						validateLocation(data.lokasi.uid, data.latitude, data.longitude);
 					}
+					checkAndFillPm25(data, capturedVal, sfx);
 					lokasiDone();
 				},
-				error: lokasiDone
+				error: function() {
+					checkAndFillPm25(data, null, sfx);
+					lokasiDone();
+				}
 			});
 		} else {
 			if (data.lokasi && data.lokasi.text) {
 				unmatched.push("Lokasi Pemantauan (\"" + data.lokasi.text + "\")");
 			}
-			lokasiDone();
 		}
 
 		if (data.peruntukan && data.peruntukan.uid) {
@@ -399,6 +491,12 @@
 				unmatched.push("Metode " + labelMap[param] + " (\"" + p.metode.text + "\")");
 			}
 		});
+
+		// For the no-lokasi-uid case, params loop has now run so PM2.5 check is safe
+		if (!hasLokasiUid) {
+			checkAndFillPm25(data, null, sfx);
+			lokasiDone();
+		}
 
 		return unmatched;
 	}
