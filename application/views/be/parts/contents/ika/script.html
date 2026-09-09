@@ -122,6 +122,182 @@
     });
   }
 
+  //===== Validasi & konversi satuan parameter hasil OCR =====
+  //Konversi satuan dan pemeriksaan kewajaran nilai dikerjakan di backend
+  //(ocrController::buildIkaParameters) supaya deterministik dan bisa diuji ulang tanpa
+  //memanggil model; di sini hanya penandaannya.
+  //
+  //Sengaja TIDAK memblokir: nilai yang ditolak tetap diisikan ke input supaya operator
+  //melihat apa yang benar-benar terbaca dari dokumen dan bisa mengoreksinya. Menyembunyikan
+  //angkanya justru menghilangkan konteks yang dibutuhkan untuk memperbaiki.
+  var GAYA_VALIDASI = {
+    reject:    "is-invalid",
+    unknown:   "border-warning",
+    converted: "border-info"
+  };
+
+  //Teks nama parameter dan alasan berasal dari bacaan OCR atas dokumen yang diunggah user,
+  //jadi tidak boleh dirangkai langsung ke HTML.
+  function escHtml(teks) {
+    return $("<div>").text(teks == null ? "" : String(teks)).html();
+  }
+
+  function clearParamValidation(sfx) {
+    sfx = sfx || "";
+    jQuery.each(IKA_PARAMS, function(i, id) {
+      $("#" + id + sfx).removeClass("is-invalid border-warning border-info").removeAttr("title");
+    });
+    if (!sfx) {
+      $("#validasi-ocr-panel").hide();
+      $("#validasi-ocr-body").html("");
+    }
+  }
+
+  function showParamValidation(data, sfx) {
+    sfx = sfx || "";
+    clearParamValidation(sfx);
+
+    var validasi = (data && data.parameters_validasi) ? data.parameters_validasi : {};
+    var baris = [];
+
+    jQuery.each(validasi, function(id, v) {
+      //status verified tanpa catatan adalah keadaan normal — tidak perlu ditandai apa pun
+      if (!v || !v.alasan || !v.alasan.length) {
+        return;
+      }
+      var $input = $("#" + id + sfx);
+      if ($input.length) {
+        if (GAYA_VALIDASI[v.status]) {
+          $input.addClass(GAYA_VALIDASI[v.status]);
+        }
+        $input.attr("title", v.alasan.join("; "));
+      }
+      baris.push({ nama: v.nama_text || id, status: v.status, alasan: v.alasan });
+    });
+
+    if (!sfx) {
+      renderValidasiPanel(baris, data ? data.validasi_ringkas : null);
+    }
+  }
+
+  function renderValidasiPanel(baris, ringkas) {
+    var ditolak = [];
+    var dikonversi = [];
+    var tanpaSatuan = [];
+
+    $.each(baris, function(i, b) {
+      if (b.status === "reject") {
+        ditolak.push(b);
+      } else if (b.status === "unknown") {
+        tanpaSatuan.push(b.nama);
+      } else {
+        dikonversi.push(b);
+      }
+    });
+
+    var html = "";
+    if (ringkas && ringkas.wajib_hilang && ringkas.wajib_hilang.length) {
+      html += "<p class='mb-1'><strong>Parameter wajib belum terisi:</strong> "
+            + escHtml(ringkas.wajib_hilang.join(", ")) + "</p>";
+    }
+    if (ditolak.length) {
+      html += "<p class='mb-1'><strong>Perlu dikoreksi:</strong></p><ul class='mb-1 pl-3'>";
+      $.each(ditolak, function(i, b) {
+        html += "<li><small><strong>" + escHtml(b.nama) + "</strong> &mdash; "
+              + escHtml(b.alasan.join("; ")) + "</small></li>";
+      });
+      html += "</ul>";
+    }
+    if (dikonversi.length) {
+      html += "<p class='mb-1'><strong>Satuan disesuaikan otomatis:</strong></p><ul class='mb-1 pl-3'>";
+      $.each(dikonversi, function(i, b) {
+        html += "<li><small>" + escHtml(b.nama) + " &mdash; " + escHtml(b.alasan.join("; ")) + "</small></li>";
+      });
+      html += "</ul>";
+    }
+    //Sengaja dijadikan SATU baris, bukan daftar per parameter: dokumen yang menaruh satuan di
+    //header kolom (bukan di tiap baris) membuat hampir semua parameter masuk kategori ini, dan
+    //mendaftarnya satu per satu justru menenggelamkan temuan yang benar-benar perlu dikoreksi.
+    if (tanpaSatuan.length) {
+      html += "<p class='mb-0'><small><strong>Satuan tidak tercantum</strong> "
+            + "(nilai dianggap sudah sesuai satuan pada form): "
+            + escHtml(tanpaSatuan.join(", ")) + "</small></p>";
+    }
+
+    if (html) {
+      $("#validasi-ocr-panel")
+        .removeClass("alert-warning alert-danger")
+        .addClass(ditolak.length ? "alert-danger" : "alert-warning");
+      $("#validasi-ocr-body").html(html);
+      $("#validasi-ocr-panel").show();
+    }
+  }
+
+  //Menampilkan kembali catatan_ocr yang SUDAH tersimpan di baris pelaporan. Dipisah dari
+  //renderValidasiPanel() karena bentuk datanya berbeda: yang ini {lokasi, parameters} hasil
+  //buildCatatanOcr(), sedangkan renderValidasiPanel() bekerja pada respons OCR yang masih
+  //segar dan masih memuat status per parameter.
+  function renderCatatanOcrTersimpan(catatan) {
+    if (!catatan) {
+      return;
+    }
+    var html = "";
+
+    if (catatan.lokasi && catatan.lokasi.length) {
+      html += "<ul class='mb-1 pl-3'>";
+      $.each(catatan.lokasi, function(i, v) {
+        html += "<li><small>" + escHtml(v) + "</small></li>";
+      });
+      html += "</ul>";
+    }
+
+    if (catatan.parameters) {
+      var items = "";
+      $.each(catatan.parameters, function(id, alasan) {
+        if (alasan && alasan.length) {
+          items += "<li><small><strong>" + escHtml(id) + "</strong> &mdash; "
+                 + escHtml([].concat(alasan).join("; ")) + "</small></li>";
+        }
+      });
+      if (items) {
+        html += "<ul class='mb-0 pl-3'>" + items + "</ul>";
+      }
+    }
+
+    if (html) {
+      $("#validasi-ocr-body").html(html);
+      $("#validasi-ocr-panel").show();
+    }
+  }
+
+  //Menyusun isi kolom catatan_ocr dari satu opsi hasil OCR. Bentuknya disamakan dengan
+  //catatan_ocr milik IKU — {lokasi: [...], parameters: {...}} — di mana "lokasi" menampung
+  //catatan tingkat BARIS dan "parameters" catatan per field, supaya sisi PHP dan penyajiannya
+  //kelak bisa memakai cara baca yang sama.
+  function buildCatatanOcr(data) {
+    var catatan = { lokasi: [], parameters: {} };
+    if (!data) {
+      return catatan;
+    }
+
+    if (data.lokasi && !data.lokasi.uid && data.lokasi.text) {
+      catatan.lokasi.push('Lokasi "' + data.lokasi.text + '" tidak ditemukan di master data');
+    }
+    if (data.validasi_ringkas && data.validasi_ringkas.wajib_hilang && data.validasi_ringkas.wajib_hilang.length) {
+      catatan.lokasi.push("Parameter wajib belum terisi: " + data.validasi_ringkas.wajib_hilang.join(", "));
+    }
+    if (data.unmatched_parameters && data.unmatched_parameters.length) {
+      catatan.lokasi.push("Parameter terbaca tapi belum dipetakan: " + data.unmatched_parameters.join(", "));
+    }
+    $.each(data.parameters_validasi || {}, function(id, v) {
+      if (v && v.alasan && v.alasan.length) {
+        catatan.parameters[id] = v.alasan;
+      }
+    });
+
+    return catatan;
+  }
+
   //sfx = "" for the single/default fields, "_r0", "_r1", ... for cloned repeater rows.
   //Unlike IKU/IKAL, IKA's OCR result carries tanggal PER LOCATION (not document-level), so it's
   //set here per-suffix rather than via applySharedFields.
@@ -191,6 +367,9 @@
       }
     });
 
+    //dipanggil SETELAH nilai terisi supaya penandaan tidak terhapus oleh pengisian
+    showParamValidation(data, sfx);
+
     if (data.unmatched_parameters && data.unmatched_parameters.length) {
       unmatched.push("Parameter lain yang terbaca tapi belum bisa dipetakan otomatis: " + data.unmatched_parameters.join(", "));
     }
@@ -203,8 +382,26 @@
     if (data.periode_pemantauan) {
       $("#periode_pemantauan").val(data.periode_pemantauan).trigger("change");
     }
-    if (data.lab && data.lab.uid) {
-      $("#uid_lab").val([String(data.lab.uid)]).trigger("change");
+    //data.lab berupa ARRAY sejak satu lokasi IKA bisa punya hasil dari beberapa lab yang
+    //digabung model jadi satu entri ("Lab A; Lab B" — lihat aturan laboratorium_text di
+    //prompts/ika.md). #uid_lab memang multi-select dan disimpan sebagai CSV.
+    //
+    //Bentuk objek tunggal tetap diterima: hasil OCR lama yang sudah tersimpan di kolom
+    //ocr_result masih berbentuk itu.
+    var labs = [];
+    if (data.lab) {
+      labs = $.isArray(data.lab) ? data.lab : [data.lab];
+    }
+    var labUids = [];
+    $.each(labs, function(i, l) {
+      //lab yang tidak ketemu di rf_lab tetap dikirim dengan uid null — dilewati di sini,
+      //tapi sengaja tetap ada di respons supaya bisa ditampilkan sebagai catatan
+      if (l && l.uid) {
+        labUids.push(String(l.uid));
+      }
+    });
+    if (labUids.length) {
+      $("#uid_lab").val(labUids).trigger("change");
     }
   }
 
@@ -310,6 +507,7 @@
       $("#ocr-repeater-rows").hide().empty();
       $("#ocr-single-block").show();
       $("#ocr_result_payload").val(JSON.stringify(ocrOptions[val]));
+      $("#catatan_ocr_payload").val(JSON.stringify(buildCatatanOcr(ocrOptions[val])));
       var unmatched = applyOcrResult(ocrOptions[val]);
       var msg = "Lokasi \"" + (ocrOptions[val].label || "") + "\" diisikan ke form. Lokasi Pemantauan tetap bisa diganti manual di bawah.";
       if (unmatched.length) {
@@ -346,6 +544,7 @@
       fd.set("submit", "1");
       //.set() replaces whatever the (hidden) single block's same-named fields captured
       fd.set("form[ocr_result]", JSON.stringify(ocrOptions[idx] || {}));
+      fd.set("form[catatan_ocr]", JSON.stringify(buildCatatanOcr(ocrOptions[idx] || {})));
       fd.set("form[tanggal]", $("#tanggal" + sfx).val() || "");
       fd.set("form[uid_lokasi_pemantauan]", $("#uid_lokasi_pemantauan" + sfx).val() || "");
       fd.set("form[kategori]", $("#kategori" + sfx).val() || "");
@@ -452,6 +651,7 @@
             applySharedFields(res.data);
             var unmatched = applyOcrResult(res.data);
             $("#ocr_result_payload").val(JSON.stringify(res.data));
+            $("#catatan_ocr_payload").val(JSON.stringify(buildCatatanOcr(res.data)));
             var msg = "Dokumen berhasil dibaca, form terisi otomatis. Mohon periksa kembali sebelum menyimpan.";
             if (unmatched.length) {
               setOcrStatus("warning", msg + "<br>Tidak dapat dicocokkan otomatis, mohon isi manual: " + unmatched.join(", "));
@@ -655,6 +855,10 @@
     $("#uid_lab").val("").trigger("change");
     $("#shu").val("");
     $("#ocr_result_payload").val("");
+    $("#catatan_ocr_payload").val("");
+    //penandaan validasi wajib dibersihkan di sini, kalau tidak badge merah dari dokumen
+    //sebelumnya tetap menempel pada dokumen berikutnya
+    clearParamValidation("");
     $("#ocr-status").hide().html("");
     ocrOptions = [];
     ocrMode = null;
@@ -751,6 +955,14 @@
             if (req.ocr_result) {
               $("#ocr_result_payload").val(JSON.stringify(req.ocr_result));
               setOcrStatus("info", "Data ini pernah diisi via OCR. Hasil bacaan tersimpan sebagai referensi.");
+            }
+
+            //Catatan validasi/konversi yang menyertai bacaan OCR saat baris ini dibuat.
+            //Nilainya dipertahankan di hidden field supaya tidak hilang saat disimpan ulang,
+            //dan ditampilkan lagi supaya verifikator melihat apa yang dulu perlu diperiksa.
+            if (req.catatan_ocr) {
+              $("#catatan_ocr_payload").val(JSON.stringify(req.catatan_ocr));
+              renderCatatanOcrTersimpan(req.catatan_ocr);
             }
           }
         },
