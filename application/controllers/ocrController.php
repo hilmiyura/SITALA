@@ -956,10 +956,10 @@ class ocrController extends Front
         $out = array();
         $out['tanggal'] = $shared['tanggal'];
         $out['periode_pemantauan'] = $shared['periode_pemantauan'];
-        $out['lokasi'] = $this -> matchLokasi(isset($entry['lokasi_text']) ? $entry['lokasi_text'] : null, $component);
-        $out['lab'] = $this -> matchLab($shared['laboratorium_text']);
         $out['latitude'] = isset($entry['latitude']) ? $entry['latitude'] : null;
         $out['longitude'] = isset($entry['longitude']) ? $entry['longitude'] : null;
+        $out['lokasi'] = $this -> matchLokasi(isset($entry['lokasi_text']) ? $entry['lokasi_text'] : null, $component, $out['latitude'], $out['longitude']);
+        $out['lab'] = $this -> matchLab($shared['laboratorium_text']);
         $out['label'] = trim(
             (isset($entry['peruntukan_text']) ? $entry['peruntukan_text'] : '')
             . (isset($entry['lokasi_text']) ? ' - ' . $entry['lokasi_text'] : '')
@@ -1298,14 +1298,47 @@ class ocrController extends Front
         );
     }
 
-    //Menyesuaikan satu nilai ke satuan yang diharapkan sistem.
+    //Satuan yang DIHARAPKAN sistem untuk tiap field IKAL, disalin dari label input di
+    //views/be/parts/contents/ikal/index/form.html. IKAL hanya punya 5 parameter dan
+    //kelimanya berlabel mg/L -- tidak seragam seperti IKA yang mencampur mg/L, µg/L, dan
+    //satuan lain, tapi tetap disalin lewat fungsi terpisah (bukan konstanta inline) supaya
+    //perubahan pada form tetap tercermin di satu tempat.
+    private function ikalParameterUnits()
+    {
+        return array(
+            'tss' => 'mg/L',
+            'do_p' => 'mg/L',
+            'minyak_dan_lemak' => 'mg/L',
+            'amonia_total' => 'mg/L',
+            'orto_fosfat' => 'mg/L',
+        );
+    }
+
+    //Wrapper tipis di atas convertParameterValue() untuk parameter IKA -- lihat
+    //convertIkalValue() untuk pasangannya di modul IKAL. Dipisah per modul (bukan satu
+    //fungsi generik yang dipanggil langsung dengan ikaParameterUnits()/ikalParameterUnits())
+    //supaya titik panggil di buildIkaParameters()/buildIkalParameters() tetap menyebut nama
+    //modulnya secara eksplisit dan gampang ditelusuri.
+    private function convertIkaValue($fieldId, $nilai, $satuanText)
+    {
+        return $this -> convertParameterValue($fieldId, $nilai, $satuanText, $this -> ikaParameterUnits());
+    }
+
+    private function convertIkalValue($fieldId, $nilai, $satuanText)
+    {
+        return $this -> convertParameterValue($fieldId, $nilai, $satuanText, $this -> ikalParameterUnits());
+    }
+
+    //Menyesuaikan satu nilai ke satuan yang diharapkan sistem. $units adalah map
+    //fieldId => satuan_target milik modul pemanggil (ikaParameterUnits() atau
+    //ikalParameterUnits()) -- konversi & faktor pengalinya (ikaUnitFactors()) dipakai
+    //bersama karena aritmetikanya sama, hanya daftar field dan target yang berbeda per modul.
     //
     //@return array(satuan_target, faktor, nilai, status, alasan[])
     //        status: verified (sudah benar) | converted (dikalikan faktor) |
     //                unknown (satuan tidak tercantum) | reject (satuan asing/tak terkonversi)
-    private function convertIkaValue($fieldId, $nilai, $satuanText)
+    private function convertParameterValue($fieldId, $nilai, $satuanText, $units)
     {
-        $units = $this -> ikaParameterUnits();
         $target = isset($units[$fieldId]) ? $units[$fieldId] : null;
 
         $out = array(
@@ -1417,6 +1450,26 @@ class ocrController extends Front
 
         return $alasan;
     }
+
+    //Ambang IKAL yang berdiri sendiri, sama pola dengan validateIkaAmbang() tapi konstantanya
+    //TIDAK bergantung parameter lain: batas DO air laut ini tetap 8.5 mg/L berapa pun suhunya
+    //-- beda dari IKA di mana batas DO memang berubah mengikuti temperatur_air (lihat
+    //validateIkaCrossParams()). Dijalankan pada nilai yang sudah dikonversi.
+    private function validateIkalAmbang($fieldId, $nilai)
+    {
+        $alasan = array();
+        if ($nilai === null) {
+            return $alasan;
+        }
+
+        if ($fieldId === 'do_p' && $nilai > self::IKAL_DO_MAKS) {
+            $alasan[] = 'DO di atas ' . self::IKAL_DO_MAKS . ' mg/L tidak wajar untuk air laut';
+        }
+
+        return $alasan;
+    }
+
+    const IKAL_DO_MAKS = 8.5;
 
     //Batas bawah pelaporan fecal coliform. 1,8 bukan angka sembarang melainkan nilai terkecil
     //yang bisa DIHASILKAN metode MPN seri tiga tabung -- di bawah itu hasilnya hanya bisa
@@ -1630,6 +1683,80 @@ class ocrController extends Front
         );
     }
 
+    //Sama pola dengan buildIkaParameters(), disederhanakan sesuai bentuk IKAL: hanya 5
+    //parameter, semuanya bertarget mg/L (ikalParameterUnits()), tidak ada field bakumutu di
+    //skema prompts/ikal.md, dan tidak ada nama parameter ambigu maupun aturan lintas-parameter
+    //yang perlu ditegakkan (bandingkan dengan IKA yang punya keduanya).
+    private function buildIkalParameters($params)
+    {
+        $rows = array();
+        $unmatched = array();
+
+        foreach ($params as $p) {
+            if (!is_array($p)) {
+                continue;
+            }
+            $name = isset($p['nama_text']) ? trim((string) $p['nama_text']) : '';
+            if ($name === '') {
+                continue;
+            }
+
+            $nilai = $this -> angkaAtauNull(isset($p['nilai']) ? $p['nilai'] : null);
+            $satuan = isset($p['satuan_text']) ? $p['satuan_text'] : null;
+            $jejak = $name . ($nilai !== null ? ' = ' . $nilai : '');
+
+            $fieldId = $this -> matchIkalParameterField($name);
+            if (!$fieldId) {
+                $unmatched[] = $jejak;
+                continue;
+            }
+
+            $konversi = $this -> convertIkalValue($fieldId, $nilai, $satuan);
+
+            $row = array(
+                'nama_text' => $name,
+                'nilai_asal' => $nilai,
+                'satuan_text' => $satuan,
+                'satuan_target' => $konversi['satuan_target'],
+                'faktor' => $konversi['faktor'],
+                'nilai' => $konversi['nilai'],
+                'status' => $konversi['status'],
+                'alasan' => $konversi['alasan'],
+            );
+
+            //bakumutu selalu null di sini -- prompts/ikal.md tidak mengekstraknya, beda dari
+            //IKA. validateIkaValueBasic() tetap dipakai apa adanya karena pemeriksaan 0/negatif
+            //tidak bergantung modul.
+            foreach ($this -> validateIkaValueBasic($nilai, null) as $alasanNilai) {
+                $this -> tandaiRejectIka($row, $alasanNilai);
+            }
+            foreach ($this -> validateIkalAmbang($fieldId, $row['nilai']) as $alasanAmbang) {
+                $this -> tandaiRejectIka($row, $alasanAmbang);
+            }
+
+            $rows[$fieldId] = $row;
+        }
+
+        $parameters = array();
+        $jumlahReject = 0;
+        foreach ($rows as $fieldId => $row) {
+            $parameters[$fieldId] = $row['nilai'];
+            if ($row['status'] === 'reject') {
+                $jumlahReject++;
+            }
+        }
+
+        return array(
+            'parameters' => $parameters,
+            'parameters_validasi' => $rows,
+            'unmatched_parameters' => $unmatched,
+            'validasi_ringkas' => array(
+                'jumlah_reject' => $jumlahReject,
+                'jumlah_terbaca' => count($rows),
+            ),
+        );
+    }
+
     //IKAL form has a Peruntukan field (rf_peruntukan discriminator peruntukan=2); its water-quality
     //values come back as a free-form parameters[] array (application/prompts/ikal.md) that needs
     //name-matching against the form's 5 known parameter field ids, same approach as matchFieldsIka.
@@ -1638,24 +1765,20 @@ class ocrController extends Front
         $out = $this -> matchFieldsBase($shared, $entry, 5);
         $out['peruntukan'] = $this -> matchPeruntukan(isset($entry['peruntukan_text']) ? $entry['peruntukan_text'] : null, 2);
 
+        //IKAL, seperti IKA, tidak punya langkah merge backend seperti IKU -- prompts/ikal.md
+        //meminta model MENGGABUNGKAN sendiri hasil >1 lab untuk lokasi yang sama ke satu
+        //elemen lokasi_list, dengan laboratorium_text digabung "; " (lihat aturan
+        //laboratorium_text di ikal.md). "lab" karena itu jadi ARRAY, menimpa hasil
+        //matchFieldsBase() yang objek tunggal.
+        $out['lab'] = $this -> matchLabMulti($this -> splitLabTexts($shared['laboratorium_text']));
+
         $params = isset($entry['parameters']) && is_array($entry['parameters']) ? $entry['parameters'] : array();
-        $matched = array();
-        $unmatched = array();
-        foreach ($params as $p) {
-            $name = isset($p['nama_text']) ? $p['nama_text'] : null;
-            $nilai = isset($p['nilai']) ? $p['nilai'] : null;
-            if (!$name) {
-                continue;
-            }
-            $fieldId = $this -> matchIkalParameterField($name);
-            if ($fieldId) {
-                $matched[$fieldId] = $nilai;
-            } else {
-                $unmatched[] = $name . ($nilai !== null ? (" = " . $nilai) : '');
-            }
-        }
-        $out['parameters'] = $matched;
-        $out['unmatched_parameters'] = $unmatched;
+        $hasil = $this -> buildIkalParameters($params);
+
+        $out['parameters'] = $hasil['parameters'];
+        $out['parameters_validasi'] = $hasil['parameters_validasi'];
+        $out['unmatched_parameters'] = $hasil['unmatched_parameters'];
+        $out['validasi_ringkas'] = $hasil['validasi_ringkas'];
 
         return $out;
     }

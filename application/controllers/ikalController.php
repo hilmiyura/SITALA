@@ -105,13 +105,22 @@ class ikalController extends Front
             //dan spasi antar-token yang dikirim browser. Ini bukan sekadar kerapian —
             //kolomnya TEXT (maks 65.535 byte) dan sql_mode server tidak memuat
             //STRICT_TRANS_TABLES, jadi payload yang kepanjangan dipotong DIAM-DIAM.
-            if (isset($post['form']['ocr_result'])) {
-                $ocrResult = trim($post['form']['ocr_result']);
-                $ocrDecoded = json_decode($ocrResult);
-                if ($ocrResult !== '' && json_last_error() === JSON_ERROR_NONE) {
-                    $post['form']['ocr_result'] = json_encode($ocrDecoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            //catatan_ocr diperlakukan SAMA PERSIS: isinya juga JSON dari field tersembunyi,
+            //juga perlu dipadatkan, dan juga harus di-unset alih-alih dikosongkan supaya
+            //penyimpanan ulang secara manual tidak menghapus catatan yang sudah ada. Bedanya
+            //hanya isi: ocr_result memuat apa yang DIBACA model, catatan_ocr memuat temuan
+            //validasi/konversi satuan yang menyertai bacaan itu (lihat buildCatatanOcr() di
+            //views/be/parts/contents/ikal/script.html).
+            foreach (array('ocr_result', 'catatan_ocr') as $kolomJson) {
+                if (!isset($post['form'][$kolomJson])) {
+                    continue;
+                }
+                $isiJson = trim($post['form'][$kolomJson]);
+                $isiDecoded = json_decode($isiJson);
+                if ($isiJson !== '' && json_last_error() === JSON_ERROR_NONE) {
+                    $post['form'][$kolomJson] = json_encode($isiDecoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 } else {
-                    unset($post['form']['ocr_result']);
+                    unset($post['form'][$kolomJson]);
                 }
             }
 
@@ -462,6 +471,10 @@ class ikalController extends Front
             //sql_mode server tanpa STRICT_TRANS_TABLES.
             if ($row) {
                 $row['ocr_result'] = $this -> _ocrResult(isset($row['ocr_result']) ? $row['ocr_result'] : null);
+                //_ocrResult() murni pembaca JSON tanpa penyeragaman bentuk apa pun, jadi
+                //dipakai ulang untuk catatan_ocr -- kolomnya sama-sama TEXT berisi JSON dan
+                //sama-sama boleh kosong.
+                $row['catatan_ocr'] = $this -> _ocrResult(isset($row['catatan_ocr']) ? $row['catatan_ocr'] : null);
             }
 
             echo json_encode($row);
@@ -1599,7 +1612,11 @@ class ikalController extends Front
         //mencari nama lab bisa mendapat baris yang lab-nya sama sekali lain — hanya
         //karena nama itu masih tersisa di hasil OCR yang sudah dikoreksi manual. Selain
         //menyesatkan, LIKE '%...%' pada kolom TEXT tanpa index juga memaksa scan penuh.
-        $excluded = array('ocr_result');
+        //catatan_ocr dikecualikan dengan alasan yang sama seperti ocr_result, ditambah satu:
+        //isinya JSON, sehingga nama kunci ("lokasi", "parameters") ikut tersapu sebagai teks
+        //biasa dan kata-kata umum semacam itu akan mencocoki hampir semua baris yang punya
+        //catatan.
+        $excluded = array('ocr_result', 'catatan_ocr');
 
         $sql = "SHOW COLUMNS FROM " . $model;
         $result = $this -> db -> fetch($sql);
