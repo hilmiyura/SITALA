@@ -196,7 +196,7 @@
 
 			$this->getData();
 			$this->rfData();
-			$this->view->assign("masterActive","active");
+			$this->view->assign("lokasiPemantauanActive","active");
 			$this->view->assign("show",$show);
 			$this->view->assign("message",$message);
 			$this->view->assign("icons",'<i class="la la-map-marker"></i>');
