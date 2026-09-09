@@ -69,6 +69,161 @@
       .show();
   }
 
+  var IKAL_PARAMS = ["tss", "do_p", "minyak_dan_lemak", "amonia_total", "orto_fosfat"];
+
+  //===== Validasi & konversi satuan parameter hasil OCR =====
+  //Sama pola dengan ika/script.html: konversi dan pemeriksaan kewajaran nilai dikerjakan di
+  //backend (ocrController::buildIkalParameters), di sini hanya penandaannya. Non-blocking --
+  //nilai yang ditolak tetap diisikan ke input supaya operator melihat apa yang benar-benar
+  //terbaca dari dokumen.
+  var GAYA_VALIDASI = {
+    reject:    "is-invalid",
+    unknown:   "border-warning",
+    converted: "border-info"
+  };
+
+  function escHtml(teks) {
+    return $("<div>").text(teks == null ? "" : String(teks)).html();
+  }
+
+  function clearParamValidation(sfx) {
+    sfx = sfx || "";
+    jQuery.each(IKAL_PARAMS, function(i, id) {
+      $("#" + id + sfx).removeClass("is-invalid border-warning border-info").removeAttr("title");
+    });
+    if (!sfx) {
+      $("#validasi-ocr-panel").hide();
+      $("#validasi-ocr-body").html("");
+    }
+  }
+
+  function showParamValidation(data, sfx) {
+    sfx = sfx || "";
+    clearParamValidation(sfx);
+
+    var validasi = (data && data.parameters_validasi) ? data.parameters_validasi : {};
+    var baris = [];
+
+    jQuery.each(validasi, function(id, v) {
+      if (!v || !v.alasan || !v.alasan.length) {
+        return;
+      }
+      var $input = $("#" + id + sfx);
+      if ($input.length) {
+        if (GAYA_VALIDASI[v.status]) {
+          $input.addClass(GAYA_VALIDASI[v.status]);
+        }
+        $input.attr("title", v.alasan.join("; "));
+      }
+      baris.push({ nama: v.nama_text || id, status: v.status, alasan: v.alasan });
+    });
+
+    if (!sfx) {
+      renderValidasiPanel(baris);
+    }
+  }
+
+  function renderValidasiPanel(baris) {
+    var ditolak = [];
+    var dikonversi = [];
+    var tanpaSatuan = [];
+
+    $.each(baris, function(i, b) {
+      if (b.status === "reject") {
+        ditolak.push(b);
+      } else if (b.status === "unknown") {
+        tanpaSatuan.push(b.nama);
+      } else {
+        dikonversi.push(b);
+      }
+    });
+
+    var html = "";
+    if (ditolak.length) {
+      html += "<p class='mb-1'><strong>Perlu dikoreksi:</strong></p><ul class='mb-1 pl-3'>";
+      $.each(ditolak, function(i, b) {
+        html += "<li><small><strong>" + escHtml(b.nama) + "</strong> &mdash; "
+              + escHtml(b.alasan.join("; ")) + "</small></li>";
+      });
+      html += "</ul>";
+    }
+    if (dikonversi.length) {
+      html += "<p class='mb-1'><strong>Satuan disesuaikan otomatis:</strong></p><ul class='mb-1 pl-3'>";
+      $.each(dikonversi, function(i, b) {
+        html += "<li><small>" + escHtml(b.nama) + " &mdash; " + escHtml(b.alasan.join("; ")) + "</small></li>";
+      });
+      html += "</ul>";
+    }
+    if (tanpaSatuan.length) {
+      html += "<p class='mb-0'><small><strong>Satuan tidak tercantum</strong> "
+            + "(nilai dianggap sudah sesuai satuan pada form): "
+            + escHtml(tanpaSatuan.join(", ")) + "</small></p>";
+    }
+
+    if (html) {
+      $("#validasi-ocr-panel")
+        .removeClass("alert-warning alert-danger")
+        .addClass(ditolak.length ? "alert-danger" : "alert-warning");
+      $("#validasi-ocr-body").html(html);
+      $("#validasi-ocr-panel").show();
+    }
+  }
+
+  function renderCatatanOcrTersimpan(catatan) {
+    if (!catatan) {
+      return;
+    }
+    var html = "";
+
+    if (catatan.lokasi && catatan.lokasi.length) {
+      html += "<ul class='mb-1 pl-3'>";
+      $.each(catatan.lokasi, function(i, v) {
+        html += "<li><small>" + escHtml(v) + "</small></li>";
+      });
+      html += "</ul>";
+    }
+
+    if (catatan.parameters) {
+      var items = "";
+      $.each(catatan.parameters, function(id, alasan) {
+        if (alasan && alasan.length) {
+          items += "<li><small><strong>" + escHtml(id) + "</strong> &mdash; "
+                 + escHtml([].concat(alasan).join("; ")) + "</small></li>";
+        }
+      });
+      if (items) {
+        html += "<ul class='mb-0 pl-3'>" + items + "</ul>";
+      }
+    }
+
+    if (html) {
+      $("#validasi-ocr-body").html(html);
+      $("#validasi-ocr-panel").show();
+    }
+  }
+
+  //Bentuknya disamakan dengan catatan_ocr milik IKA/IKU — {lokasi: [...], parameters: {...}}.
+  function buildCatatanOcr(data) {
+    var catatan = { lokasi: [], parameters: {} };
+    if (!data) {
+      return catatan;
+    }
+
+    if (data.lokasi && !data.lokasi.uid && data.lokasi.text) {
+      catatan.lokasi.push('Lokasi "' + data.lokasi.text + '" tidak ditemukan di master data');
+    }
+    if (data.unmatched_parameters && data.unmatched_parameters.length) {
+      catatan.lokasi.push("Parameter terbaca tapi belum dipetakan: " + data.unmatched_parameters.join(", "));
+    }
+    $.each(data.parameters_validasi || {}, function(id, v) {
+      if (v && v.alasan && v.alasan.length) {
+        catatan.parameters[id] = v.alasan;
+      }
+    });
+
+    return catatan;
+  }
+
   //sfx = "" for the single/default fields, "_r0", "_r1", ... for cloned repeater rows
   function applyOcrResult(data, opts) {
     opts = opts || {};
@@ -118,12 +273,16 @@
       unmatched.push("Peruntukan (\"" + data.peruntukan.text + "\")");
     }
 
-    jQuery.each(["tss", "do_p", "minyak_dan_lemak", "amonia_total", "orto_fosfat"], function(i, id) {
+    jQuery.each(IKAL_PARAMS, function(i, id) {
       var nilai = data.parameters ? data.parameters[id] : undefined;
       if (nilai !== undefined && nilai !== null) {
         $("#" + id + sfx).val(nilai);
       }
     });
+
+    //dipanggil SETELAH nilai terisi supaya penandaan tidak terhapus oleh pengisian
+    showParamValidation(data, sfx);
+
     if (data.unmatched_parameters && data.unmatched_parameters.length) {
       unmatched.push("Parameter lain terbaca di dokumen tapi tidak ada kolomnya di form: " + data.unmatched_parameters.join(", "));
     }
@@ -140,8 +299,25 @@
     if (data.periode_pemantauan) {
       $("#periode_pemantauan").val(data.periode_pemantauan).trigger("change");
     }
-    if (data.lab && data.lab.uid) {
-      $("#uid_lab").val([String(data.lab.uid)]).trigger("change");
+
+    //data.lab berupa ARRAY sejak satu lokasi IKAL bisa punya hasil dari beberapa lab yang
+    //digabung model jadi satu entri ("Lab A; Lab B" -- lihat aturan laboratorium_text di
+    //prompts/ikal.md). #uid_lab memang multi-select dan disimpan sebagai CSV.
+    //
+    //Bentuk objek tunggal tetap diterima: hasil OCR lama yang sudah tersimpan di kolom
+    //ocr_result masih berbentuk itu.
+    var labs = [];
+    if (data.lab) {
+      labs = $.isArray(data.lab) ? data.lab : [data.lab];
+    }
+    var labUids = [];
+    $.each(labs, function(i, l) {
+      if (l && l.uid) {
+        labUids.push(String(l.uid));
+      }
+    });
+    if (labUids.length) {
+      $("#uid_lab").val(labUids).trigger("change");
     }
   }
 
@@ -229,6 +405,7 @@
       $("#ocr-repeater-rows").hide().empty();
       $("#ocr-single-block").show();
       $("#ocr_result_payload").val(JSON.stringify(ocrOptions[val]));
+      $("#catatan_ocr_payload").val(JSON.stringify(buildCatatanOcr(ocrOptions[val])));
       var unmatched = applyOcrResult(ocrOptions[val]);
       var msg = "Lokasi \"" + (ocrOptions[val].label || "") + "\" diisikan ke form. Lokasi Pemantauan tetap bisa diganti manual di bawah.";
       if (unmatched.length) {
@@ -265,6 +442,7 @@
       fd.set("submit", "1");
       //.set() replaces whatever the (hidden) single block's same-named fields captured
       fd.set("form[ocr_result]", JSON.stringify(ocrOptions[idx] || {}));
+      fd.set("form[catatan_ocr]", JSON.stringify(buildCatatanOcr(ocrOptions[idx] || {})));
       fd.set("form[uid_lokasi_pemantauan]", $("#uid_lokasi_pemantauan" + sfx).val() || "");
       fd.set("form[uid_rf_peruntukan]", $("#uid_rf_peruntukan" + sfx).val() || "");
       fd.set("form[tss]", $("#tss" + sfx).val() || "");
@@ -372,9 +550,8 @@
             applySharedFields(res.data);
             var unmatched = applyOcrResult(res.data);
             $("#ocr_result_payload").val(JSON.stringify(res.data));
-            var msg = "Dokumen berhasil dibaca, form terisi otomatis. Mohon periksa kembali sebelum menyimpan. "
-              + "Catatan: parameter kualitas air (TSS/DO/Minyak &amp; Lemak/Amonia/Ortofosfat) belum didukung "
-              + "OCR untuk IKAL, mohon isi manual.";
+            $("#catatan_ocr_payload").val(JSON.stringify(buildCatatanOcr(res.data)));
+            var msg = "Dokumen berhasil dibaca, form terisi otomatis. Mohon periksa kembali sebelum menyimpan.";
             if (unmatched.length) {
               setOcrStatus("warning", msg + "<br>Tidak dapat dicocokkan otomatis, mohon isi manual: " + unmatched.join(", "));
             } else {
@@ -518,6 +695,8 @@
     $("#uid_lab").val("").trigger("change");
     $("#shu").val("");
     $("#ocr_result_payload").val("");
+    $("#catatan_ocr_payload").val("");
+    clearParamValidation("");
     $("#ocr-status").hide().html("");
     ocrOptions = [];
     ocrMode = null;
@@ -605,6 +784,11 @@
             if (req.ocr_result) {
               $("#ocr_result_payload").val(JSON.stringify(req.ocr_result));
               setOcrStatus("info", "Data ini pernah diisi via OCR. Hasil bacaan tersimpan sebagai referensi.");
+            }
+
+            if (req.catatan_ocr) {
+              $("#catatan_ocr_payload").val(JSON.stringify(req.catatan_ocr));
+              renderCatatanOcrTersimpan(req.catatan_ocr);
             }
           }
         },

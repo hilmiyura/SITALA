@@ -352,6 +352,9 @@
       <form method="POST" action="" class="form_with_load" enctype="multipart/form-data" novalidate>
         <input type="hidden" name="form[{$primaryKey}]" id="{$primaryKey}" />
         <input type="hidden" name="form[ocr_result]" id="ocr_result_payload" value="" />
+        {* catatan_ocr menyimpan temuan validasi/konversi satuan yang menyertai bacaan OCR,
+           terpisah dari ocr_result yang memuat payload bacaannya sendiri *}
+        <input type="hidden" name="form[catatan_ocr]" id="catatan_ocr_payload" value="" />
         <div class="modal-body p-0">
           <div class="row no-gutters iku-modal-body">
             <div class="col-lg-5 iku-preview-pane border-right">
@@ -374,6 +377,12 @@
               <p class="ocr-hint" id="ocr-hint">Data di sebelah kanan akan terisi otomatis, mohon periksa kembali sebelum menyimpan.</p>
               <span class="help-block shu-download" style="display:none"></span>
               <div id="ocr-status" class="alert mb-0" style="display:none;"></div>
+              {* Ringkasan konversi satuan dan pelanggaran aturan parameter. Non-blocking:
+                 form tetap bisa disimpan, isian tetap terisi apa adanya. *}
+              <div id="validasi-ocr-panel" class="alert alert-warning mt-1 mb-0" style="display:none;">
+                <strong><i class="ft-alert-triangle"></i> Periksa Kembali Hasil OCR</strong>
+                <div id="validasi-ocr-body" class="mt-1"></div>
+              </div>
               <div id="ocr-multi-panel" style="display:none;">
                 <label class="mb-1" for="ocr-lokasi-picker">Lokasi Pemantauan Terdeteksi</label>
                 <select class="form-control" id="ocr-lokasi-picker">
