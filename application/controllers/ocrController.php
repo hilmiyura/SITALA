@@ -1015,10 +1015,18 @@ class ocrController extends Front
         $out = array();
         $out['tanggal'] = isset($entry['tanggal']) ? $entry['tanggal'] : $shared['tanggal'];
         $out['periode_pemantauan'] = $shared['periode_pemantauan'];
-        $out['lokasi'] = $this -> matchLokasi(isset($entry['lokasi_text']) ? $entry['lokasi_text'] : null, 2);
-        $out['lab'] = $this -> matchLab($shared['laboratorium_text']);
         $out['latitude'] = isset($entry['latitude']) ? $entry['latitude'] : null;
         $out['longitude'] = isset($entry['longitude']) ? $entry['longitude'] : null;
+        $out['lokasi'] = $this -> matchLokasi(isset($entry['lokasi_text']) ? $entry['lokasi_text'] : null, 2, $out['latitude'], $out['longitude']);
+
+        //IKA tidak punya langkah merge backend seperti IKU (lihat mergeSameLocationEntries()) --
+        //prompt ika.md justru meminta model MENGGABUNGKAN sendiri hasil >1 lab untuk lokasi yang
+        //sama ke satu elemen lokasi_list, dengan laboratorium_text digabung "; " (lihat aturan
+        //laboratorium_text di ika.md). "lab" karena itu jadi ARRAY seperti IKU: teksnya dipecah
+        //dulu baru dicocokkan satu-satu ke rf_lab, supaya gabungan "Lab A; Lab B" tidak dilempar
+        //sebagai satu string utuh yang hampir pasti tidak match record manapun.
+        $out['lab'] = $this -> matchLabMulti($this -> splitLabTexts($shared['laboratorium_text']));
+
         $out['label'] = trim(isset($entry['lokasi_text']) ? $entry['lokasi_text'] : '');
         $out['kategori'] = $this -> matchKategoriIka(isset($entry['jenis_contoh_text']) ? $entry['jenis_contoh_text'] : null);
 
@@ -1191,12 +1199,14 @@ class ocrController extends Front
         return null;
     }
 
-    private function matchLokasi($text, $component)
+    //Radius (meter) untuk pencocokan lokasi berbasis koordinat — koordinat GPS OCR jauh lebih
+    //bisa diandalkan daripada kemiripan teks (nama/alamat lokasi sering generik dan gampang
+    //salah cocok), jadi kalau tersedia dicoba dulu sebelum fallback ke kemiripan teks.
+    const KOORDINAT_MATCH_RADIUS_M = 2000;
+
+    private function matchLokasi($text, $component, $lat = null, $lng = null)
     {
         $result = array('uid' => null, 'text' => $text);
-        if (!$text) {
-            return $result;
-        }
 
         $w = "deleted = 0 AND uid_rf_component = " . (int) $component;
         //is_array() diperiksa lebih dulu karena $this->me TIDAK selalu array: bila sesi
@@ -1214,6 +1224,29 @@ class ocrController extends Front
 
         $this -> tables -> set("lokasi_pemantauan", "uid_lokasi_pemantauan");
         $rows = $this -> tables -> fetch($w)['data'];
+
+        if (is_numeric($lat) && is_numeric($lng)) {
+            $nearest = null;
+            $nearestDist = null;
+            foreach ($rows as $row) {
+                if (!is_numeric($row['latitude']) || !is_numeric($row['longitude'])) {
+                    continue;
+                }
+                $dist = $this -> haversineMeters($lat, $lng, $row['latitude'], $row['longitude']);
+                if ($nearestDist === null || $dist < $nearestDist) {
+                    $nearestDist = $dist;
+                    $nearest = $row;
+                }
+            }
+            if ($nearest && $nearestDist <= self::KOORDINAT_MATCH_RADIUS_M) {
+                $result['uid'] = $nearest['uid_lokasi_pemantauan'];
+                return $result;
+            }
+        }
+
+        if (!$text) {
+            return $result;
+        }
 
         $needle = $this -> normalize($text);
         $best = null;
@@ -1239,6 +1272,17 @@ class ocrController extends Front
             $result['uid'] = $best['uid_lokasi_pemantauan'];
         }
         return $result;
+    }
+
+    private function haversineMeters($lat1, $lon1, $lat2, $lon2)
+    {
+        $r = 6371000; //radius bumi, meter
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat / 2) * sin($dLat / 2)
+            + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon / 2) * sin($dLon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        return $r * $c;
     }
 
     //$discriminator is rf_peruntukan.peruntukan (1=IKU, 2=IKAL — IKA has no Peruntukan field)
@@ -1312,6 +1356,24 @@ class ocrController extends Front
         }
 
         return $results;
+    }
+
+    //Memecah laboratorium_text yang sudah digabung MODEL dengan pemisah "; " (lihat aturan
+    //laboratorium_text di prompts/ika.md) jadi daftar nama lab tersendiri, siap dilempar ke
+    //matchLabMulti() — supaya tiap lab dicocokkan sendiri-sendiri ke rf_lab, bukan sebagai satu
+    //string gabungan yang tidak akan match record manapun.
+    private function splitLabTexts($text)
+    {
+        if (!$text) {
+            return array();
+        }
+
+        $parts = preg_split('/\s*;\s*/', trim($text));
+        $parts = array_filter(array_map('trim', $parts), function ($t) {
+            return $t !== '';
+        });
+
+        return array_values($parts);
     }
 
     //Cadangan bila baris LOCATION_MERGE_RADIUS_M belum ada di config_parameters.
