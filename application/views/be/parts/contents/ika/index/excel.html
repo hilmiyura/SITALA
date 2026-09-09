@@ -876,7 +876,7 @@
 			{if $data.ocr}
 			<td align="center">ADA</td>
 			<td>{$data.ocr.lokasi.text|escape}</td>
-			<td>{$data.ocr.lab.text|escape}</td>
+			<td>{foreach from=$data.ocr.lab item=l name=lab}{$l.text|escape}{if !$smarty.foreach.lab.last}; {/if}{/foreach}</td>
 			<td>{$data.ocr.kategori.text|escape}</td>
 			{* Nilai diuji terhadap null, BUKAN dengan |default, supaya angka 0 yang sah
 			   tidak ikut tersembunyi. Apostrof di depan mengikuti pola kolom di kiri:
