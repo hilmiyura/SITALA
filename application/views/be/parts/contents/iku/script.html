@@ -4,6 +4,8 @@
 	var currentDocBlobUrl = null;
 	var ocrOptions = [];
 	var ocrMode = null; //null|"single"|"all"
+	var catatanOcr = {};
+	var ocrApplied = false;
 
 	function renderDocPreview(url, isPdf) {
 		$("#doc-preview-empty").hide();
@@ -232,6 +234,9 @@
 		$("#uid_lab").val("").trigger("change");
 		$("#shu").val("");
 		$("#ocr_result_payload").val("");
+		$("#catatan_ocr_payload").val("");
+		catatanOcr = {};
+		ocrApplied = false;
 		$("#ocr-status").hide().html("");
 		ocrOptions = [];
 		ocrMode = null;
@@ -287,6 +292,9 @@
 			success: function(res) {
 				try { res = (typeof res === "string") ? JSON.parse(res) : res; } catch(e) {}
 				showLocationValidation(res, $container);
+				if (ocrApplied && $container.is("#location-validation-result") && res && res.message) {
+					catatanOcr.lokasi = [res.message];
+				}
 			}
 		});
 	}
@@ -411,6 +419,33 @@
 		}
 	}
 
+	// Tandai field yang sudah diisi OCR. Dipanggil SETELAH .trigger("change")
+	// agar event handler tidak langsung terpicu saat OCR mengisi field.
+	function markOcrField($el, ocrValue, section, key, label) {
+		var assigned = (ocrValue !== null && ocrValue !== undefined && ocrValue !== "") ? "filled" : "null";
+		$el.attr({
+			"data-ocr-assigned": assigned,
+			"data-ocr-section": section,
+			"data-ocr-key": key,
+			"data-ocr-label": label
+		});
+	}
+
+	function addCatatanMsg(section, key, msg) {
+		if (section === "parameters") {
+			if (!catatanOcr.parameters) catatanOcr.parameters = {};
+			catatanOcr.parameters[key] = catatanOcr.parameters[key] || [];
+			if (catatanOcr.parameters[key].indexOf(msg) === -1) {
+				catatanOcr.parameters[key].push(msg);
+			}
+		} else {
+			catatanOcr[key] = catatanOcr[key] || [];
+			if (catatanOcr[key].indexOf(msg) === -1) {
+				catatanOcr[key].push(msg);
+			}
+		}
+	}
+
 	//sfx = "" for the single/default fields, "_r0", "_r1", ... for cloned repeater rows
 	function applyOcrResult(data, opts) {
 		opts = opts || {};
@@ -418,6 +453,10 @@
 		var done = opts.done;
 		var source = opts.source || "manual";
 		var unmatched = [];
+		if (!sfx) {
+			catatanOcr = {};
+			ocrApplied = true;
+		}
 
 		var hasLokasiUid = !!(data.lokasi && data.lokasi.uid);
 
@@ -455,11 +494,15 @@
 					if (!sfx && data.latitude && data.longitude) {
 						validateLocation(data.lokasi.uid, data.latitude, data.longitude);
 					} else if (!sfx && source === "aqms" && capturedVal) {
+						var aqmsLocMsg = "Lokasi dicocokkan berdasarkan nama stasiun AQMS.";
 						var $locVal = $("#location-validation-result");
 						$locVal.removeClass("alert alert-success alert-warning alert-danger")
 							.addClass("alert alert-info")
-							.html('<i class="ft-info"></i> Lokasi dicocokkan berdasarkan nama stasiun AQMS.')
+							.html('<i class="ft-info"></i> ' + aqmsLocMsg)
 							.show();
+						if (ocrApplied) {
+							catatanOcr.lokasi = [aqmsLocMsg];
+						}
 					}
 					checkAndFillPm25(data, capturedVal, sfx, source);
 					lokasiDone();
@@ -480,6 +523,9 @@
 		} else if (data.peruntukan && data.peruntukan.text) {
 			unmatched.push("Peruntukan (\"" + data.peruntukan.text + "\")");
 		}
+		if (!sfx && data.peruntukan) {
+			markOcrField($("#uid_rf_peruntukan"), data.peruntukan.uid, "top", "peruntukan", "Peruntukan");
+		}
 
 		var labelMap = { no2: "NO2", so2: "SO2", pm25: "PM2.5" };
 		var params = data.parameters || {};
@@ -488,21 +534,42 @@
 			if (!p) {
 				return;
 			}
-			if (p.nilai !== null && p.nilai !== undefined) {
-				$("#" + param + sfx).val(p.nilai);
+			// Isi nilai — mark setelah set (tidak perlu trigger pada text input)
+			$("#" + param + sfx).val(p.nilai !== null && p.nilai !== undefined ? p.nilai : "");
+			if (!sfx) {
+				markOcrField($("#" + param), p.nilai, "parameters", param, "Nilai");
 			}
 			if (p.metode && p.metode.uid) {
 				$("#" + param + "_uid_metode_pemantauan" + sfx).val(p.metode.uid).trigger("change");
+				// Mark SETELAH trigger agar handler tidak terpicu saat OCR mengisi
+				if (!sfx) {
+					markOcrField($("#" + param + "_uid_metode_pemantauan"), p.metode.uid, "parameters", param, "Metode");
+				}
 				if (p.metode.uid == 1) {
 					if (p.durasi_pemantauan) {
 						$("#" + param + "_durasi_pemantauan" + sfx).val(p.durasi_pemantauan).trigger("change");
+						if (!sfx) {
+							markOcrField($("#" + param + "_durasi_pemantauan"), p.durasi_pemantauan, "parameters", param, "Durasi pemantauan");
+						}
+					} else if (!sfx) {
+						markOcrField($("#" + param + "_durasi_pemantauan"), null, "parameters", param, "Durasi pemantauan");
 					}
-				} else if (p.durasi_pemantauan) {
-					$("#" + param + "_durasi_pemantauan_pasif" + sfx).val(p.durasi_pemantauan);
+				} else {
+					if (p.durasi_pemantauan) {
+						$("#" + param + "_durasi_pemantauan_pasif" + sfx).val(p.durasi_pemantauan);
+						if (!sfx) {
+							markOcrField($("#" + param + "_durasi_pemantauan_pasif"), p.durasi_pemantauan, "parameters", param, "Durasi pemantauan");
+						}
+					} else if (!sfx) {
+						markOcrField($("#" + param + "_durasi_pemantauan_pasif"), null, "parameters", param, "Durasi pemantauan");
+					}
 				}
 				checkDurasiPasif(param, sfx);
 			} else if (p.metode && p.metode.text) {
 				unmatched.push("Metode " + labelMap[param] + " (\"" + p.metode.text + "\")");
+				if (!sfx) {
+					markOcrField($("#" + param + "_uid_metode_pemantauan"), null, "parameters", param, "Metode");
+				}
 			}
 		});
 
@@ -521,9 +588,11 @@
 			$("#tanggal").val(data.tanggal).trigger("change");
 			$('input[name="form[tanggal]_submit"]').val(data.tanggal);
 		}
+		markOcrField($("#tanggal"), data.tanggal, "top", "tanggal", "Tanggal");
 		if (data.periode_pemantauan) {
 			$("#periode_pemantauan").val(data.periode_pemantauan).trigger("change");
 		}
+		markOcrField($("#periode_pemantauan"), data.periode_pemantauan, "parameters", "periode_pemantauan", "Periode Pemantauan");
 		//data.lab untuk IKU berupa ARRAY sejak OCR menggabungkan sertifikat dari beberapa
 		//lab untuk satu lokasi — sejalan dengan #uid_lab yang memang multi-select dan
 		//kolom pelaporan_iku.uid_lab yang disimpan sebagai CSV.
@@ -546,6 +615,7 @@
 		if (labUids.length) {
 			$("#uid_lab").val(labUids).trigger("change");
 		}
+		markOcrField($("#uid_lab"), labUids.length ? labUids : null, "top", "lab", "Laboratorium");
 	}
 
 	//clone the <template>, suffix every id/for/to with _r{idx} so it can coexist with the single block
@@ -671,7 +741,28 @@
 		}
 	});
 
+	$(document).on("change", "#tambahData [data-ocr-assigned]", function() {
+		var assigned = $(this).attr("data-ocr-assigned");
+		var section  = $(this).attr("data-ocr-section");
+		var key      = $(this).attr("data-ocr-key");
+		var label    = $(this).attr("data-ocr-label");
+		var val      = $.trim($(this).val());
+
+		var msg;
+		if (assigned === "filled") {
+			msg = label + " diperbarui dari data ocr";
+		} else if (assigned === "null" && val) {
+			msg = label + " diisi manual oleh user";
+		}
+
+		if (msg) addCatatanMsg(section, key, msg);
+		$(this).removeAttr("data-ocr-assigned data-ocr-section data-ocr-key data-ocr-label");
+	});
+
 	$(document).on("submit", "#tambahData form", function(event) {
+		if (ocrApplied && ocrMode !== "all" && Object.keys(catatanOcr).length > 0) {
+			$("#catatan_ocr_payload").val(JSON.stringify(catatanOcr));
+		}
 		if (ocrMode !== "all") {
 			return;
 		}
