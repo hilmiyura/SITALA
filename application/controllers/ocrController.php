@@ -1030,24 +1030,18 @@ class ocrController extends Front
         $out['label'] = trim(isset($entry['lokasi_text']) ? $entry['lokasi_text'] : '');
         $out['kategori'] = $this -> matchKategoriIka(isset($entry['jenis_contoh_text']) ? $entry['jenis_contoh_text'] : null);
 
+        //Konversi satuan dan validasi dikerjakan di sini, BUKAN oleh model: aritmetikanya
+        //tidak butuh kecerdasan, dan hasilnya harus bisa diuji ulang tanpa memanggil model
+        //lagi. Model hanya melaporkan nilai, satuan, dan baku mutu apa adanya seperti tercetak
+        //(lihat prompts/ika.md) -- sebelum ini satuan_text dibuang begitu saja, sehingga
+        //"12 L/detik" masuk ke kolom berlabel m3/s tanpa ada yang tahu.
         $params = isset($entry['parameters']) && is_array($entry['parameters']) ? $entry['parameters'] : array();
-        $matched = array();
-        $unmatched = array();
-        foreach ($params as $p) {
-            $name = isset($p['nama_text']) ? $p['nama_text'] : null;
-            $nilai = isset($p['nilai']) ? $p['nilai'] : null;
-            if (!$name) {
-                continue;
-            }
-            $fieldId = $this -> matchIkaParameterField($name);
-            if ($fieldId) {
-                $matched[$fieldId] = $nilai;
-            } else {
-                $unmatched[] = $name . ($nilai !== null ? (" = " . $nilai) : '');
-            }
-        }
-        $out['parameters'] = $matched;
-        $out['unmatched_parameters'] = $unmatched;
+        $hasil = $this -> buildIkaParameters($params);
+
+        $out['parameters'] = $hasil['parameters'];
+        $out['parameters_validasi'] = $hasil['parameters_validasi'];
+        $out['unmatched_parameters'] = $hasil['unmatched_parameters'];
+        $out['validasi_ringkas'] = $hasil['validasi_ringkas'];
 
         return $out;
     }
@@ -1084,8 +1078,11 @@ class ocrController extends Front
             'ph'                     => array('/\bph\b/i'),
             'no3_n'                  => array('/nitrat/i', '/\bno3\b/i', '/no₃/i'),
             'nitrit'                 => array('/nitrit/i', '/\bno2\b/i', '/no₂/i'),
-            'total_phosphat'         => array('/total\s*fosfat/i', '/total\s*phosphat/i', '/fosfat\s*total/i'),
-            'fecal_coliform'         => array('/fecal coliform/i', '/faecal coliform/i', '/coliform tinja/i', '/koliform tinja/i'),
+            //"TP" dan "total pospat" adalah penulisan yang dipakai sebagian SHU untuk Total
+            //Fosfat (lihat rulesika.txt). "Fosfat" POLOS sengaja tidak ada di sini -- bisa
+            //berarti total fosfat atau organofosfat, jadi ditolak ikaAmbiguousPatterns().
+            'total_phosphat'         => array('/total\s*fosfat/i', '/total\s*phosphat/i', '/total\s*pospat/i', '/fosfat\s*total/i', '/\btp\b/i'),
+            'fecal_coliform'         => array('/fecal coliform/i', '/faecal coliform/i', '/coliform tinja/i', '/koliform tinja/i', '/coli\s*tinja/i', '/bakteri\s*koli\s*tinja/i'),
             'total_coliform'         => array('/total coliform/i', '/coliform total/i', '/koliform total/i'),
             'e_coli'                 => array('/e\.?\s*coli/i', '/escherichia coli/i'),
             'kecerahan'              => array('/kecerahan/i', '/transparansi/i', '/secchi/i'),
@@ -1102,7 +1099,11 @@ class ocrController extends Front
             'florida'                => array('/flourida/i', '/fluorida/i', '/fluoride/i'),
             'belerang_sbg_h2s'       => array('/h2s/i', '/h₂s/i', '/belerang/i', '/sulfida/i', '/hydrogen sulfide/i'),
             'sianida'                => array('/sianida/i', '/cyanide/i', '/\bcn\b/i'),
-            'klorin_bebas'           => array('/klorin bebas/i', '/free chlorine/i', '/sisa khlor/i', '/residual chlorine/i'),
+            //HANYA klorin BEBAS. "Residu klorin"/"residual klorin"/"sisa klor" tanpa kata
+            //"bebas" adalah parameter yang BERBEDA (rulesika.txt) -- dulu keduanya ikut
+            //dipetakan ke sini sehingga nilai parameter lain masuk ke kolom klorin bebas
+            //tanpa jejak. Sekarang ditolak lewat ikaAmbiguousPatterns().
+            'klorin_bebas'           => array('/klorin bebas/i', '/free chlorine/i', '/sisa\s*klor\s*bebas/i'),
             'warna'                  => array('/warna/i', '/\bcolour\b/i', '/\bcolor\b/i'),
             'sampah'                 => array('/sampah/i'),
             'ba'                     => array('/barium/i', '/\bba\b/i'),
@@ -1143,6 +1144,490 @@ class ocrController extends Front
             }
         }
         return null;
+    }
+
+    //Nama parameter yang BENTUKNYA mirip parameter yang kita kenal, tapi artinya belum tentu
+    //sama -- dan salah memetakannya berarti menaruh hasil uji parameter lain ke kolom yang
+    //keliru, tanpa jejak apa pun bahwa itu terjadi. Lebih baik dilempar ke
+    //unmatched_parameters supaya operator memutuskan sendiri (lihat rulesika.txt).
+    //
+    //Diperiksa SEBELUM ikaParameterPatterns(), jadi tiap pola di sini harus dipastikan tidak
+    //ikut menangkap bentuk yang sah -- itulah guna lookahead negatifnya:
+    //  "Sisa Klor Bebas" -> lolos ke klorin_bebas, "Sisa Klor" saja -> ditolak
+    //  "Temperatur Air"  -> lolos ke temperatur_air, "Temperatur" saja -> ditolak
+    //  "Total Fosfat"    -> lolos ke total_phosphat, "Fosfat" saja -> ditolak
+    private function ikaAmbiguousPatterns()
+    {
+        return array(
+            '/residu(al)?\s*klor(?!.*bebas)/i'            => 'ambigu: residu/residual klorin bukan klorin bebas',
+            '/sisa\s*k?hlor(?!.*bebas)/i'                 => 'ambigu: sisa klor bukan klorin bebas',
+            '/residual\s*chlorine(?!.*free)/i'            => 'ambigu: residual chlorine bukan klorin bebas',
+            '/\b(temperatur|suhu)\b(?!.*\b(air|udara)\b)/i' => 'ambigu: temperatur tanpa keterangan air atau udara',
+            '/^(?!.*\btotal\b)(?!.*\borto\b)(?!.*\bortho\b).*\b(fosfat|pospat|phosphat)\b/i' => 'ambigu: fosfat bisa total fosfat atau organofosfat',
+        );
+    }
+
+    //Mengembalikan alasan penolakan bila nama parameter tergolong ambigu, atau null bila aman
+    //untuk dicocokkan seperti biasa.
+    private function matchIkaAmbiguousReason($name)
+    {
+        foreach ($this -> ikaAmbiguousPatterns() as $pattern => $alasan) {
+            if (preg_match($pattern, $name)) {
+                return $alasan;
+            }
+        }
+        return null;
+    }
+
+    //Satuan yang DIHARAPKAN sistem untuk tiap field IKA, disalin dari label input di
+    //views/be/parts/contents/ika/index/form.html. Sumbernya sengaja disebut: satuan ini tidak
+    //tersimpan di tabel referensi mana pun, jadi kalau label di form berubah, tabel ini harus
+    //ikut diubah -- kalau tidak, konversi akan menghasilkan angka yang salah secara diam-diam.
+    //
+    //Field tanpa satuan (ph, sampah) sengaja TIDAK didaftarkan: nilainya dipakai apa adanya
+    //dan tidak pernah dikonversi.
+    private function ikaParameterUnits()
+    {
+        $mgL = array(
+            'bod', 'cod', 'tss', 'do_p', 'do_max_p', 'no3_n', 'total_phosphat', 'total_nitrogen',
+            'minyak_lemak', 'detergen_total', 'fenol', 'tds', 'sulfat', 'klorida', 'nitrit',
+            'amoniak', 'florida', 'belerang_sbg_h2s', 'sianida', 'klorin_bebas',
+            'ba', 'bo', 'hg', 'as_', 'se', 'fe', 'cd', 'co', 'mn', 'ni', 'zn', 'cu', 'pb', 'cr_6',
+        );
+        $ugL = array(
+            'aldrin', 'bhc', 'chlordane', 'ddt', 'endrin', 'heptachlor', 'lindane',
+            'methoxychlor', 'toxapan',
+        );
+
+        $units = array(
+            'debit'                  => 'm3/s',
+            'kecerahan'              => 'm',
+            'klorofil_a'             => 'mg/m3',
+            'fecal_coliform'         => 'MPN/100 mL',
+            'total_coliform'         => 'MPN/100 mL',
+            'e_coli'                 => 'MPN/100 mL',
+            'temperatur_air'         => '°C',
+            'temperatur_udara'       => '°C',
+            'warna'                  => 'Pt-Co Unit',
+            'radioaktivitas_gross_a' => 'Bq/L',
+            'radioaktivitas_gross_b' => 'Bq/L',
+        );
+        foreach ($mgL as $id) {
+            $units[$id] = 'mg/L';
+        }
+        foreach ($ugL as $id) {
+            $units[$id] = 'µg/L';
+        }
+
+        return $units;
+    }
+
+    //Menyederhanakan satuan tertulis jadi satu token baku supaya "MPN/100 mL", "MPN/100mL",
+    //dan "mpn / 100 ml" dikenali sebagai satuan yang sama.
+    //
+    //Mengembalikan null untuk dua keadaan yang BERBEDA artinya bagi pemanggil, jadi
+    //convertIkaValue() memeriksa teks kosongnya lebih dulu: teks kosong berarti dokumen tidak
+    //mencantumkan satuan, sedangkan teks terisi yang tidak dikenali berarti satuannya asing
+    //dan nilainya tidak boleh dipercaya.
+    private function normalizeUnitToken($text)
+    {
+        $t = trim((string) $text);
+        if ($t === '' || $t === '-') {
+            return null;
+        }
+
+        //Karakter non-ASCII diganti SEBELUM strtolower(), dan urutan itu wajib. strtolower()
+        //bekerja per BYTE dan mengikuti locale: pada locale Latin-1 byte 0xC2 -- yang justru
+        //merupakan byte pertama UTF-8 untuk µ dan ° -- ikut "dihurufkecilkan" jadi 0xE2,
+        //sehingga urutan byte-nya rusak dan str_replace() di bawah tidak lagi mengenalinya.
+        //Akibatnya µg/L dan °C jatuh ke cabang "satuan tidak dikenali" dan seluruh hasil uji
+        //logam serta temperatur ditolak tanpa sebab yang terlihat. Setelah baris-baris ini
+        //string sudah murni ASCII, jadi strtolower() aman dipanggil.
+        //
+        //Mikro bisa ditulis µ (U+00B5), μ/Μ (huruf mu Yunani), atau sekadar "u" bila dokumen
+        //tidak memuat karakter khusus. Semuanya sama.
+        $t = str_replace(array('µ', 'μ', 'Μ'), 'u', $t);
+        $t = str_replace(array('³', '^3'), '3', $t);
+        $t = str_replace(array('°', 'º'), '', $t);
+        $t = strtolower($t);
+        //Sebagian SHU menulis derajat dengan superscript nol, yang terbaca sebagai "0c"
+        $t = preg_replace('/(^|[^0-9])0c$/', '$1c', $t);
+        $t = str_replace(array('detik', 'dtk', 'det', 'second', 'sec'), 's', $t);
+        //Spasi, titik, dan strip dibuang seluruhnya: "Pt-Co Unit" dan "ptco" satuan yang sama
+        $t = preg_replace('/[\s.\-]+/', '', $t);
+
+        $alias = array(
+            'mg/l' => 'mg/L', 'ppm' => 'mg/L', 'miligram/l' => 'mg/L',
+            'ug/l' => 'µg/L', 'ppb' => 'µg/L', 'mikrogram/l' => 'µg/L',
+            'mg/m3' => 'mg/m3', 'ug/m3' => 'µg/m3',
+            'm3/s' => 'm3/s', 'm3/dt' => 'm3/s',
+            'l/s' => 'L/s', 'l/dt' => 'L/s',
+            'm' => 'm', 'meter' => 'm', 'cm' => 'cm',
+            'mpn/100ml' => 'MPN/100 mL', 'mpn/100cc' => 'MPN/100 mL',
+            'cfu/100ml' => 'CFU/100 mL', 'koloni/100ml' => 'CFU/100 mL', 'jml/100ml' => 'Jml/100 mL',
+            'ptco' => 'Pt-Co Unit', 'ptcounit' => 'Pt-Co Unit', 'unitptco' => 'Pt-Co Unit', 'skalaptco' => 'Pt-Co Unit',
+            'tcu' => 'TCU',
+            'c' => '°C', 'derajatc' => '°C', 'degc' => '°C',
+            'bq/l' => 'Bq/L',
+            'ntu' => 'NTU',
+        );
+
+        return isset($alias[$t]) ? $alias[$t] : null;
+    }
+
+    //Faktor pengali untuk mengubah satuan asal jadi satuan target, dikunci "asal|target".
+    //Hanya pasangan yang tercantum di sini yang boleh dikonversi -- pasangan lain sengaja
+    //ditolak, karena "kelihatan mirip" bukan alasan yang cukup untuk mengalikan angka
+    //pelaporan. Contohnya CFU/100 mL dan MPN/100 mL: keduanya cacah bakteri per 100 mL, tapi
+    //hasil metode yang berbeda dan TIDAK saling dikonversi (rulesika.txt).
+    private function ikaUnitFactors()
+    {
+        return array(
+            'µg/L|mg/L'  => 0.001,
+            'mg/L|µg/L'  => 1000,
+            'L/s|m3/s'   => 0.001,
+            'cm|m'       => 0.01,
+            'm|cm'       => 100,
+            //Klorofil-a hampir selalu dilaporkan lab dalam µg/L, sedangkan form memakai
+            //mg/m3. Keduanya SETARA persis: 1 µg/L = 1e-6 g / 1e-3 m3 = 1 mg/m3. Tanpa baris
+            //ini setiap laporan danau akan menolak klorofil-a padahal satuannya benar.
+            'µg/L|mg/m3' => 1,
+            'mg/L|mg/m3' => 1000,
+            //Setara, bukan dikonversi: skala TCU dibaca sama dengan Pt-Co (rulesika.txt)
+            'TCU|Pt-Co Unit' => 1,
+        );
+    }
+
+    //Menyesuaikan satu nilai ke satuan yang diharapkan sistem.
+    //
+    //@return array(satuan_target, faktor, nilai, status, alasan[])
+    //        status: verified (sudah benar) | converted (dikalikan faktor) |
+    //                unknown (satuan tidak tercantum) | reject (satuan asing/tak terkonversi)
+    private function convertIkaValue($fieldId, $nilai, $satuanText)
+    {
+        $units = $this -> ikaParameterUnits();
+        $target = isset($units[$fieldId]) ? $units[$fieldId] : null;
+
+        $out = array(
+            'satuan_target' => $target,
+            'faktor' => null,
+            'nilai' => $nilai,
+            'status' => 'verified',
+            'alasan' => array(),
+        );
+
+        //Parameter tanpa satuan baku (ph, sampah) atau baris tanpa angka tidak ada yang bisa
+        //dikonversi -- dan "tidak diuji" bukan temuan, jadi tidak diberi alasan apa pun.
+        if ($target === null || $nilai === null) {
+            return $out;
+        }
+
+        $satuanBersih = trim((string) $satuanText);
+        if ($satuanBersih === '' || $satuanBersih === '-') {
+            $out['status'] = 'unknown';
+            $out['alasan'][] = 'Satuan tidak tercantum di dokumen, nilai dianggap sudah dalam ' . $target;
+            return $out;
+        }
+
+        $asal = $this -> normalizeUnitToken($satuanBersih);
+        if ($asal === null) {
+            $out['status'] = 'reject';
+            $out['alasan'][] = 'Satuan "' . $satuanBersih . '" tidak dikenali (seharusnya ' . $target . ')';
+            return $out;
+        }
+
+        if ($asal === $target) {
+            return $out;
+        }
+
+        $factors = $this -> ikaUnitFactors();
+        $kunci = $asal . '|' . $target;
+        if (!isset($factors[$kunci])) {
+            $out['status'] = 'reject';
+            $out['alasan'][] = 'Satuan "' . $satuanBersih . '" tidak dapat dikonversi ke ' . $target;
+            return $out;
+        }
+
+        $faktor = $factors[$kunci];
+        $out['faktor'] = $faktor;
+        $out['nilai'] = $nilai * $faktor;
+
+        if ($faktor == 1) {
+            $out['alasan'][] = 'Satuan ' . $asal . ' diperlakukan setara ' . $target;
+            return $out;
+        }
+
+        $out['status'] = 'converted';
+        $out['alasan'][] = 'Dikonversi ' . $nilai . ' ' . $asal . ' menjadi ' . $out['nilai'] . ' ' . $target;
+
+        return $out;
+    }
+
+    //Pemeriksaan yang berlaku untuk SEMUA parameter, dijalankan pada angka APA ADANYA seperti
+    //tercetak di dokumen (bukan hasil konversi): ketiganya membandingkan nilai terhadap dirinya
+    //sendiri atau terhadap baku mutu yang tercetak di baris yang sama, jadi keduanya harus
+    //berada di satuan yang sama -- yaitu satuan dokumen.
+    //
+    //@return array daftar alasan penolakan, kosong bila lolos
+    private function validateIkaValueBasic($nilai, $bakumutu)
+    {
+        $alasan = array();
+
+        //null berarti parameternya tidak diuji, dan itu bukan pelanggaran. Dibedakan dari 0
+        //dengan perbandingan identitas, BUKAN empty() -- empty(0) bernilai TRUE dan akan
+        //meloloskan justru nilai yang harus ditolak (rulesika.txt).
+        if ($nilai === null) {
+            return $alasan;
+        }
+
+        if ($nilai == 0) {
+            $alasan[] = 'Nilai 0 tidak dianggap hasil pengukuran yang sah';
+        }
+        if ($nilai < 0) {
+            $alasan[] = 'Nilai negatif tidak sah';
+        }
+        //Toleransi relatif, bukan perbandingan == : nilai dan baku mutu sama-sama pecahan
+        //hasil parsing teks, dan 0.1 hasil hitung tidak selalu identik bit-per-bit dengan 0.1
+        //yang ditulis langsung.
+        if ($bakumutu !== null && abs($nilai - $bakumutu) <= 1e-9 * max(1.0, abs($bakumutu))) {
+            $alasan[] = 'Nilai sama persis dengan baku mutu (' . $bakumutu . ')';
+        }
+
+        return $alasan;
+    }
+
+    //Ambang per parameter yang berdiri sendiri (tidak bergantung parameter lain). Dijalankan
+    //pada nilai yang SUDAH dikonversi, karena ambangnya dinyatakan dalam satuan sistem.
+    private function validateIkaAmbang($fieldId, $nilai)
+    {
+        $alasan = array();
+        if ($nilai === null) {
+            return $alasan;
+        }
+
+        if ($fieldId === 'ph' && $nilai > 14) {
+            $alasan[] = 'pH di atas 14 tidak mungkin';
+        }
+        if ($fieldId === 'bod' && $nilai < 1) {
+            $alasan[] = 'BOD di bawah 1 mg/L dianggap tidak wajar';
+        }
+        if ($fieldId === 'fecal_coliform' && $nilai < self::IKA_FECAL_MIN) {
+            $alasan[] = 'Fecal coliform di bawah ' . self::IKA_FECAL_MIN . ' MPN/100 mL tidak dapat dilaporkan';
+        }
+
+        return $alasan;
+    }
+
+    //Batas bawah pelaporan fecal coliform. 1,8 bukan angka sembarang melainkan nilai terkecil
+    //yang bisa DIHASILKAN metode MPN seri tiga tabung -- di bawah itu hasilnya hanya bisa
+    //dinyatakan "<1,8", bukan sebuah angka. Nilai yang lebih kecil karena itu menandakan salah
+    //baca atau salah satuan, bukan air yang sangat bersih (rulesika.txt).
+    //
+    //Perbandingannya "kurang dari": tepat 1,8 masih sah.
+    const IKA_FECAL_MIN = 1.8;
+
+    //Batas atas DO menurut suhu air. Angkanya adalah kelarutan oksigen jenuh: makin hangat
+    //air, makin sedikit oksigen yang bisa larut, jadi DO di atas ambang ini secara fisika
+    //tidak mungkin dan menandakan salah baca (rulesika.txt).
+    const IKA_DO_MAKS_HANGAT = 8.24;  //temperatur_air >= 25 °C
+    const IKA_DO_MAKS_SEDANG = 9.08;  //20 <= temperatur_air < 25 °C
+    const IKA_DO_MAKS_DINGIN = 10.07; //temperatur_air < 20 °C
+
+    //Delapan parameter yang wajib ada dalam pelaporan IKA (rulesika.txt).
+    private function ikaParameterWajib()
+    {
+        return array('ph', 'bod', 'cod', 'tss', 'do_p', 'fecal_coliform', 'no3_n', 'total_phosphat');
+    }
+
+    //Aturan yang baru bisa dinilai setelah SELURUH parameter satu lokasi terkumpul, karena
+    //membandingkan satu parameter terhadap parameter lain. Bekerja pada nilai yang sudah
+    //dikonversi.
+    //
+    //Bila pembandingnya tidak ada di dokumen, hasilnya BUKAN pelanggaran -- tidak ada yang
+    //bisa disimpulkan dari perbandingan yang tidak bisa dilakukan. Ini mengikuti pola
+    //'cocok' => null di aqmsIntegritas().
+    private function validateIkaCrossParams($rows)
+    {
+        $bod = $this -> ikaRowValue($rows, 'bod');
+        $cod = $this -> ikaRowValue($rows, 'cod');
+        //Aturan tertulis di rulesika.txt sebagai "bod > cod", tapi itu terbalik secara kimia:
+        //COD mengoksidasi semua bahan yang dioksidasi BOD DITAMBAH bahan lain, sehingga COD
+        //selalu >= BOD. BOD melebihi COD hampir pasti berarti kedua kolom tertukar saat
+        //dibaca. Yang ditegakkan di sini karena itu COD > BOD.
+        if ($bod !== null && $cod !== null && $cod <= $bod) {
+            $this -> tandaiRejectIka($rows['bod'], 'BOD (' . $bod . ') tidak boleh >= COD (' . $cod . ')');
+            $this -> tandaiRejectIka($rows['cod'], 'COD (' . $cod . ') harus lebih besar dari BOD (' . $bod . ')');
+        }
+
+        $fecal = $this -> ikaRowValue($rows, 'fecal_coliform');
+        $total = $this -> ikaRowValue($rows, 'total_coliform');
+        if ($fecal !== null && $total !== null && $fecal >= $total) {
+            $this -> tandaiRejectIka($rows['fecal_coliform'], 'Fecal coliform (' . $fecal . ') harus lebih kecil dari total coliform (' . $total . ')');
+        }
+
+        $do = $this -> ikaRowValue($rows, 'do_p');
+        if ($do !== null) {
+            $suhu = $this -> ikaRowValue($rows, 'temperatur_air');
+            if ($suhu === null) {
+                $maks = self::IKA_DO_MAKS_HANGAT;
+                $dasar = 'temperatur air tidak tersedia';
+            } elseif ($suhu >= 25) {
+                $maks = self::IKA_DO_MAKS_HANGAT;
+                $dasar = 'temperatur air ' . $suhu . ' °C';
+            } elseif ($suhu >= 20) {
+                $maks = self::IKA_DO_MAKS_SEDANG;
+                $dasar = 'temperatur air ' . $suhu . ' °C';
+            } else {
+                $maks = self::IKA_DO_MAKS_DINGIN;
+                $dasar = 'temperatur air ' . $suhu . ' °C';
+            }
+
+            if ($do > $maks) {
+                $this -> tandaiRejectIka($rows['do_p'], 'DO ' . $do . ' mg/L melebihi batas kelarutan ' . $maks . ' mg/L (' . $dasar . ')');
+            }
+        }
+
+        return $rows;
+    }
+
+    private function ikaRowValue($rows, $fieldId)
+    {
+        return isset($rows[$fieldId]['nilai']) ? $rows[$fieldId]['nilai'] : null;
+    }
+
+    //Status reject "menang" atas status apa pun sebelumnya: sebuah nilai yang berhasil
+    //dikonversi tapi kemudian melanggar ambang tetap tidak boleh dipakai.
+    private function tandaiRejectIka(&$row, $alasan)
+    {
+        $row['status'] = 'reject';
+        $row['alasan'][] = $alasan;
+    }
+
+    //Membaca angka dari keluaran model dengan hati-hati.
+    //
+    //is_numeric(), bukan empty(): 0 adalah hasil pengukuran yang harus dinilai (dan menurut
+    //rulesika.txt justru ditolak), sedangkan null berarti parameternya tidak diuji. empty()
+    //menyamakan keduanya.
+    //
+    //Koma desimal ikut ditangani meski prompt sudah meminta titik. Model terbukti sesekali
+    //mengembalikan "24,5" (lihat docs/ocrIku.md), dan tanpa penanganan ini nilai tersebut
+    //bukan cuma salah -- ia hilang sama sekali menjadi null. Hanya koma tunggal tanpa titik
+    //yang diperlakukan sebagai pemisah desimal; penulisan ribuan gaya Indonesia memakai titik,
+    //sehingga tidak ada bentuk sah yang tertukar di sini.
+    private function angkaAtauNull($nilai)
+    {
+        if ($nilai === null || $nilai === '') {
+            return null;
+        }
+        if (is_numeric($nilai)) {
+            return (float) $nilai;
+        }
+
+        $teks = trim((string) $nilai);
+        if (substr_count($teks, ',') === 1 && strpos($teks, '.') === false) {
+            $teks = str_replace(',', '.', $teks);
+            if (is_numeric($teks)) {
+                return (float) $teks;
+            }
+        }
+
+        return null;
+    }
+
+    //Merakit parameters/parameters_validasi/unmatched_parameters untuk SATU lokasi.
+    //
+    //Urutannya penting: konversi satuan dijalankan lebih dulu supaya seluruh ambang di
+    //belakangnya membandingkan angka pada satuan yang sama. Aturan lintas parameter menyusul
+    //paling akhir, saat semua baris sudah terkumpul.
+    private function buildIkaParameters($params)
+    {
+        $rows = array();
+        $unmatched = array();
+
+        foreach ($params as $p) {
+            if (!is_array($p)) {
+                continue;
+            }
+            $name = isset($p['nama_text']) ? trim((string) $p['nama_text']) : '';
+            if ($name === '') {
+                continue;
+            }
+
+            $nilai = $this -> angkaAtauNull(isset($p['nilai']) ? $p['nilai'] : null);
+            $bakumutu = $this -> angkaAtauNull(isset($p['bakumutu']) ? $p['bakumutu'] : null);
+            $satuan = isset($p['satuan_text']) ? $p['satuan_text'] : null;
+            $jejak = $name . ($nilai !== null ? ' = ' . $nilai : '');
+
+            $ambigu = $this -> matchIkaAmbiguousReason($name);
+            if ($ambigu !== null) {
+                $unmatched[] = $jejak . ' (' . $ambigu . ')';
+                continue;
+            }
+
+            $fieldId = $this -> matchIkaParameterField($name);
+            if (!$fieldId) {
+                $unmatched[] = $jejak;
+                continue;
+            }
+
+            $konversi = $this -> convertIkaValue($fieldId, $nilai, $satuan);
+
+            $row = array(
+                'nama_text' => $name,
+                'nilai_asal' => $nilai,
+                'satuan_text' => $satuan,
+                'satuan_target' => $konversi['satuan_target'],
+                'faktor' => $konversi['faktor'],
+                'nilai' => $konversi['nilai'],
+                'bakumutu' => $bakumutu,
+                'status' => $konversi['status'],
+                'alasan' => $konversi['alasan'],
+            );
+
+            //Dibandingkan terhadap angka dokumen (nilai_asal), sedangkan ambang memakai nilai
+            //terkonversi -- lihat alasannya di masing-masing fungsi.
+            foreach ($this -> validateIkaValueBasic($nilai, $bakumutu) as $alasanNilai) {
+                $this -> tandaiRejectIka($row, $alasanNilai);
+            }
+            foreach ($this -> validateIkaAmbang($fieldId, $row['nilai']) as $alasanAmbang) {
+                $this -> tandaiRejectIka($row, $alasanAmbang);
+            }
+
+            $rows[$fieldId] = $row;
+        }
+
+        $rows = $this -> validateIkaCrossParams($rows);
+
+        //Nilai yang ditolak TETAP dimasukkan ke parameters supaya operator melihat apa yang
+        //terbaca dari dokumen dan bisa mengoreksinya; penandaannya dikerjakan frontend lewat
+        //parameters_validasi. Sengaja tidak memblokir -- konsisten dengan validasi OCR lain
+        //di controller ini (lihat AQMS_HARI_VALID_MIN).
+        $parameters = array();
+        $jumlahReject = 0;
+        foreach ($rows as $fieldId => $row) {
+            $parameters[$fieldId] = $row['nilai'];
+            if ($row['status'] === 'reject') {
+                $jumlahReject++;
+            }
+        }
+
+        $wajibHilang = array();
+        foreach ($this -> ikaParameterWajib() as $fieldId) {
+            if (!isset($rows[$fieldId]) || $rows[$fieldId]['nilai'] === null) {
+                $wajibHilang[] = $fieldId;
+            }
+        }
+
+        return array(
+            'parameters' => $parameters,
+            'parameters_validasi' => $rows,
+            'unmatched_parameters' => $unmatched,
+            'validasi_ringkas' => array(
+                'wajib_hilang' => $wajibHilang,
+                'jumlah_reject' => $jumlahReject,
+                'jumlah_terbaca' => count($rows),
+            ),
+        );
     }
 
     //IKAL form has a Peruntukan field (rf_peruntukan discriminator peruntukan=2); its water-quality
