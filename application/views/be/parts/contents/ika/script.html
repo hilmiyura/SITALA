@@ -130,23 +130,77 @@
   //Sengaja TIDAK memblokir: nilai yang ditolak tetap diisikan ke input supaya operator
   //melihat apa yang benar-benar terbaca dari dokumen dan bisa mengoreksinya. Menyembunyikan
   //angkanya justru menghilangkan konteks yang dibutuhkan untuk memperbaiki.
-  var GAYA_VALIDASI = {
-    reject:    "is-invalid",
-    unknown:   "border-warning",
-    converted: "border-info"
-  };
-
   //Teks nama parameter dan alasan berasal dari bacaan OCR atas dokumen yang diunggah user,
   //jadi tidak boleh dirangkai langsung ke HTML.
   function escHtml(teks) {
     return $("<div>").text(teks == null ? "" : String(teks)).html();
   }
 
+  function showFlag(id, msg) {
+    var $el = $("#" + id);
+    if (msg) { $el.text(msg).show(); } else { $el.text("").hide(); }
+  }
+
+  function checkSimpanButton() {
+    if (ocrMode === "all") return; // batch mode mengelola state-nya sendiri
+    var hasEmpty = false;
+    $("#ocr-single-block .border-wajib input:visible, #ocr-single-block .border-wajib select:visible").each(function() {
+      if (!$.trim($(this).val())) { hasEmpty = true; return false; }
+    });
+    var hasFlag = $("#tambahData #flag-ph:visible, #tambahData #flag-bod:visible, #tambahData #flag-cod:visible, #tambahData #flag-do:visible, #tambahData #flag-fecal:visible").length > 0;
+    $("#btn-simpan-ika").prop("disabled", hasEmpty || hasFlag);
+  }
+
+  function validateIkaParams(sfx) {
+    sfx = sfx || "";
+    var ph    = parseFloat($("#ph"    + sfx).val());
+    var bod   = parseFloat($("#bod"   + sfx).val());
+    var cod   = parseFloat($("#cod"   + sfx).val());
+    var doVal = parseFloat($("#do_p"  + sfx).val());
+    var fecal = parseFloat($("#fecal_coliform" + sfx).val());
+    var total = parseFloat($("#total_coliform" + sfx).val());
+    var temp  = parseFloat($("#temperatur_air" + sfx).val());
+
+    // pH > 14
+    showFlag("flag-ph" + sfx, (!isNaN(ph) && ph > 14) ? "Nilai pH tidak boleh melebihi 14." : null);
+
+    // BOD: minimal 1 dan tidak boleh > COD
+    var bodMsg = null;
+    if (!isNaN(bod) && bod < 1) {
+      bodMsg = "Nilai BOD minimal 1 mg/L.";
+    } else if (!isNaN(bod) && !isNaN(cod) && bod > cod) {
+      bodMsg = "Nilai BOD tidak boleh lebih besar dari COD.";
+    }
+    showFlag("flag-bod" + sfx, bodMsg);
+    showFlag("flag-cod" + sfx, (!isNaN(bod) && !isNaN(cod) && bod > cod) ? "Nilai BOD tidak boleh lebih besar dari COD." : null);
+
+    // DO vs temperatur air
+    var doMsg = null;
+    if (!isNaN(doVal)) {
+      var doMaks;
+      if (isNaN(temp) || temp >= 25) { doMaks = 8.24; }
+      else if (temp >= 20)           { doMaks = 9.08; }
+      else                           { doMaks = 10.07; }
+      if (doVal > doMaks) {
+        doMsg = "Nilai DO melebihi batas maksimum " + doMaks + " mg/L"
+              + (isNaN(temp) ? " (tidak ada data temperatur air, digunakan batas default ≥25°C)." : " untuk temperatur air " + temp + "°C.");
+      }
+    }
+    showFlag("flag-do" + sfx, doMsg);
+
+    // Fecal Coliform: minimal 1.8 dan tidak boleh > Total Coliform
+    var fecalMsg = null;
+    if (!isNaN(fecal) && fecal < 1.8) {
+      fecalMsg = "Nilai Fecal Coliform minimal 1.8 MPN/100 mL.";
+    } else if (!isNaN(fecal) && !isNaN(total) && fecal > total) {
+      fecalMsg = "Nilai Fecal Coliform tidak boleh lebih besar dari Total Coliform.";
+    }
+    showFlag("flag-fecal" + sfx, fecalMsg);
+    if (!sfx) checkSimpanButton();
+  }
+
   function clearParamValidation(sfx) {
     sfx = sfx || "";
-    jQuery.each(IKA_PARAMS, function(i, id) {
-      $("#" + id + sfx).removeClass("is-invalid border-warning border-info").removeAttr("title");
-    });
     if (!sfx) {
       $("#validasi-ocr-panel").hide();
       $("#validasi-ocr-body").html("");
@@ -164,13 +218,6 @@
       //status verified tanpa catatan adalah keadaan normal — tidak perlu ditandai apa pun
       if (!v || !v.alasan || !v.alasan.length) {
         return;
-      }
-      var $input = $("#" + id + sfx);
-      if ($input.length) {
-        if (GAYA_VALIDASI[v.status]) {
-          $input.addClass(GAYA_VALIDASI[v.status]);
-        }
-        $input.attr("title", v.alasan.join("; "));
       }
       baris.push({ nama: v.nama_text || id, status: v.status, alasan: v.alasan });
     });
@@ -363,12 +410,18 @@
     jQuery.each(IKA_PARAMS, function(i, id) {
       var val = data.parameters ? data.parameters[id] : undefined;
       if (val !== undefined && val !== null) {
+        var validasi = data.parameters_validasi ? data.parameters_validasi[id] : null;
+        var status = validasi ? validasi.status : null;
+        if (status === "reject" || status === "unknown") {
+          return; // nilai tidak ditetapkan — user isi manual
+        }
         $("#" + id + sfx).val(val);
       }
     });
 
     //dipanggil SETELAH nilai terisi supaya penandaan tidak terhapus oleh pengisian
     showParamValidation(data, sfx);
+    validateIkaParams(sfx);
 
     if (data.unmatched_parameters && data.unmatched_parameters.length) {
       unmatched.push("Parameter lain yang terbaca tapi belum bisa dipetakan otomatis: " + data.unmatched_parameters.join(", "));
@@ -672,6 +725,26 @@
     });
   });
 
+  $(document).on("change", "#tambahData #ph, #tambahData #bod, #tambahData #cod, #tambahData #do_p, #tambahData #fecal_coliform, #tambahData #total_coliform, #tambahData #temperatur_air", function() {
+    validateIkaParams("");
+  });
+
+  // Untuk field border-wajib lain (TSS, Total Fosfat, dll.) yang tidak lewat validateIkaParams
+  $(document).on("change", "#ocr-single-block .border-wajib input, #ocr-single-block .border-wajib select", function() {
+    checkSimpanButton();
+  });
+
+  // handler untuk repeater rows (id ber-suffix _r0, _r1, ...)
+  $(document).on("change", "#tambahData [id$='_ph'], #tambahData [id$='_bod'], #tambahData [id$='_cod'], #tambahData [id$='_do_p'], #tambahData [id$='_fecal_coliform'], #tambahData [id$='_total_coliform'], #tambahData [id$='_temperatur_air']", function() {
+    var base = ["ph","bod","cod","do_p","fecal_coliform","total_coliform","temperatur_air"];
+    var id = this.id;
+    var sfx = "";
+    for (var i = 0; i < base.length; i++) {
+      if (id.indexOf(base[i]) === 0) { sfx = id.slice(base[i].length); break; }
+    }
+    if (sfx) validateIkaParams(sfx);
+  });
+
   $(document).ready(function() {
     // insert container validasi lokasi sebelum section Pemantauan di #ocr-single-block
     $('<div id="location-validation-result" style="display:none;"></div>')
@@ -840,6 +913,7 @@
     jQuery.each(IKA_PARAMS, function(i, id) {
       $("#" + id).val("");
     });
+    $("#flag-ph, #flag-bod, #flag-cod, #flag-do, #flag-fecal").hide().text("");
     $("#kategori").val("").trigger("change");
     $("#alamat").val("");
     $("#alamat_detail").val("");
@@ -866,7 +940,8 @@
     $("#ocr-lokasi-picker").html('<option value="">--PILIH LOKASI--</option><option value="all">PILIH SEMUA</option>');
     $("#ocr-repeater-rows").hide().empty();
     $("#ocr-single-block").show();
-    $("#btn-simpan-ika").prop("disabled", false).text("Simpan");
+    $("#btn-simpan-ika").text("Simpan");
+    checkSimpanButton();
     clearDocPreview();
     resetDropzone();
   };
@@ -889,6 +964,10 @@
         $("#" + toId).html(htmls);
       }
     })
+  });
+
+  $("#tambahData").on("shown.bs.modal", function() {
+    checkSimpanButton();
   });
 
   $("#tambahData").on("show.bs.modal", function(event) {
