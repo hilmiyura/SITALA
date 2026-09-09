@@ -471,10 +471,7 @@ class ikalController extends Front
             //sql_mode server tanpa STRICT_TRANS_TABLES.
             if ($row) {
                 $row['ocr_result'] = $this -> _ocrResult(isset($row['ocr_result']) ? $row['ocr_result'] : null);
-                //_ocrResult() murni pembaca JSON tanpa penyeragaman bentuk apa pun, jadi
-                //dipakai ulang untuk catatan_ocr -- kolomnya sama-sama TEXT berisi JSON dan
-                //sama-sama boleh kosong.
-                $row['catatan_ocr'] = $this -> _ocrResult(isset($row['catatan_ocr']) ? $row['catatan_ocr'] : null);
+                $row['catatan_ocr'] = $this -> _catatanOcr(isset($row['catatan_ocr']) ? $row['catatan_ocr'] : null);
             }
 
             echo json_encode($row);
@@ -537,6 +534,41 @@ class ikalController extends Front
         //  - isinya gagal di-parse, misalnya karena payload melebihi kapasitas TEXT
         //    lalu terpotong diam-diam (sql_mode server tanpa STRICT_TRANS_TABLES)
         //Template cukup memeriksa {if $v.ocr} tanpa perlu membedakan ketiganya.
+        if (!$json) {
+            return null;
+        }
+        $decoded = json_decode($json, TRUE);
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+            return null;
+        }
+
+        //Bentuk "lab" berubah sejak OCR IKAL mendukung multi-lab: dulu SATU objek
+        //{uid, text}, sekarang ARRAY objek karena satu lokasi bisa dilayani beberapa lab
+        //yang digabung model lewat laboratorium_text "Lab A; Lab B" (lihat matchFieldsIkal()
+        //di ocrController.php).
+        //
+        //Baris yang sudah tersimpan sebelum perubahan itu tetap berbentuk objek. Kedua
+        //bentuk diseragamkan jadi LIST di sini supaya template cukup mem-foreach tanpa
+        //perlu tahu kapan barisnya dibuat. Tanpa penyeragaman ini, {$v.ocr.lab.text} pada
+        //payload lama menghasilkan sel kosong tanpa error -- salah diam-diam.
+        if (!isset($decoded['lab']) || !is_array($decoded['lab'])) {
+            $decoded['lab'] = array();
+        } elseif (array_key_exists('uid', $decoded['lab']) || array_key_exists('text', $decoded['lab'])) {
+            $decoded['lab'] = array($decoded['lab']);
+        }
+
+        return $decoded;
+    }
+
+    private function _catatanOcr($json)
+    {// decode kolom catatan_ocr (TEXT berisi JSON) jadi array siap pakai di template
+        //Seperti _ocrResult(), di-decode sebagai ARRAY asosiatif supaya Smarty bisa
+        //mengaksesnya dengan notasi titik.
+        //
+        //Sengaja TIDAK ikut _ocrResult(): fungsi itu menyeragamkan bentuk "lab" yang khas
+        //payload ocr_result, sedangkan catatan_ocr bentuknya bebas ({lokasi, parameters} --
+        //lihat buildCatatanOcr() di views/be/parts/contents/ikal/script.html). Menyatukan
+        //keduanya berarti menambahkan kunci "lab" kosong ke setiap catatan.
         if (!$json) {
             return null;
         }
