@@ -2005,7 +2005,13 @@ class ocrController extends Front
         return addslashes($text);
     }
 
-    //$discriminator is rf_peruntukan.peruntukan (1=IKU, 2=IKAL — IKA has no Peruntukan field)
+    //$discriminator is rf_peruntukan.peruntukan (1=IKU, 2=IKAL — IKA has no Peruntukan field).
+    //rf_peruntukan cuma berisi segelintir baris tetap per discriminator (IKU: TRANSPORTASI,
+    //INDUSTRI, PERKANTORAN, PEMUKIMAN, "-"; IKAL: Wisata Bahari, Pelabuhan, Biota Laut) --
+    //beda dari lokasi/lab yang bisa ribuan baris, jadi di sini semua baris yang lolos scope
+    //discriminator langsung di-fetch dan similar_text() PHP dipakai cari yang paling mirip,
+    //bukan LIKE polos seperti sebelumnya (butuh substring persis, berhenti di baris pertama
+    //tanpa ORDER BY).
     private function matchPeruntukan($text, $discriminator)
     {
         $result = array('uid' => null, 'text' => $text);
@@ -2014,9 +2020,30 @@ class ocrController extends Front
         }
 
         $this -> tables -> set("rf_peruntukan", "uid_rf_peruntukan");
-        $rows = $this -> tables -> fetch("deleted = 0 AND peruntukan = " . (int) $discriminator . " AND nama LIKE '%" . $this -> esc($text) . "%'")['data'];
-        if (count($rows)) {
-            $result['uid'] = $rows[0]['uid_rf_peruntukan'];
+        $rows = $this -> tables -> fetch("deleted = 0 AND peruntukan = " . (int) $discriminator)['data'];
+
+        $needle = $this -> normalize($text);
+        $best = null;
+        $bestScore = 0;
+        foreach ($rows as $row) {
+            $hay = $this -> normalize($row['nama']);
+            if ($hay && (strpos($needle, $hay) !== false || strpos($hay, $needle) !== false)) {
+                $best = $row;
+                $bestScore = 100;
+                break;
+            }
+            similar_text($needle, $hay, $pct);
+            if ($pct > $bestScore) {
+                $bestScore = $pct;
+                $best = $row;
+            }
+        }
+
+        //Reuse threshold yang sama dipakai matchLokasi() (KOORDINAT_MATCH_FUZZY_THRESHOLD,
+        //default 80) -- tidak perlu parameter config terpisah untuk tabel referensi sekecil ini.
+        $threshold = $this -> utils -> configInt('KOORDINAT_MATCH_FUZZY_THRESHOLD', self::KOORDINAT_MATCH_FUZZY_THRESHOLD_FALLBACK);
+        if ($best && $bestScore >= $threshold) {
+            $result['uid'] = $best['uid_rf_peruntukan'];
         }
         return $result;
     }
