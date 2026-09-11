@@ -1943,7 +1943,7 @@ class ocrController extends Front
     //tidak ada yang cukup mirip, atau $text kosong, hasilnya null.
     private function matchLokasiByTextSql($where, $text, $fuzzyThreshold)
     {
-        $skorSql = $this -> likeScoreSql($text, 'kode_lokasi', 'alamat', 'alamat_detail');
+        $skorSql = $this -> likeScoreSql($text, array('kode_lokasi', 'alamat', 'alamat_detail'));
         if ($skorSql === '0') {
             return null;
         }
@@ -1961,19 +1961,20 @@ class ocrController extends Front
 
     //Ekspresi SQL yang menghitung skor kemiripan (0-100) sebuah baris terhadap $text:
     //persentase kata (token) dari $text yang ditemukan sebagai substring di gabungan
-    //kolom yang dioper (via LIKE '%token%'). Dipakai sebagai pengganti similar_text()
+    //kolom-kolom di $cols (via LIKE '%token%'). Dipakai sebagai pengganti similar_text()
     //PHP supaya tidak perlu loop PHP atas baris kandidat -- MySQL tidak punya fungsi
     //kemiripan teks native yang setara similar_text(), jadi ini pendekatan praktis:
     //bukan algoritma longest-common-substring seperti similar_text(), tapi rasio
-    //kata-yang-cocok, cukup untuk tie-break antar kandidat yang sudah disaring jarak.
-    private function likeScoreSql($text, $col1, $col2, $col3)
+    //kata-yang-cocok. Dipakai baik untuk lokasi (matchLokasiByTextSql()) maupun lab
+    //(matchLab()) -- $cols menentukan kolom tabel mana yang dibandingkan.
+    private function likeScoreSql($text, $cols)
     {
         $tokens = $this -> likeTokens($text);
         if (!count($tokens)) {
             return '0';
         }
 
-        $hay = "LOWER(CONCAT_WS(' ', " . $col1 . ", " . $col2 . ", " . $col3 . "))";
+        $hay = "LOWER(CONCAT_WS(' ', " . implode(', ', $cols) . "))";
         $hits = array();
         foreach ($tokens as $tok) {
             $hits[] = "(" . $hay . " LIKE '%" . $this -> likeEscape($tok) . "%')";
@@ -2020,6 +2021,16 @@ class ocrController extends Front
         return $result;
     }
 
+    //Cadangan bila baris LAB_MATCH_FUZZY_THRESHOLD belum ada di config_parameters.
+    const LAB_MATCH_FUZZY_THRESHOLD_FALLBACK = 70;
+
+    //1. Exact: kode rf_lab (mis. "MTG", "SWT") sebagai substring teks OCR -- murah dan
+    //   nyaris tidak mungkin salah kalau memang ketemu, jadi dicoba duluan.
+    //2. Fuzzy: skor kemiripan kata (likeScoreSql(), sama seperti dipakai lokasi) terhadap
+    //   nama + kode, supaya variasi penulisan ("PT Mutuagung Lestari" vs "Mutu
+    //   International" vs "Mutuagung Lestari, PT") masih bisa ketemu selama kata-kata
+    //   intinya cocok -- beda dari LIKE polos sebelumnya yang butuh substring persis.
+    //   ORDER BY skor DESC membuat hasil deterministik (dulu $rows[0] tanpa ORDER BY).
     private function matchLab($text)
     {
         $result = array('uid' => null, 'text' => $text);
@@ -2027,9 +2038,32 @@ class ocrController extends Front
             return $result;
         }
 
-        $this -> tables -> set("rf_lab", "uid");
-        $safe = $this -> esc($text);
-        $rows = $this -> tables -> fetch("deleted = 0 AND (nama LIKE '%" . $safe . "%' OR '" . $safe . "' LIKE CONCAT('%', kode, '%'))")['data'];
+        $needle = $this -> esc($this -> normalize($text));
+        $exact = $this -> tables -> query(
+            "SELECT uid FROM rf_lab
+             WHERE deleted = 0 AND kode IS NOT NULL AND kode <> ''
+                 AND '" . $needle . "' LIKE CONCAT('%', LOWER(kode), '%')
+             LIMIT 1"
+        )['data'];
+        if (count($exact)) {
+            $result['uid'] = $exact[0]['uid'];
+            return $result;
+        }
+
+        $skorSql = $this -> likeScoreSql($text, array('nama', 'kode'));
+        if ($skorSql === '0') {
+            return $result;
+        }
+
+        $threshold = $this -> utils -> configInt('LAB_MATCH_FUZZY_THRESHOLD', self::LAB_MATCH_FUZZY_THRESHOLD_FALLBACK);
+        $rows = $this -> tables -> query(
+            "SELECT uid, " . $skorSql . " AS skor
+             FROM rf_lab
+             WHERE deleted = 0
+             HAVING skor >= " . (int) $threshold . "
+             ORDER BY skor DESC
+             LIMIT 1"
+        )['data'];
         if (count($rows)) {
             $result['uid'] = $rows[0]['uid'];
         }
