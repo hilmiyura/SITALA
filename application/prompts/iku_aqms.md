@@ -18,6 +18,7 @@ Tugasmu **hanya membaca angka RINGKASAN yang tercetak**. Kamu TIDAK diminta memb
 Untuk setiap parameter NO2, SO2, dan PM2.5. Bila suatu parameter sama sekali tidak muncul di dokumen, isi seluruh objeknya `null` — jangan mengarang.
 
 - **lokasi_text**: nama stasiun seperti tertulis di field "STASIUN" pada kop halaman bulanan parameter ini. Bila berbeda-beda antar halaman, ambil yang paling sering muncul.
+- **latitude & longitude**: koordinat GPS stasiun, HANYA JIKA benar-benar tercetak di dokumen (mis. di kop halaman, halaman info stasiun, atau halaman rekap). Kebanyakan laporan AQMS TIDAK mencantumkan koordinat sama sekali — dalam kondisi itu isi `null`, JANGAN mengarang atau menebak dari nama stasiun/kota. Kalau ADA tercetak: dokumen bisa menulis dengan label tidak konsisten (kadang "X"/"Y", kadang "S"/"E", kadang "Lintang"/"Bujur") dan format tidak konsisten (desimal langsung, atau DMS/derajat-menit-detik seperti `S 7°2'47.61" E 110°19'28.944"`). Kalau format DMS, KONVERSI ke desimal dengan rumus `derajat + menit/60 + detik/3600`, lalu negatifkan hasilnya kalau berlabel S (Selatan) atau W (Barat). Setelah dikonversi ke desimal, tentukan mana latitude dan mana longitude berdasarkan RENTANG WILAYAH INDONESIA (jangan percaya urutan/label mentahnya begitu saja): latitude Indonesia berkisar sekitar -11 sampai 6, longitude berkisar sekitar 95 sampai 141.
 - **tahun**: tahun dari field "BULAN" di kop (mis. `"JANUARI 2025"` → `2025`), sebagai angka 4 digit. `null` bila tahunnya tidak tercetak di mana pun.
 - **bulanan**: satu objek untuk **setiap halaman bulanan** parameter ini yang benar-benar ada di dokumen, urut menaik:
   - `bulan` — nomor bulan: 1 = Januari, 2 = Februari, … 11 = November
@@ -44,6 +45,8 @@ Balas HANYA dengan JSON valid (tanpa markdown code fence, tanpa penjelasan tamba
 {
   "no2": {
     "lokasi_text": "string atau null",
+    "latitude": "number atau null",
+    "longitude": "number atau null",
     "tahun": 2025,
     "bulanan": [
       {"bulan": 1, "hari_valid": 31, "data_valid": 1464}

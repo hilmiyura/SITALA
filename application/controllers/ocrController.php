@@ -402,16 +402,28 @@ class ocrController extends Front
         }
 
         //Satu dokumen AQMS = satu stasiun, jadi tidak ada lokasi_list dan tidak ada mode
-        //multi seperti jalur SHU. Label pertama yang terisi dipakai untuk pencocokan.
+        //multi seperti jalur SHU. Label/koordinat pertama yang terisi dipakai untuk
+        //pencocokan -- kebanyakan laporan AQMS tidak mencantumkan koordinat sama sekali
+        //(lihat prompts/iku_aqms.md), jadi primaryLat/primaryLng sering tetap null dan
+        //matchLokasi() akan mengembalikan uid null (tidak ada fallback fuzzy tanpa
+        //koordinat, sama seperti jalur IKU/IKA/IKAL lainnya).
         $primaryLabel = null;
+        $primaryLat = null;
+        $primaryLng = null;
         foreach (array('no2', 'so2', 'pm25') as $param) {
-            if (!empty($labels[$param])) {
+            $p = isset($ocr[$param]) && is_array($ocr[$param]) ? $ocr[$param] : null;
+            if (!empty($labels[$param]) && $primaryLabel === null) {
                 $primaryLabel = $labels[$param];
-                break;
+            }
+            if ($p && isset($p['latitude'], $p['longitude']) && is_numeric($p['latitude']) && is_numeric($p['longitude']) && $primaryLat === null) {
+                $primaryLat = $p['latitude'];
+                $primaryLng = $p['longitude'];
             }
         }
 
-        $out['lokasi'] = $this -> matchLokasi($primaryLabel, 1);
+        $out['lokasi'] = $this -> matchLokasi($primaryLabel, 1, $primaryLat, $primaryLng);
+        $out['latitude'] = $primaryLat;
+        $out['longitude'] = $primaryLng;
         $out['labels'] = $labels;
 
         //Field sisanya dikirim kosong supaya bentuk respons tetap sama dengan OCR IKU
@@ -1807,10 +1819,12 @@ class ocrController extends Front
         return null;
     }
 
-    //Radius (meter) untuk pencocokan lokasi berbasis koordinat — koordinat GPS OCR jauh lebih
-    //bisa diandalkan daripada kemiripan teks (nama/alamat lokasi sering generik dan gampang
-    //salah cocok), jadi kalau tersedia dicoba dulu sebelum fallback ke kemiripan teks.
-    const KOORDINAT_MATCH_RADIUS_M = 2000;
+    //Cadangan bila baris KOORDINAT_MATCH_RADIUS_M / _CANDIDATE_LIMIT / _FUZZY_THRESHOLD
+    //belum ada di config_parameters (lihat migration
+    //2026-09-11_add_koordinat_match_radius_param.sql).
+    const KOORDINAT_MATCH_RADIUS_FALLBACK_M = 500;
+    const KOORDINAT_MATCH_CANDIDATE_LIMIT_FALLBACK = 10;
+    const KOORDINAT_MATCH_FUZZY_THRESHOLD_FALLBACK = 80;
 
     private function matchLokasi($text, $component, $lat = null, $lng = null)
     {
@@ -1830,45 +1844,85 @@ class ocrController extends Front
             $w .= " AND uid_provinsi = " . (int) $me['uid_provinsi'];
         }
 
-        $this -> tables -> set("lokasi_pemantauan", "uid_lokasi_pemantauan");
-        $rows = $this -> tables -> fetch($w)['data'];
+        $result['uid'] = $this -> nearestLokasiByCoordinate($w, $lat, $lng, $text);
+        return $result;
+    }
+
+    //Orkestrasi:
+    //  1+2. Kalau koordinat ada, matchLokasiWithinRadius() cari beberapa titik terdekat
+    //       dalam radius lewat SQL, lalu similar_text() PHP dipakai sebagai tie-break di
+    //       antara kandidat yang sudah di-fetch itu (bukan seluruh tabel -- cuma sampai
+    //       candidateLimit baris, jadi loop PHP-nya murah).
+    //  3.   STEP 3 (fallback) dipicu di DUA kondisi: koordinat sama sekali tidak ada, ATAU
+    //       step 1 tidak menemukan titik apa pun dalam radius. Keduanya jatuh ke
+    //       matchLokasiByTextSql() -- fuzzy match via SQL LIKE ke seluruh tabel (masih
+    //       dibatasi component + region yang sama), tanpa syarat jarak. Dipakai SQL (bukan
+    //       similar_text()) di sini karena kandidatnya bisa ribuan baris -- menariknya ke
+    //       PHP dulu untuk similar_text() akan mahal.
+    private function nearestLokasiByCoordinate($where, $lat, $lng, $text = null)
+    {
+        $radius = $this -> utils -> configInt('KOORDINAT_MATCH_RADIUS_M', self::KOORDINAT_MATCH_RADIUS_FALLBACK_M);
+        $candidateLimit = $this -> utils -> configInt('KOORDINAT_MATCH_CANDIDATE_LIMIT', self::KOORDINAT_MATCH_CANDIDATE_LIMIT_FALLBACK);
+        $fuzzyThreshold = $this -> utils -> configInt('KOORDINAT_MATCH_FUZZY_THRESHOLD', self::KOORDINAT_MATCH_FUZZY_THRESHOLD_FALLBACK);
 
         if (is_numeric($lat) && is_numeric($lng)) {
-            $nearest = null;
-            $nearestDist = null;
-            foreach ($rows as $row) {
-                if (!is_numeric($row['latitude']) || !is_numeric($row['longitude'])) {
-                    continue;
-                }
-                $dist = $this -> haversineMeters($lat, $lng, $row['latitude'], $row['longitude']);
-                if ($nearestDist === null || $dist < $nearestDist) {
-                    $nearestDist = $dist;
-                    $nearest = $row;
-                }
-            }
-            if ($nearest && $nearestDist <= self::KOORDINAT_MATCH_RADIUS_M) {
-                $result['uid'] = $nearest['uid_lokasi_pemantauan'];
-                return $result;
+            $uid = $this -> matchLokasiWithinRadius($where, (float) $lat, (float) $lng, $text, $radius, $candidateLimit, $fuzzyThreshold);
+            if ($uid !== null) {
+                return $uid;
             }
         }
 
+        return $this -> matchLokasiByTextSql($where, $text, $fuzzyThreshold);
+    }
+
+    //STEP 1 + STEP 2: ambil sampai $candidateLimit lokasi terdekat dalam radius $radius
+    //langsung lewat SQL (haversine formula di SELECT/HAVING, dibatasi bounding box dulu
+    //supaya index idx_lokasi_geo_lookup di kolom latitude/longitude kepakai). Baris yang
+    //kembali (maksimal $candidateLimit) dipakai similar_text() PHP sebagai tie-break:
+    //kandidat dengan skor >= $fuzzyThreshold menang berdasar skor tertinggi (bisa jadi
+    //bukan yang paling dekat jaraknya); kalau tidak ada yang cukup mirip, kandidat
+    //paling dekat (baris pertama, karena sudah ORDER BY jarak) yang menang. Return null
+    //hanya kalau TIDAK ADA titik sama sekali dalam radius (memicu step 3 fallback).
+    private function matchLokasiWithinRadius($where, $lat, $lng, $text, $radius, $candidateLimit, $fuzzyThreshold)
+    {
+        $r = 6371000; //radius bumi, meter
+        //Padding bounding box dalam derajat, dilebihkan dikit dari radius supaya tidak
+        //memotong kandidat yang sebenarnya masih dalam radius (arc vs chord approx).
+        $latDelta = $radius / 110574;
+        $lngDelta = $radius / (111320 * max(cos(deg2rad($lat)), 0.000001));
+
+        $latSql = sprintf('%F', $lat);
+        $lngSql = sprintf('%F', $lng);
+
+        $sql = "SELECT uid_lokasi_pemantauan, kode_lokasi, alamat, alamat_detail,
+                    (" . $r . " * ACOS(LEAST(1, GREATEST(-1,
+                        COS(RADIANS(" . $latSql . ")) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(" . $lngSql . "))
+                        + SIN(RADIANS(" . $latSql . ")) * SIN(RADIANS(latitude))
+                    )))) AS jarak
+                FROM lokasi_pemantauan
+                WHERE " . $where . "
+                    AND latitude IS NOT NULL AND longitude IS NOT NULL
+                    AND latitude BETWEEN " . sprintf('%F', $lat - $latDelta) . " AND " . sprintf('%F', $lat + $latDelta) . "
+                    AND longitude BETWEEN " . sprintf('%F', $lng - $lngDelta) . " AND " . sprintf('%F', $lng + $lngDelta) . "
+                HAVING jarak <= " . $radius . "
+                ORDER BY jarak ASC
+                LIMIT " . (int) $candidateLimit;
+
+        $rows = $this -> tables -> query($sql)['data'];
+        if (!count($rows)) {
+            return null;
+        }
+
+        $nearestUid = $rows[0]['uid_lokasi_pemantauan'];
         if (!$text) {
-            return $result;
+            return $nearestUid;
         }
 
         $needle = $this -> normalize($text);
         $best = null;
         $bestScore = 0;
         foreach ($rows as $row) {
-            $kode = $this -> normalize($row['kode_lokasi']);
             $hay = $this -> normalize($row['kode_lokasi'] . " " . $row['alamat'] . " " . $row['alamat_detail']);
-
-            if ($kode && strpos($needle, $kode) !== false) {
-                $best = $row;
-                $bestScore = 100;
-                break;
-            }
-
             similar_text($needle, $hay, $pct);
             if ($pct > $bestScore) {
                 $bestScore = $pct;
@@ -1876,21 +1930,78 @@ class ocrController extends Front
             }
         }
 
-        if ($best && $bestScore >= 40) {
-            $result['uid'] = $best['uid_lokasi_pemantauan'];
+        if ($best && $bestScore >= $fuzzyThreshold) {
+            return $best['uid_lokasi_pemantauan'];
         }
-        return $result;
+        return $nearestUid;
     }
 
-    private function haversineMeters($lat1, $lon1, $lat2, $lon2)
+    //STEP 3 (fallback): dipanggil hanya kalau matchLokasiWithinRadius() tidak menemukan
+    //titik sama sekali dalam radius. Fuzzy match via SQL ke SELURUH tabel yang lolos
+    //$where (component + region yang sama seperti step 1), tanpa syarat jarak sama
+    //sekali. uid dikembalikan hanya kalau skor terbaiknya >= $fuzzyThreshold -- kalau
+    //tidak ada yang cukup mirip, atau $text kosong, hasilnya null.
+    private function matchLokasiByTextSql($where, $text, $fuzzyThreshold)
     {
-        $r = 6371000; //radius bumi, meter
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLon = deg2rad($lon2 - $lon1);
-        $a = sin($dLat / 2) * sin($dLat / 2)
-            + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon / 2) * sin($dLon / 2);
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-        return $r * $c;
+        $skorSql = $this -> likeScoreSql($text, 'kode_lokasi', 'alamat', 'alamat_detail');
+        if ($skorSql === '0') {
+            return null;
+        }
+
+        $sql = "SELECT uid_lokasi_pemantauan, " . $skorSql . " AS skor
+                FROM lokasi_pemantauan
+                WHERE " . $where . "
+                HAVING skor >= " . (int) $fuzzyThreshold . "
+                ORDER BY skor DESC
+                LIMIT 1";
+
+        $rows = $this -> tables -> query($sql)['data'];
+        return count($rows) ? $rows[0]['uid_lokasi_pemantauan'] : null;
+    }
+
+    //Ekspresi SQL yang menghitung skor kemiripan (0-100) sebuah baris terhadap $text:
+    //persentase kata (token) dari $text yang ditemukan sebagai substring di gabungan
+    //kolom yang dioper (via LIKE '%token%'). Dipakai sebagai pengganti similar_text()
+    //PHP supaya tidak perlu loop PHP atas baris kandidat -- MySQL tidak punya fungsi
+    //kemiripan teks native yang setara similar_text(), jadi ini pendekatan praktis:
+    //bukan algoritma longest-common-substring seperti similar_text(), tapi rasio
+    //kata-yang-cocok, cukup untuk tie-break antar kandidat yang sudah disaring jarak.
+    private function likeScoreSql($text, $col1, $col2, $col3)
+    {
+        $tokens = $this -> likeTokens($text);
+        if (!count($tokens)) {
+            return '0';
+        }
+
+        $hay = "LOWER(CONCAT_WS(' ', " . $col1 . ", " . $col2 . ", " . $col3 . "))";
+        $hits = array();
+        foreach ($tokens as $tok) {
+            $hits[] = "(" . $hay . " LIKE '%" . $this -> likeEscape($tok) . "%')";
+        }
+        return "((" . implode(' + ', $hits) . ") / " . count($tokens) . " * 100)";
+    }
+
+    //Pecah $text ternormalisasi jadi kata-kata unik (>=2 karakter, maks 10 kata) untuk
+    //dipakai likeScoreSql(). Kata sangat pendek (1 huruf) dibuang karena nyaris pasti
+    //muncul di semua baris dan tidak berguna sebagai sinyal kemiripan.
+    private function likeTokens($text)
+    {
+        $needle = $this -> normalize($text);
+        if ($needle === '') {
+            return array();
+        }
+        $tokens = array_filter(explode(' ', $needle), function ($t) {
+            return mb_strlen($t) >= 2;
+        });
+        return array_slice(array_values(array_unique($tokens)), 0, 10);
+    }
+
+    //Escape token untuk dipakai di dalam pola LIKE '%...%': wildcard LIKE (% dan _)
+    //serta backslash (escape char default LIKE) di-escape dulu, baru quote SQL biasa.
+    private function likeEscape($text)
+    {
+        $text = str_replace(array('\\', '%', '_'), array('\\\\', '\\%', '\\_'), $text);
+        return addslashes($text);
     }
 
     //$discriminator is rf_peruntukan.peruntukan (1=IKU, 2=IKAL — IKA has no Peruntukan field)
